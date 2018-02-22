@@ -322,6 +322,10 @@ func (self *extKeyParse) IsCmd() bool {
 	return self.isCmd
 }
 
+func (self *extKeyParse) TypeName() string {
+	return self.typeName
+}
+
 func (self *extKeyParse) validate() error {
 	if self.isFlag {
 		assert_test(!self.isCmd, "cmdmode setted")

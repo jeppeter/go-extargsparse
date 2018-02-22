@@ -1,6 +1,7 @@
 package extargsparse
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"runtime"
@@ -34,5 +35,31 @@ func Test_A001(t *testing.T) {
 	check_equal(t, flags.IsFlag(), true)
 	check_equal(t, flags.IsCmd(), false)
 	check_equal(t, flags.VarName(), "type_flag")
-	return
+}
+
+func Test_A002(t *testing.T) {
+	var v interface{}
+	var vmap map[string]interface{}
+	var err error
+	var js string
+	var flags *extKeyParse
+	js = `{"code" : []}`
+	err = json.Unmarshal([]byte(js), &v)
+	check_equal(t, err, nil)
+	vmap = v.(map[string]interface{})
+	flags, err = NewExtKeyParse_short("", "$flag|f+type", vmap["code"], true)
+	check_equal(t, err, nil)
+	check_equal(t, flags.FlagName(), "flag")
+	check_equal(t, flags.ShortFlag(), "f")
+	check_equal(t, flags.Longopt(), "--type-flag")
+	check_equal(t, flags.Shortopt(), "-f")
+	check_equal(t, flags.Optdest(), "type_flag")
+	check_equal(t, flags.Value(), vmap["code"])
+	check_equal(t, flags.TypeName(), "list")
+	check_equal(t, flags.HelpInfo(), "")
+	check_equal(t, flags.Function(), "")
+	check_equal(t, flags.CmdName(), "")
+	check_equal(t, flags.IsFlag(), true)
+	check_equal(t, flags.IsCmd(), false)
+	check_equal(t, flags.VarName(), "type_flag")
 }

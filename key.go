@@ -1,7 +1,6 @@
 package extargsparse
 
 import (
-	"encoding/json"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -20,12 +19,12 @@ var funcExpr *regexp.Regexp = regexp.MustCompile(`(?i)<([^\<\>\#\$\| \t\!]+)>`)
 var flagExpr *regexp.Regexp = regexp.MustCompile(`(?i)^([a-zA-Z_\|\?\-]+[a-zA-Z_0-9\|\?\-]*)`)
 var mustFlagExpr *regexp.Regexp = regexp.MustCompile(`(?i)^\$([a-zA-Z_\|\?]+[a-zA-Z_0-9\|\?\-]*)`)
 var attrExpr *regexp.Regexp = regexp.MustCompile(`\!([^\<\>\$!\#\|]+)\!`)
-var flagwords = []string{"flagname","helpinfo","shortflag","nargs","varname"}
-var flagspecial = []string{"value","prefix"}
+var flagwords = []string{"flagname", "helpinfo", "shortflag", "nargs", "varname"}
+var flagspecial = []string{"value", "prefix"}
 
-var assert_test(ischeck bool, fmtstr string,a...interface{}) {
-	if ! ischeck {
-		s := fmt.Sprintf(fmtstr,a...)
+func assert_test(ischeck bool, fmtstr string, a ...interface{}) {
+	if !ischeck {
+		s := fmt.Sprintf(fmtstr, a...)
 		panic(s)
 	}
 }
@@ -178,38 +177,40 @@ func (self *extKeyParse) getType(value interface{}) string {
 		return "string"
 	}
 
-	panic("not valid type [%v]", value)
+	s := fmt.Sprintf("not valid type [%v]", value)
+	panic(s)
 	return ""
 }
 
-func (self *extKeyParse) setFlag(prefix,key string,value interface{}) error {
+func (self *extKeyParse) setFlag(prefix, key string, value interface{}) error {
 	var vmap map[string]interface{}
 	var findvalue bool = false
 	var v interface{}
-	var k,k2,vstr string
+	var k, k2, vstr string
 	var isflagwords bool
 	var isflagspecial bool
 	var newprefix string
+	var err error
 	self.isFlag = true
 	self.isCmd = false
 	self.origKey = key
 	vmap = value.(map[string]interface{})
-	for k,_ = range vmap {
+	for k, _ = range vmap {
 		if k == "value" {
 			findvalue = true
 			break
 		}
 	}
 
-	if ! findvalue {
+	if !findvalue {
 		self.typeName = "string"
 		self.value = nil
 	}
 
-	for k,v = range vmap {
+	for k, v = range vmap {
 		isflagwords = false
 		isflagspecial = false
-		for _,k2 = range flagwords {
+		for _, k2 = range flagwords {
 			if k2 == k {
 				isflagwords = true
 				break
@@ -222,10 +223,10 @@ func (self *extKeyParse) setFlag(prefix,key string,value interface{}) error {
 			default:
 				if k != "nargs" {
 					if v != nil {
-						return fmt.Errorf("not value type")		
+						return fmt.Errorf("not value type")
 					} else {
 						vstr = ""
-					}					
+					}
 				}
 			}
 			switch k {
@@ -244,7 +245,7 @@ func (self *extKeyParse) setFlag(prefix,key string,value interface{}) error {
 			}
 
 		} else {
-			for _,k2 = range flagspecial {
+			for _, k2 = range flagspecial {
 				if k2 == k {
 					isflagspecial = true
 					break
@@ -261,8 +262,8 @@ func (self *extKeyParse) setFlag(prefix,key string,value interface{}) error {
 					case string:
 						vstr = v.(string)
 					}
-					if len(prefix) > 0  && len(vstr) > 0 {
-						newprefix = fmt.Sprintf("%s_%s", prefix,vstr)
+					if len(prefix) > 0 && len(vstr) > 0 {
+						newprefix = fmt.Sprintf("%s_%s", prefix, vstr)
 					}
 					self.prefix = newprefix
 				case "value":
@@ -272,7 +273,7 @@ func (self *extKeyParse) setFlag(prefix,key string,value interface{}) error {
 					return fmt.Errorf("[%s] not valid specialword", k)
 				}
 			} else if k == "attr" {
-				self.attr , err = setAttr(v)
+				self.attr, err = setAttr(v)
 				if err != nil {
 					self.attr = make(map[string]string)
 					return err
@@ -287,10 +288,10 @@ func (self *extKeyParse) setFlag(prefix,key string,value interface{}) error {
 	return nil
 }
 
-func (self* extKeyParse) Optdest() string {
+func (self *extKeyParse) Optdest() string {
 	var optdest string
-	if ! self.isFlag || len(self.flagName) == 0 || self.typeName == "args" {
-		s := fmt.Sprintf("can not set (%s) optdest",self.origKey)
+	if !self.isFlag || len(self.flagName) == 0 || self.typeName == "args" {
+		s := fmt.Sprintf("can not set (%s) optdest", self.origKey)
 		panic(s)
 	}
 
@@ -299,7 +300,9 @@ func (self* extKeyParse) Optdest() string {
 		optdest += fmt.Sprintf("%s_", self.prefix)
 	}
 
-	if ! self.noChange  {
+	optdest += self.flagName
+
+	if !self.noChange {
 		optdest = strings.ToLower(optdest)
 		optdest = strings.Replace(optdest, "-", "_", -1)
 	}
@@ -307,9 +310,21 @@ func (self* extKeyParse) Optdest() string {
 	return optdest
 }
 
+func (self *extKeyParse) ShortFlag() string {
+	return self.shortFlag
+}
+
+func (self *extKeyParse) IsFlag() bool {
+	return self.isFlag
+}
+
+func (self *extKeyParse) IsCmd() bool {
+	return self.isCmd
+}
+
 func (self *extKeyParse) validate() error {
 	if self.isFlag {
-		assert_test(!self.isCmd,"cmdmode setted")
+		assert_test(!self.isCmd, "cmdmode setted")
 		if len(self.function) > 0 {
 			return fmt.Errorf("(%s) can not accept function", self.origKey)
 		}
@@ -319,7 +334,7 @@ func (self *extKeyParse) validate() error {
 		}
 
 		if self.typeName != self.getType(self.value) && self.typeName != "count" && self.typeName != "help" && self.typeName != "jsonfile" {
-			return fmt.Errorf("(%s) value (%v) not match type (%s)", self.origKey,self.value,self.typeName)
+			return fmt.Errorf("(%s) value (%v) not match type (%s)", self.origKey, self.value, self.typeName)
 		}
 
 		if len(self.flagName) == 0 {
@@ -343,12 +358,12 @@ func (self *extKeyParse) validate() error {
 			}
 		} else {
 			if len(self.flagName) < 0 {
-				return fmt.Errorf("(%s) can not accept (%s)short flag in flagname", self.origKey,self.flagName)
+				return fmt.Errorf("(%s) can not accept (%s)short flag in flagname", self.origKey, self.flagName)
 			}
 		}
 
 		if len(self.shortFlag) > 1 {
-			return fmt.Errorf("(%s) can not accept (%s) for shortflag", self.origKey,self.shortFlag)
+			return fmt.Errorf("(%s) can not accept (%s) for shortflag", self.origKey, self.shortFlag)
 		}
 
 		if self.typeName == "bool" {
@@ -377,11 +392,11 @@ func (self *extKeyParse) validate() error {
 		}
 
 		if len(self.shortFlag) > 0 {
-			return fmt.Errorf("(%s) has shortflag (%s)", self.origKey,self.shortFlag)
+			return fmt.Errorf("(%s) has shortflag (%s)", self.origKey, self.shortFlag)
 		}
 
 		if self.nargs != nil {
-			return fmt.Errorf("(%s) has nargs (%v)", self.origKey,self.nargs)
+			return fmt.Errorf("(%s) has nargs (%v)", self.origKey, self.nargs)
 		}
 
 		if self.typeName != "dict" {
@@ -394,7 +409,7 @@ func (self *extKeyParse) validate() error {
 		self.typeName = "command"
 	}
 
-	if self.isFlag && len(self.varName) > 0 && len(self.flagName) > 0 {
+	if self.isFlag && len(self.varName) == 0 && len(self.flagName) > 0 {
 		if self.flagName != "$" {
 			self.varName = self.Optdest()
 		} else {
@@ -579,8 +594,8 @@ func (self *extKeyParse) parse(prefix string, key string, value interface{}, isf
 	}
 
 	if self.isFlag && self.flagName == "$" && self.typeName != "dict" {
-		if !((self.typeName == "string" && strings.Contains("?+*",self.value.(string))) or self.typeName == "int" ) {
-			return fmt.Errorf("(%s)(%s)(%s) for $ should option dict set opt or +?* specialcase or type int", prefix,self.origKey,fmt.Sprintf("%v", self.value))
+		if !((self.typeName == "string" && strings.Contains("?+*", self.value.(string))) || self.typeName == "int") {
+			return fmt.Errorf("(%s)(%s)(%s) for $ should option dict set opt or +?* specialcase or type int", prefix, self.origKey, fmt.Sprintf("%v", self.value))
 		} else {
 			self.nargs = self.value
 			self.value = nil
@@ -589,7 +604,7 @@ func (self *extKeyParse) parse(prefix string, key string, value interface{}, isf
 	}
 
 	if self.isFlag && self.typeName == "dict" && len(self.flagName) > 0 {
-		err = self.setFlag(prefix,key,value)
+		err = self.setFlag(prefix, key, value)
 		if err != nil {
 			return err
 		}
@@ -597,7 +612,10 @@ func (self *extKeyParse) parse(prefix string, key string, value interface{}, isf
 
 	matchstrings = attrExpr.FindStringSubmatch(self.origKey)
 	if len(matchstrings) > 1 {
-		self.attr = parseAttr(matchstrings[1])
+		self.attr, err = parseAttr(matchstrings[1])
+		if err != nil {
+			return err
+		}
 	}
 
 	matchstrings = funcExpr.FindStringSubmatch(self.origKey)
@@ -611,7 +629,7 @@ func (self *extKeyParse) parse(prefix string, key string, value interface{}, isf
 	return self.validate()
 }
 
-func (self *extKeyParse)Format() string {
+func (self *extKeyParse) Format() string {
 	var s string
 	s = "{"
 	s += fmt.Sprintf("<type:%s>", self.typeName)
@@ -633,9 +651,9 @@ func (self *extKeyParse)Format() string {
 
 	if self.isFlag {
 		if len(self.flagName) > 0 {
-			s += fmt.Sprintf("<flagname:%s>", self.flagName)	
+			s += fmt.Sprintf("<flagname:%s>", self.flagName)
 		}
-		
+
 		if len(self.shortFlag) > 0 {
 			s += fmt.Sprintf("<shortflag:%s>", self.shortFlag)
 		}
@@ -666,7 +684,7 @@ func (self *extKeyParse)Format() string {
 
 func (self *extKeyParse) Longopt() string {
 	var longopt string
-	if ! self.isFlag || len(self.flagName) == 0 || self.typeName == "args" {
+	if !self.isFlag || len(self.flagName) == 0 || self.typeName == "args" {
 		s := fmt.Sprintf("can not set (%s) longopt", self.origKey)
 		panic(s)
 	}
@@ -676,44 +694,44 @@ func (self *extKeyParse) Longopt() string {
 		longopt += "no-"
 	}
 
-	if len(self.prefix) > 0 and self.typeName != "help" {
-		longopt += self.prefix
+	if len(self.prefix) > 0 && self.typeName != "help" {
+		longopt += fmt.Sprintf("%s_", self.prefix)
 	}
 	longopt += self.flagName
 
-	if ! self.noChange {
+	if !self.noChange {
 		longopt = strings.ToLower(longopt)
-		longopt = strings.Replace(longopt, "_","-",-1)
+		longopt = strings.Replace(longopt, "_", "-", -1)
 	}
 	return longopt
 }
 
 func (self *extKeyParse) Shortopt() string {
 	var shortopt string = ""
-	if ! self.isFlag || len(self.flagName) == 0 || self.typeName == "args" {
+	if !self.isFlag || len(self.flagName) == 0 || self.typeName == "args" {
 		s := fmt.Sprintf("can not set (%s) shortopt", self.origKey)
 		panic(s)
 	}
 
-	if self.shortFlag {
-		shortopt = fmt.Sprintf("%s%s", self.shortPrefix,self.shortFlag)
+	if len(self.shortFlag) > 0 {
+		shortopt = fmt.Sprintf("%s%s", self.shortPrefix, self.shortFlag)
 	}
 	return shortopt
 }
 
 func (self *extKeyParse) NeedArg() int {
-	if ! self.isFlag {
+	if !self.isFlag {
 		return 0
 	}
-	if self.typeName == "int" || self.typeName == "list" || 
+	if self.typeName == "int" || self.typeName == "list" ||
 		self.typeName == "long" || self.typeName == "float" ||
 		self.typeName == "string" || self.typeName == "jsonfile" {
-			return 1
+		return 1
 	}
 	return 0
 }
 
-func (self *extKeyParse) Prefix() string{
+func (self *extKeyParse) Prefix() string {
 	return self.prefix
 }
 
@@ -733,12 +751,20 @@ func (self *extKeyParse) Function() string {
 	return self.function
 }
 
-func (self *extKeyParse) Attr( k string) string {
+func (self *extKeyParse) Attr(k string) string {
 	v, ok := self.attr[k]
-	if ! ok {
+	if !ok {
 		return ""
 	}
 	return v
+}
+
+func (self *extKeyParse) FlagName() string {
+	return self.flagName
+}
+
+func (self *extKeyParse) VarName() string {
+	return self.varName
 }
 
 func NewExtKeyParse_long(prefix string, key string, value interface{}, isflag bool, ishelp bool, isjsonfile bool, longprefix string, shortprefix string, nochange bool) (k *extKeyParse, err error) {

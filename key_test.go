@@ -108,3 +108,24 @@ func Test_A004(t *testing.T) {
 	check_equal(t, flags.IsCmd(), true)
 	check_equal(t, flags.VarName(), "")
 }
+
+func Test_A005(t *testing.T) {
+	var err error
+	var flags *extKeyParse
+	flags, err = NewExtKeyParse_short("", "flag<flag.main>##help for flag##", "", true)
+	check_equal(t, err, nil)
+	check_equal(t, flags.CmdName(), "")
+	check_equal(t, flags.Function(), "")
+	check_equal(t, flags.TypeName(), "string")
+	check_equal(t, flags.Prefix(), "")
+	check_equal(t, flags.FlagName(), "flag")
+	check_equal(t, flags.HelpInfo(), "help for flag")
+	check_equal(t, flags.ShortFlag(), "")
+	check_equal(t, flags.Value(), "")
+	check_equal(t, flags.IsFlag(), true)
+	check_equal(t, flags.IsCmd(), false)
+	check_equal(t, flags.VarName(), "flag.main")
+	check_equal(t, flags.Longopt(), "--flag")
+	check_equal(t, flags.Shortopt(), "")
+	check_equal(t, flags.Optdest(), "flag")
+}

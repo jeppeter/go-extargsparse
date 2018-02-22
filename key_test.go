@@ -63,3 +63,23 @@ func Test_A002(t *testing.T) {
 	check_equal(t, flags.IsCmd(), false)
 	check_equal(t, flags.VarName(), "type_flag")
 }
+
+func Test_A003(t *testing.T) {
+	var flags *extKeyParse
+	var err error
+	flags, err = NewExtKeyParse_short("", "flag|f", false, false)
+	check_equal(t, err, nil)
+	check_equal(t, flags.FlagName(), "flag")
+	check_equal(t, flags.ShortFlag(), "f")
+	check_equal(t, flags.Longopt(), "--flag")
+	check_equal(t, flags.Shortopt(), "-f")
+	check_equal(t, flags.Optdest(), "flag")
+	check_equal(t, flags.Value(), false)
+	check_equal(t, flags.TypeName(), "bool")
+	check_equal(t, flags.HelpInfo(), "")
+	check_equal(t, flags.Function(), "")
+	check_equal(t, flags.CmdName(), "")
+	check_equal(t, flags.IsFlag(), true)
+	check_equal(t, flags.IsCmd(), false)
+	check_equal(t, flags.VarName(), "flag")
+}

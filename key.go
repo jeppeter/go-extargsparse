@@ -511,8 +511,7 @@ func (self *extKeyParse) parse(prefix string, key string, value interface{}, isf
 
 		matchstrings = cmdExpr.FindStringSubmatch(self.origKey)
 		if len(matchstrings) > 1 {
-			assert_test(flagmode, "flagmode set")
-
+			assert_test(!flagmode, "flagmode set")
 			if strings.Contains(matchstrings[1], "|") {
 				flags = matchstrings[1]
 				hexpr = regexp.MustCompile(`\|`)

@@ -13,6 +13,14 @@ const (
 	ATTR_SPLIT_EQUAL = "split="
 )
 
+func formatMap(kattr map[string]string) string {
+	var s string = ""
+	for k, v := range kattr {
+		s += fmt.Sprintf("[%s]=[%s]\n", k, v)
+	}
+	return s
+}
+
 func parseAttr(attr string) (kattr map[string]string, err error) {
 	var lattr string
 	var splitchar string = ";"

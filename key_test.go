@@ -8,14 +8,14 @@ import (
 	"testing"
 )
 
-func format_out_stack(level int) string {
+func format_out_stack_test(level int) string {
 	_, f, l, _ := runtime.Caller(level)
 	return fmt.Sprintf("[%s:%d]", f, l)
 }
 
 func check_equal(t *testing.T, orig, check interface{}) {
 	if !reflect.DeepEqual(orig, check) {
-		t.Fatalf("%s[%s] orig [%v] check[%v]", format_out_stack(2), t.Name(), orig, check)
+		t.Fatalf("%s[%s] orig [%v] check[%v]", format_out_stack_test(2), t.Name(), orig, check)
 	}
 }
 
@@ -82,4 +82,29 @@ func Test_A003(t *testing.T) {
 	check_equal(t, flags.IsFlag(), true)
 	check_equal(t, flags.IsCmd(), false)
 	check_equal(t, flags.VarName(), "flag")
+}
+
+func Test_A004(t *testing.T) {
+	var v interface{}
+	var vmap map[string]interface{}
+	var err error
+	var js string
+	var flags *extKeyParse
+	js = `{"code" : {}}`
+	err = json.Unmarshal([]byte(js), &v)
+	check_equal(t, err, nil)
+	vmap = v.(map[string]interface{})
+	flags, err = NewExtKeyParse_short("newtype", "flag<flag.main>##help for flag##", vmap["code"], false)
+	check_equal(t, err, nil)
+	check_equal(t, flags.CmdName(), "flag")
+	check_equal(t, flags.Function(), "flag.main")
+	check_equal(t, flags.TypeName(), "command")
+	check_equal(t, flags.Prefix(), "newtype")
+	check_equal(t, flags.HelpInfo(), "help for flag")
+	check_equal(t, flags.FlagName(), "")
+	check_equal(t, flags.ShortFlag(), "")
+	check_equal(t, flags.Value(), vmap["code"])
+	check_equal(t, flags.IsFlag(), false)
+	check_equal(t, flags.IsCmd(), true)
+	check_equal(t, flags.VarName(), "")
 }

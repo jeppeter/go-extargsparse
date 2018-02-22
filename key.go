@@ -287,6 +287,26 @@ func (self *extKeyParse) setFlag(prefix,key string,value interface{}) error {
 	return nil
 }
 
+func (self* extKeyParse) Optdest() string {
+	var optdest string
+	if ! self.isFlag || len(self.flagName) == 0 || self.typeName == "args" {
+		s := fmt.Sprintf("can not set (%s) optdest",self.origKey)
+		panic(s)
+	}
+
+	optdest = ""
+	if len(self.prefix) > 0 {
+		optdest += fmt.Sprintf("%s_", self.prefix)
+	}
+
+	if ! self.noChange  {
+		optdest = strings.ToLower(optdest)
+	}
+
+	optdest = strings.Replace(optdest, "-", "_", -1)
+	return optdest
+}
+
 func (self *extKeyParse) validate() error {
 	if self.isFlag {
 		assert_test(!self.isCmd,"cmdmode setted")
@@ -332,8 +352,56 @@ func (self *extKeyParse) validate() error {
 		}
 
 		if self.typeName == "bool" {
-			if self.nargs.(type) != int && self.nargs.(int) != 0 {
+			if self.nargs != nil && self.nargs.(int) != 0 {
 				return fmt.Errorf("bool type (%s) can not accept not 0 nargs", self.origKey)
+			}
+			self.nargs = 0
+		} else if self.typeName == "help" {
+			if self.nargs != nil && self.nargs.(int) != 0 {
+				return fmt.Errorf("help type (%s) can not accept not 0 nargs", self.origKey)
+			}
+			self.nargs = 0
+		} else if self.typeName != "prefix" && self.flagName != "$" && self.typeName != "count" {
+			if self.typeName != "$" && self.nargs != nil && self.nargs.(int) != 1 {
+				return fmt.Errorf("(%s)only $ can accept nargs option", self.origKey)
+			}
+			self.nargs = 1
+		} else {
+			if self.flagName == "$" && self.nargs == nil {
+				self.nargs = "*"
+			}
+		}
+	} else {
+		if len(self.cmdName) == 0 {
+			return fmt.Errorf("(%s) not set cmdname", self.origKey)
+		}
+
+		if len(self.shortFlag) > 0 {
+			return fmt.Errorf("(%s) has shortflag (%s)", self.origKey,self.shortFlag)
+		}
+
+		if self.nargs != nil {
+			return fmt.Errorf("(%s) has nargs (%v)", self.origKey,self.nargs)
+		}
+
+		if self.typeName != "dict" {
+			return fmt.Errorf("(%s) command must be dict", self.origKey)
+		}
+
+		if len(self.prefix) == 0 {
+			self.prefix += self.cmdName
+		}
+		self.typeName = "command"
+	}
+
+	if self.isFlag && len(self.varName) > 0 && len(self.flagName) > 0 {
+		if self.flagName != "$" {
+			self.varName = self.Optdest()
+		} else {
+			if len(self.prefix) > 0 {
+				self.varName = "subnargs"
+			} else {
+				self.varName = "args"
 			}
 		}
 	}
@@ -541,6 +609,39 @@ func (self *extKeyParse) parse(prefix string, key string, value interface{}, isf
 		}
 	}
 	return self.validate()
+}
+
+func (self *extKeyParse)Format() string {
+	var s string
+	s = "{"
+	s += fmt.Sprintf("<type:%s>", self.typeName)
+	s += fmt.Sprintf("<origkey:%s>", self.origKey)
+	if self.isCmd {
+		s += fmt.Sprintf("<cmdname:%s>", self.cmdName)
+		if len(self.function) > 0 {
+			s += fmt.Sprintf("<function:%s>", self.function)
+		}
+
+		if len(self.helpInfo) > 0 {
+			s += fmt.Sprintf("<helpinfo:%s>", self.helpInfo)
+		}
+
+		if len(self.prefix) > 0 {
+			s += fmt.Sprintf("<prefix:%s>", self.prefix)
+		}
+	}
+
+	if self.isFlag {
+		if len(self.flagName) > 0 {
+			s += fmt.Sprintf("<flagname:%s>", self.flagName)	
+		}
+		
+		if len(self.shortFlag) > 0 {
+			s += fmt.Sprintf("<shortflag:%s>", self.shortFlag)
+		}
+
+	}
+	return s
 }
 
 func NewExtKeyParse_long(prefix string, key string, value interface{}, isflag bool, ishelp bool, isjsonfile bool, longprefix string, shortprefix string, nochange bool) (k *extKeyParse, err error) {

@@ -569,3 +569,20 @@ func Test_A031(t *testing.T) {
 	check_equal(t, flags.IsFlag(), true)
 	check_equal(t, flags.IsCmd(), false)
 }
+
+func Test_A032(t *testing.T) {
+	var err error
+	var flags *extKeyParse
+	flags, err = NewExtKeyParse_short("", "$<numargs>", "+", false)
+	check_equal(t, err, nil)
+	check_equal(t, flags.FlagName(), "$")
+	check_equal(t, flags.Prefix(), "")
+	check_equal(t, flags.Value(), nil)
+	check_equal(t, flags.TypeName(), "args")
+	check_equal(t, flags.HelpInfo(), "")
+	check_equal(t, flags.Nargs(), "+")
+	check_equal(t, flags.ShortFlag(), "")
+	check_equal(t, flags.CmdName(), "")
+	check_equal(t, flags.Function(), "")
+	check_equal(t, flags.VarName(), "numargs")
+}

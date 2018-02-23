@@ -656,3 +656,25 @@ func Test_A036(t *testing.T) {
 	check_equal(t, flags.Attr("func"), "args_opt_func")
 	check_equal(t, flags.Attr("wait"), "cc")
 }
+
+func Test_A037(t *testing.T) {
+	var err error
+	var flags *extKeyParse
+	flags, err = NewExtKeyParse_long("prefix", "help|h!func=args_opt_func;wait=cc!", nil, false, true, false, "--", "-", false)
+	check_equal(t, err, nil)
+	check_equal(t, flags.FlagName(), "help")
+	check_equal(t, flags.Prefix(), "prefix")
+	check_equal(t, flags.Value(), nil)
+	check_equal(t, flags.TypeName(), "help")
+	check_equal(t, flags.HelpInfo(), "")
+	check_equal(t, flags.Nargs(), 0)
+	check_equal(t, flags.ShortFlag(), "h")
+	check_equal(t, flags.CmdName(), "")
+	check_equal(t, flags.Function(), "")
+	check_equal(t, flags.VarName(), "prefix_help")
+	check_equal(t, flags.Attr("func"), "args_opt_func")
+	check_equal(t, flags.Attr("wait"), "cc")
+	check_equal(t, flags.Longopt(), "--help")
+	check_equal(t, flags.Shortopt(), "-h")
+	check_equal(t, flags.Optdest(), "prefix_help")
+}

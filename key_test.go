@@ -474,3 +474,25 @@ func Test_A027(t *testing.T) {
 	check_equal(t, flags.Shortopt(), "-v")
 	check_equal(t, flags.Optdest(), "dep_verbose")
 }
+
+func Test_A028(t *testing.T) {
+	var err error
+	var flags *extKeyParse
+	flags, err = NewExtKeyParse_short("", "verbose|v## new help info ##", "+", false)
+	check_equal(t, err, nil)
+	check_equal(t, flags.FlagName(), "verbose")
+	check_equal(t, flags.ShortFlag(), "v")
+	check_equal(t, flags.Prefix(), "")
+	check_equal(t, flags.TypeName(), "count")
+	check_equal(t, flags.Value(), 0)
+	check_equal(t, flags.HelpInfo(), " new help info ")
+	check_equal(t, flags.Nargs(), 0)
+	check_equal(t, flags.CmdName(), "")
+	check_equal(t, flags.Function(), "")
+	check_equal(t, flags.Optdest(), "verbose")
+	check_equal(t, flags.VarName(), "verbose")
+	check_equal(t, flags.IsFlag(), true)
+	check_equal(t, flags.IsCmd(), false)
+	check_equal(t, flags.Longopt(), "--verbose")
+	check_equal(t, flags.Shortopt(), "-v")
+}

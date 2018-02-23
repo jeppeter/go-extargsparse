@@ -783,6 +783,13 @@ func (self *extKeyParse) Nargs() interface{} {
 	return self.nargs
 }
 
+func (self *extKeyParse) Equal(other *extKeyParse) bool {
+	if self.Format() != other.Format() {
+		return false
+	}
+	return true
+}
+
 func NewExtKeyParse_long(prefix string, key string, value interface{}, isflag bool, ishelp bool, isjsonfile bool, longprefix string, shortprefix string, nochange bool) (k *extKeyParse, err error) {
 	p := &extKeyParse{}
 	p.nargs = nil

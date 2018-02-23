@@ -678,3 +678,23 @@ func Test_A037(t *testing.T) {
 	check_equal(t, flags.Shortopt(), "-h")
 	check_equal(t, flags.Optdest(), "prefix_help")
 }
+
+func Test_A038(t *testing.T) {
+	var err error
+	var flag1, flag2 *extKeyParse
+	flag1, err = NewExtKeyParse_long("prefix", "help|h!func=args_opt_func;wait=cc!", nil, false, true, false, "--", "-", false)
+	check_equal(t, err, nil)
+	flag2, err = NewExtKeyParse_long("prefix", "help|h!func=args_opt_func;wait=cc!", nil, false, false, false, "--", "-", false)
+	check_equal(t, err, nil)
+	check_equal(t, flag1.Equal(flag2), false)
+	flag1, err = NewExtKeyParse_long("prefix", "help|h!func=args_opt_func;wait=cc!", nil, false, true, false, "--", "-", false)
+	check_equal(t, err, nil)
+	flag2, err = NewExtKeyParse_long("prefix", "help|h!func=args_opt_func;wait=cc!", nil, false, true, false, "--", "-", false)
+	check_equal(t, err, nil)
+	check_equal(t, flag1.Equal(flag2), true)
+	flag1, err = NewExtKeyParse_long("prefix", "help|h!func=args_opt_func!", nil, false, true, false, "--", "-", false)
+	check_equal(t, err, nil)
+	flag2, err = NewExtKeyParse_long("prefix", "help|h!func=args_opt_func;wait=cc!", nil, false, true, false, "--", "-", false)
+	check_equal(t, err, nil)
+	check_equal(t, flag1.Equal(flag2), false)
+}

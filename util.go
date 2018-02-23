@@ -3,6 +3,7 @@ package extargsparse
 import (
 	"fmt"
 	"runtime"
+	"sort"
 )
 
 func assert_test(ischeck bool, fmtstr string, a ...interface{}) {
@@ -25,7 +26,15 @@ func format_error(level int, fmtstr string, a ...interface{}) string {
 
 func formatMap(kattr map[string]string) string {
 	var s string = ""
-	for k, v := range kattr {
+	var ks []string
+	var k, v string
+	ks = make([]string, 0)
+	for k, _ = range kattr {
+		ks = append(ks, k)
+	}
+	sort.Strings(ks)
+	for _, k = range ks {
+		v = kattr[k]
 		s += fmt.Sprintf("[%s]=[%s]\n", k, v)
 	}
 	return s

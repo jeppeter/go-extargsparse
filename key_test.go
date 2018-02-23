@@ -586,3 +586,20 @@ func Test_A032(t *testing.T) {
 	check_equal(t, flags.Function(), "")
 	check_equal(t, flags.VarName(), "numargs")
 }
+
+func Test_A033(t *testing.T) {
+	var err error
+	var flags *extKeyParse
+	flags, err = NewExtKeyParse_short("", "$", "+", false)
+	check_equal(t, err, nil)
+	check_equal(t, flags.FlagName(), "$")
+	check_equal(t, flags.Prefix(), "")
+	check_equal(t, flags.Value(), nil)
+	check_equal(t, flags.TypeName(), "args")
+	check_equal(t, flags.HelpInfo(), "")
+	check_equal(t, flags.Nargs(), "+")
+	check_equal(t, flags.ShortFlag(), "")
+	check_equal(t, flags.CmdName(), "")
+	check_equal(t, flags.Function(), "")
+	check_equal(t, flags.VarName(), "args")
+}

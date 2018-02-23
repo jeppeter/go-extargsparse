@@ -496,3 +496,25 @@ func Test_A028(t *testing.T) {
 	check_equal(t, flags.Longopt(), "--verbose")
 	check_equal(t, flags.Shortopt(), "-v")
 }
+
+func Test_A029(t *testing.T) {
+	var err error
+	var flags *extKeyParse
+	flags, err = NewExtKeyParse_short("", "rollback|R## rollback not set ##", true, false)
+	check_equal(t, err, nil)
+	check_equal(t, flags.FlagName(), "rollback")
+	check_equal(t, flags.ShortFlag(), "R")
+	check_equal(t, flags.Prefix(), "")
+	check_equal(t, flags.TypeName(), "bool")
+	check_equal(t, flags.Value(), true)
+	check_equal(t, flags.HelpInfo(), " rollback not set ")
+	check_equal(t, flags.Nargs(), 0)
+	check_equal(t, flags.CmdName(), "")
+	check_equal(t, flags.Function(), "")
+	check_equal(t, flags.Optdest(), "rollback")
+	check_equal(t, flags.VarName(), "rollback")
+	check_equal(t, flags.IsFlag(), true)
+	check_equal(t, flags.IsCmd(), false)
+	check_equal(t, flags.Longopt(), "--no-rollback")
+	check_equal(t, flags.Shortopt(), "-R")
+}

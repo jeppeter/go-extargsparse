@@ -527,6 +527,7 @@ func (self *extKeyParse) parse(prefix string, key string, value interface{}, isf
 			}
 		}
 	}
+
 	matchstrings = helpExpr.FindStringSubmatch(self.origKey)
 	if len(matchstrings) > 1 {
 		self.helpInfo = matchstrings[1]
@@ -589,7 +590,7 @@ func (self *extKeyParse) parse(prefix string, key string, value interface{}, isf
 		self.cmdName = ""
 	}
 
-	if self.isFlag && self.typeName == "string" && self.value.(string) == "+" && self.flagName != "$" {
+	if self.isFlag && self.typeName == "string" && self.value != nil && self.value.(string) == "+" && self.flagName != "$" {
 		self.typeName = "count"
 		self.value = 0
 		self.nargs = 0

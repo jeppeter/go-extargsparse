@@ -275,3 +275,31 @@ func Test_A016(t *testing.T) {
 	check_equal(t, flags.IsFlag(), true)
 	check_equal(t, flags.IsCmd(), false)
 }
+
+func Test_A017(t *testing.T) {
+	var v interface{}
+	var vmap map[string]interface{}
+	var err error
+	var js string
+	var flags *extKeyParse
+	js = `{"code" : 3.3}`
+	err = json.Unmarshal([]byte(js), &v)
+	check_equal(t, err, nil)
+	vmap = v.(map[string]interface{})
+	flags, err = NewExtKeyParse_short("type", "flag+app## flag help ##", vmap["code"], false)
+	check_equal(t, err, nil)
+	check_equal(t, flags.FlagName(), "flag")
+	check_equal(t, flags.Prefix(), "type_app")
+	check_equal(t, flags.CmdName(), "")
+	check_equal(t, flags.ShortFlag(), "")
+	check_equal(t, flags.Function(), "")
+	check_equal(t, flags.TypeName(), "float")
+	check_equal(t, flags.Value(), 3.3)
+	check_equal(t, flags.Longopt(), "--type-app-flag")
+	check_equal(t, flags.Shortopt(), "")
+	check_equal(t, flags.Optdest(), "type_app_flag")
+	check_equal(t, flags.HelpInfo(), " flag help ")
+	check_equal(t, flags.IsFlag(), true)
+	check_equal(t, flags.IsCmd(), false)
+	check_equal(t, flags.VarName(), "type_app_flag")
+}

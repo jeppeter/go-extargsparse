@@ -115,6 +115,10 @@ func (l *logObject) Debug_long(callstack int, fmtstr string, a ...interface{}) {
 	return
 }
 
+func (l *logObject) GetFuncPtr(funcname string, outptr interface{}) error {
+	return getFunc(outptr, funcname)
+}
+
 func (l *logObject) Debug(fmtstr string, a ...interface{}) {
 	l.inner_call_msg(log_default_CALLSTACK, log_DEBUG_LEVEL, fmtstr, a...)
 	return

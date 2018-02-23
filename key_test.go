@@ -217,3 +217,61 @@ func Test_A012(t *testing.T) {
 	check_equal(t, flags.Shortopt(), "-f")
 	check_equal(t, flags.Optdest(), "flag")
 }
+
+func Test_A013(t *testing.T) {
+	var err error
+	var flags *extKeyParse
+	flags, err = NewExtKeyParse_short("", "$flag|f+cc<flag.main>", nil, false)
+	check_equal(t, err, nil)
+	check_equal(t, flags.Prefix(), "cc")
+	check_equal(t, flags.Value(), nil)
+	check_equal(t, flags.CmdName(), "")
+	check_equal(t, flags.ShortFlag(), "f")
+	check_equal(t, flags.FlagName(), "flag")
+	check_equal(t, flags.Function(), "")
+	check_equal(t, flags.HelpInfo(), "")
+	check_equal(t, flags.IsFlag(), true)
+	check_equal(t, flags.IsCmd(), false)
+	check_equal(t, flags.TypeName(), "string")
+	check_equal(t, flags.VarName(), "flag.main")
+	check_equal(t, flags.Longopt(), "--cc-flag")
+	check_equal(t, flags.Shortopt(), "-f")
+	check_equal(t, flags.Optdest(), "cc_flag")
+}
+
+func Test_A014(t *testing.T) {
+	var err error
+	_, err = NewExtKeyParse_short("", "c$", "", false)
+	check_not_equal(t, err, nil)
+}
+
+func Test_A015(t *testing.T) {
+	var err error
+	_, err = NewExtKeyParse_short("", "$$", "", false)
+	check_not_equal(t, err, nil)
+}
+
+func Test_A016(t *testing.T) {
+	var v interface{}
+	var vmap map[string]interface{}
+	var err error
+	var js string
+	var flags *extKeyParse
+	js = `{"code" : {"nargs" : "+"}}`
+	err = json.Unmarshal([]byte(js), &v)
+	check_equal(t, err, nil)
+	vmap = v.(map[string]interface{})
+	flags, err = NewExtKeyParse_short("", "$", vmap["code"], false)
+	check_equal(t, err, nil)
+	check_equal(t, flags.FlagName(), "$")
+	check_equal(t, flags.Prefix(), "")
+	check_equal(t, flags.TypeName(), "args")
+	check_equal(t, flags.VarName(), "args")
+	check_equal(t, flags.Nargs().(string), "+")
+	check_equal(t, flags.CmdName(), "")
+	check_equal(t, flags.ShortFlag(), "")
+	check_equal(t, flags.Function(), "")
+	check_equal(t, flags.HelpInfo(), "")
+	check_equal(t, flags.IsFlag(), true)
+	check_equal(t, flags.IsCmd(), false)
+}

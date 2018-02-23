@@ -770,6 +770,10 @@ func (self *extKeyParse) VarName() string {
 	return self.varName
 }
 
+func (self *extKeyParse) Nargs() interface{} {
+	return self.nargs
+}
+
 func NewExtKeyParse_long(prefix string, key string, value interface{}, isflag bool, ishelp bool, isjsonfile bool, longprefix string, shortprefix string, nochange bool) (k *extKeyParse, err error) {
 	p := &extKeyParse{}
 	p.nargs = nil

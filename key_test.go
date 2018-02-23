@@ -361,3 +361,27 @@ func Test_A020(t *testing.T) {
 	_, err = NewExtKeyParse_short("", "$", nil, false)
 	check_not_equal(t, err, nil)
 }
+
+func Test_A021(t *testing.T) {
+	var v interface{}
+	var vmap map[string]interface{}
+	var err error
+	var js string
+	var flags *extKeyParse
+	js = `{"code" : { "nargs" : "?", "value": null}}`
+	err = json.Unmarshal([]byte(js), &v)
+	check_equal(t, err, nil)
+	vmap = v.(map[string]interface{})
+	flags, err = NewExtKeyParse_short("command", "$## self define ##", vmap["code"], false)
+	check_equal(t, err, nil)
+	check_equal(t, flags.IsCmd(), false)
+	check_equal(t, flags.IsFlag(), true)
+	check_equal(t, flags.Prefix(), "command")
+	check_equal(t, flags.VarName(), "subnargs")
+	check_equal(t, flags.FlagName(), "$")
+	check_equal(t, flags.ShortFlag(), "")
+	check_equal(t, flags.Value(), nil)
+	check_equal(t, flags.TypeName(), "args")
+	check_equal(t, flags.Nargs(), "?")
+	check_equal(t, flags.HelpInfo(), " self define ")
+}

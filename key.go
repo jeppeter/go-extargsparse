@@ -501,7 +501,7 @@ func (self *extKeyParse) parse(prefix string, key string, value interface{}, isf
 			}
 			self.isFlag = true
 			flagmode = true
-		} else if self.origKey == "$" {
+		} else if len(self.origKey) > 0 && self.origKey[0:1] == "$" {
 			self.flagName = "$"
 			self.isFlag = true
 			flagmode = true

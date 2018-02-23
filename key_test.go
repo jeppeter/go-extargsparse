@@ -745,3 +745,27 @@ func Test_A040(t *testing.T) {
 	check_equal(t, flag1.Optdest(), "prefix_json")
 	check_equal(t, flag1.Longopt(), "--prefix-json")
 }
+
+func Test_A041(t *testing.T) {
+	var v interface{}
+	var vmap map[string]interface{}
+	var err error
+	var js string
+	var flags *extKeyParse
+	js = `{"code" : {"nargs": 1,"attr" : {"func":"args_opt_func","wait": "cc"}}}`
+	err = json.Unmarshal([]byte(js), &v)
+	check_equal(t, err, nil)
+	vmap = v.(map[string]interface{})
+	flags, err = NewExtKeyParse_short("prefix", "$json", vmap["code"], false)
+	check_equal(t, err, nil)
+	check_equal(t, flags.Prefix(), "prefix")
+	check_equal(t, flags.IsFlag(), true)
+	check_equal(t, flags.Attr("func"), "args_opt_func")
+	check_equal(t, flags.Attr("wait"), "cc")
+	check_equal(t, flags.FlagName(), "json")
+	check_equal(t, flags.ShortFlag(), "")
+	check_equal(t, flags.Longopt(), "--prefix-json")
+	check_equal(t, flags.Shortopt(), "")
+	check_equal(t, flags.Optdest(), "prefix_json")
+	check_equal(t, flags.VarName(), "prefix_json")
+}

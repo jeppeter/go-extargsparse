@@ -637,3 +637,22 @@ func Test_A035(t *testing.T) {
 	check_equal(t, flags.Function(), "")
 	check_equal(t, flags.VarName(), "newargs")
 }
+
+func Test_A036(t *testing.T) {
+	var err error
+	var flags *extKeyParse
+	flags, err = NewExtKeyParse_short("prefix", "$<newargs>!func=args_opt_func;wait=cc!", "+", false)
+	check_equal(t, err, nil)
+	check_equal(t, flags.FlagName(), "$")
+	check_equal(t, flags.Prefix(), "prefix")
+	check_equal(t, flags.Value(), nil)
+	check_equal(t, flags.TypeName(), "args")
+	check_equal(t, flags.HelpInfo(), "")
+	check_equal(t, flags.Nargs(), "+")
+	check_equal(t, flags.ShortFlag(), "")
+	check_equal(t, flags.CmdName(), "")
+	check_equal(t, flags.Function(), "")
+	check_equal(t, flags.VarName(), "newargs")
+	check_equal(t, flags.Attr("func"), "args_opt_func")
+	check_equal(t, flags.Attr("wait"), "cc")
+}

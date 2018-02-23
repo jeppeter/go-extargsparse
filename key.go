@@ -208,6 +208,7 @@ func (self *extKeyParse) setFlag(prefix, key string, value interface{}) error {
 				break
 			}
 		}
+
 		if isflagwords {
 			switch v.(type) {
 			case string:
@@ -249,13 +250,14 @@ func (self *extKeyParse) setFlag(prefix, key string, value interface{}) error {
 				case "prefix":
 					newprefix = ""
 					vstr = ""
-
 					switch v.(type) {
 					case string:
 						vstr = v.(string)
 					}
 					if len(prefix) > 0 && len(vstr) > 0 {
 						newprefix = fmt.Sprintf("%s_%s", prefix, vstr)
+					} else if len(vstr) > 0 {
+						newprefix = fmt.Sprintf("%s", vstr)
 					}
 					self.prefix = newprefix
 				case "value":

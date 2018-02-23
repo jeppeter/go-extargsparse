@@ -698,3 +698,33 @@ func Test_A038(t *testing.T) {
 	check_equal(t, err, nil)
 	check_equal(t, flag1.Equal(flag2), false)
 }
+
+func Test_A039(t *testing.T) {
+	var v interface{}
+	var vmap map[string]interface{}
+	var err error
+	var js string
+	var flags *extKeyParse
+	js = `{"code" : {"modules": [],"$<NARGS>" : "+"}}`
+	err = json.Unmarshal([]byte(js), &v)
+	check_equal(t, err, nil)
+	vmap = v.(map[string]interface{})
+	flags, err = NewExtKeyParse_short("rdep", "ip", vmap["code"], false)
+	check_equal(t, err, nil)
+	check_equal(t, flags.IsCmd(), true)
+	check_equal(t, flags.CmdName(), "ip")
+	check_equal(t, flags.Prefix(), "rdep")
+	js = `{"code" : []}`
+	err = json.Unmarshal([]byte(js), &v)
+	check_equal(t, err, nil)
+	vmap = v.(map[string]interface{})
+	flags, err = NewExtKeyParse_short("rdep_ip", "modules", vmap["code"], false)
+	check_equal(t, err, nil)
+	check_equal(t, flags.IsFlag(), true)
+	check_equal(t, flags.Value(), vmap["code"])
+	check_equal(t, flags.Prefix(), "rdep_ip")
+	check_equal(t, flags.Longopt(), "--rdep-ip-modules")
+	check_equal(t, flags.Shortopt(), "")
+	check_equal(t, flags.Optdest(), "rdep_ip_modules")
+	check_equal(t, flags.VarName(), "rdep_ip_modules")
+}

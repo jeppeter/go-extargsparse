@@ -728,3 +728,20 @@ func Test_A039(t *testing.T) {
 	check_equal(t, flags.Optdest(), "rdep_ip_modules")
 	check_equal(t, flags.VarName(), "rdep_ip_modules")
 }
+
+func Test_A040(t *testing.T) {
+	var err error
+	var flag1, flag2 *extKeyParse
+	flag1, err = NewExtKeyParse_long("prefix", "json!func=args_opt_func;wait=cc!", nil, false, false, true, "--", "-", false)
+	check_equal(t, err, nil)
+	flag2, err = NewExtKeyParse_short("prefix", "json!func=args_opt_func;wait=cc!", nil, false)
+	check_equal(t, err, nil)
+	check_equal(t, flag1.Equal(flag2), false)
+	flag1, err = NewExtKeyParse_long("prefix", "json!func=args_opt_func;wait=cc!", nil, false, false, true, "--", "-", false)
+	check_equal(t, err, nil)
+	flag2, err = NewExtKeyParse_long("prefix", "json!func=args_opt_func;wait=cc!", nil, false, false, true, "--", "-", false)
+	check_equal(t, err, nil)
+	check_equal(t, flag1.Equal(flag2), true)
+	check_equal(t, flag1.Optdest(), "prefix_json")
+	check_equal(t, flag1.Longopt(), "--prefix-json")
+}

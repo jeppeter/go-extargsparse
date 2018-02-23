@@ -810,10 +810,6 @@ func NewExtKeyParse_long(prefix string, key string, value interface{}, isflag bo
 	return
 }
 
-func NewExtKeyParse_short(prefix string, key string, value interface{}, isflag bool) (k *extKeyParse, err error) {
+func NewExtKeyParse(prefix string, key string, value interface{}, isflag bool) (k *extKeyParse, err error) {
 	return NewExtKeyParse_long(prefix, key, value, isflag, false, false, "--", "-", false)
-}
-
-func NewExtKeyParse(prefix string, key string, value interface{}) (k *extKeyParse, err error) {
-	return NewExtKeyParse_long(prefix, key, value, false, false, false, "--", "-", false)
 }

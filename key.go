@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -230,7 +231,13 @@ func (self *extKeyParse) setFlag(prefix, key string, value interface{}) error {
 			case "shortflag":
 				self.shortFlag = vstr
 			case "nargs":
-				self.nargs = v
+				switch v.(type) {
+				case string:
+					self.nargs = v
+				default:
+					vstr = fmt.Sprintf("%v", v)
+					self.nargs, err = strconv.Atoi(vstr)
+				}
 			case "varname":
 				self.varName = vstr
 			default:

@@ -355,3 +355,9 @@ func Test_A019(t *testing.T) {
 	check_equal(t, flags.Shortopt(), "")
 	check_equal(t, flags.Optdest(), "good_flag")
 }
+
+func Test_A020(t *testing.T) {
+	var err error
+	_, err = NewExtKeyParse_short("", "$", nil, false)
+	check_not_equal(t, err, nil)
+}

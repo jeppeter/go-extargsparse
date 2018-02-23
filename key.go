@@ -599,7 +599,7 @@ func (self *extKeyParse) parse(prefix string, key string, value interface{}, isf
 	}
 
 	if self.isFlag && self.flagName == "$" && self.typeName != "dict" {
-		if !((self.typeName == "string" && strings.Contains("?+*", self.value.(string))) || self.typeName == "int") {
+		if !((self.typeName == "string" && self.value != nil && strings.Contains("?+*", self.value.(string))) || self.typeName == "int") {
 			return fmt.Errorf(format_error(1, "(%s)(%s)(%s) for $ should option dict set opt or +?* specialcase or type int", prefix, self.origKey, fmt.Sprintf("%v", self.value)))
 		} else {
 			self.nargs = self.value

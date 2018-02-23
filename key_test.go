@@ -816,3 +816,32 @@ func Test_A043(t *testing.T) {
 	check_equal(t, flags.Longopt(), "++no-rollback")
 	check_equal(t, flags.Shortopt(), "+R")
 }
+
+func Test_A044(t *testing.T) {
+	var v interface{}
+	var vmap map[string]interface{}
+	var err error
+	var js string
+	var flags *extKeyParse
+	js = `{"code" : true}`
+	err = json.Unmarshal([]byte(js), &v)
+	check_equal(t, err, nil)
+	vmap = v.(map[string]interface{})
+	flags, err = NewExtKeyParse_long("", "rollback|R## rollback not set ##", vmap["code"], false, false, false, "++", "+", false)
+	check_equal(t, err, nil)
+	check_equal(t, flags.FlagName(), "rollback")
+	check_equal(t, flags.ShortFlag(), "R")
+	check_equal(t, flags.Prefix(), "")
+	check_equal(t, flags.TypeName(), "bool")
+	check_equal(t, flags.Value(), true)
+	check_equal(t, flags.HelpInfo(), " rollback not set ")
+	check_equal(t, flags.Nargs(), 0)
+	check_equal(t, flags.CmdName(), "")
+	check_equal(t, flags.Function(), "")
+	check_equal(t, flags.Optdest(), "rollback")
+	check_equal(t, flags.VarName(), "rollback")
+	check_equal(t, flags.Longopt(), "++no-rollback")
+	check_equal(t, flags.Shortopt(), "+R")
+	check_equal(t, flags.LongPrefix(), "++")
+	check_equal(t, flags.ShortPrefix(), "+")
+}

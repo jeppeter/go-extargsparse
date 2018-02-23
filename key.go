@@ -731,6 +731,14 @@ func (self *extKeyParse) Shortopt() string {
 	return shortopt
 }
 
+func (self *extKeyParse) LongPrefix() string {
+	return self.longPrefix
+}
+
+func (self *extKeyParse) ShortPrefix() string {
+	return self.shortPrefix
+}
+
 func (self *extKeyParse) NeedArg() int {
 	if !self.isFlag {
 		return 0

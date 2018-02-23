@@ -518,3 +518,54 @@ func Test_A029(t *testing.T) {
 	check_equal(t, flags.Longopt(), "--no-rollback")
 	check_equal(t, flags.Shortopt(), "-R")
 }
+
+func Test_A030(t *testing.T) {
+	var err error
+	var flags *extKeyParse
+	flags, err = NewExtKeyParse_short("", "maxval|m##max value set ##", 0xffffffff, false)
+	check_equal(t, err, nil)
+	check_equal(t, flags.FlagName(), "maxval")
+	check_equal(t, flags.ShortFlag(), "m")
+	check_equal(t, flags.Prefix(), "")
+	check_equal(t, flags.TypeName(), "int")
+	check_equal(t, flags.Value(), 0xffffffff)
+	check_equal(t, flags.HelpInfo(), "max value set ")
+	check_equal(t, flags.Nargs(), 1)
+	check_equal(t, flags.CmdName(), "")
+	check_equal(t, flags.Function(), "")
+	check_equal(t, flags.Optdest(), "maxval")
+	check_equal(t, flags.VarName(), "maxval")
+	check_equal(t, flags.IsFlag(), true)
+	check_equal(t, flags.IsCmd(), false)
+	check_equal(t, flags.Longopt(), "--maxval")
+	check_equal(t, flags.Shortopt(), "-m")
+}
+
+func Test_A031(t *testing.T) {
+	var v interface{}
+	var vmap map[string]interface{}
+	var err error
+	var js string
+	var flags *extKeyParse
+	js = `{"code" : ["maxval"]}`
+	err = json.Unmarshal([]byte(js), &v)
+	check_equal(t, err, nil)
+	vmap = v.(map[string]interface{})
+	flags, err = NewExtKeyParse_short("", "maxval|m", vmap["code"], false)
+	check_equal(t, err, nil)
+	check_equal(t, flags.FlagName(), "maxval")
+	check_equal(t, flags.Prefix(), "")
+	check_equal(t, flags.Value(), vmap["code"])
+	check_equal(t, flags.TypeName(), "list")
+	check_equal(t, flags.HelpInfo(), "")
+	check_equal(t, flags.Nargs(), 1)
+	check_equal(t, flags.ShortFlag(), "m")
+	check_equal(t, flags.CmdName(), "")
+	check_equal(t, flags.Function(), "")
+	check_equal(t, flags.Longopt(), "--maxval")
+	check_equal(t, flags.Shortopt(), "-m")
+	check_equal(t, flags.Optdest(), "maxval")
+	check_equal(t, flags.VarName(), "maxval")
+	check_equal(t, flags.IsFlag(), true)
+	check_equal(t, flags.IsCmd(), false)
+}

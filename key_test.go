@@ -385,3 +385,28 @@ func Test_A021(t *testing.T) {
 	check_equal(t, flags.Nargs(), "?")
 	check_equal(t, flags.HelpInfo(), " self define ")
 }
+
+func Test_A022(t *testing.T) {
+	var v interface{}
+	var vmap map[string]interface{}
+	var err error
+	var js string
+	var flags *extKeyParse
+	js = `{"code" : {}}`
+	err = json.Unmarshal([]byte(js), &v)
+	check_equal(t, err, nil)
+	vmap = v.(map[string]interface{})
+	flags, err = NewExtKeyParse_short("command", "+flag", vmap["code"], false)
+	check_equal(t, err, nil)
+	check_equal(t, flags.Prefix(), "command_flag")
+	check_equal(t, flags.Value(), vmap["code"])
+	check_equal(t, flags.CmdName(), "")
+	check_equal(t, flags.ShortFlag(), "")
+	check_equal(t, flags.FlagName(), "")
+	check_equal(t, flags.VarName(), "")
+	check_equal(t, flags.Function(), "")
+	check_equal(t, flags.HelpInfo(), "")
+	check_equal(t, flags.IsFlag(), true)
+	check_equal(t, flags.IsCmd(), false)
+	check_equal(t, flags.TypeName(), "prefix")
+}

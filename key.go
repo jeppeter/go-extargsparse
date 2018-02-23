@@ -764,6 +764,10 @@ func (self *extKeyParse) Function() string {
 }
 
 func (self *extKeyParse) Attr(k string) string {
+	if k == "" {
+		return formatMap(self.attr)
+	}
+
 	v, ok := self.attr[k]
 	if !ok {
 		return ""

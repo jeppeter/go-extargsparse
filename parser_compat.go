@@ -11,7 +11,7 @@ type parserCompat struct {
 	KeyCls       *ExtKeyParse
 	CmdName      string
 	CmdOpts      []*ExtKeyParse
-	SubCommands  []string
+	SubCommands  []*parserCompat
 	HelpInfo     string
 	CallFunction string
 	ScreenWidth  int
@@ -32,7 +32,7 @@ func newParserCompat(keycls *ExtKeyParse, opt *ExtArgsOptions) *parserCompat {
 		self.KeyCls = keycls
 		self.CmdName = keycls.CmdName()
 		self.CmdOpts = make([]*ExtKeyParse, 0)
-		self.SubCommands = make([]string, 0)
+		self.SubCommands = make([]*parserCompat, 0)
 		self.HelpInfo = fmt.Sprintf("%s handler", self.CmdName)
 		if len(keycls.HelpInfo()) > 0 {
 			self.HelpInfo = keycls.HelpInfo()
@@ -49,7 +49,7 @@ func newParserCompat(keycls *ExtKeyParse, opt *ExtArgsOptions) *parserCompat {
 		assert_test(err == nil, "make main cmd must succ")
 		self.CmdName = ""
 		self.CmdOpts = make([]*ExtKeyParse, 0)
-		self.SubCommands = make([]string, 0)
+		self.SubCommands = make([]*parserCompat, 0)
 		self.HelpInfo = ""
 		self.CallFunction = ""
 	}
@@ -116,16 +116,18 @@ func (self *parserCompat) get_help_info(keycls *ExtKeyParse) string {
 
 func (self *parserCompat) get_opt_help_optname(opt *ExtKeyParse) string {
 	var s string = ""
-	s += opt.Longopt()
-	if len(opt.Shortopt()) > 0 {
-		s += fmt.Sprintf("|%s", opt.Shortopt())
+	if opt != nil {
+		s += opt.Longopt()
+		if len(opt.Shortopt()) > 0 {
+			s += fmt.Sprintf("|%s", opt.Shortopt())
+		}
 	}
 	return s
 }
 
 func (self *parserCompat) get_opt_help_optexpr(opt *ExtKeyParse) string {
 	var s string = ""
-	if opt.TypeName() != "bool" && opt.TypeName() != "args" &&
+	if opt != nil && opt.TypeName() != "bool" && opt.TypeName() != "args" &&
 		opt.TypeName() != "dict" && opt.TypeName() != "help" {
 		s = opt.VarName()
 		s = strings.Replace(s, "-", "_", -1)
@@ -135,4 +137,88 @@ func (self *parserCompat) get_opt_help_optexpr(opt *ExtKeyParse) string {
 
 func (self *parserCompat) get_opt_help_opthelp(opt *ExtKeyParse) string {
 	return self.get_help_info(opt)
+}
+
+func (self *parserCompat) get_cmd_help_cmdname() string {
+	var s string = ""
+	if len(self.CmdName) > 0 {
+		s = self.CmdName
+	}
+	return s
+}
+
+func (self *parserCompat) get_cmd_help_cmdhelp() string {
+	var s string = ""
+	if len(self.HelpInfo) > 0 {
+		s = self.HelpInfo
+	}
+	return s
+}
+
+func (self *parserCompat) GetHelpSize(hs *helpSize, recursive int) *helpSize {
+	var curopt *ExtKeyParse
+	var chldparser *parserCompat
+	if hs == nil {
+		hs = newHelpSize()
+	}
+
+	hs.SetValue("cmdnamesize", len(self.get_cmd_help_cmdname()))
+	hs.SetValue("cmdhelpsize", len(self.get_cmd_help_cmdhelp()))
+
+	for _, curopt = range self.CmdOpts {
+		if curopt.TypeName() == "args" {
+			continue
+		}
+		hs.SetValue("optnamesize", len(self.get_opt_help_optname(curopt))+1)
+		hs.SetValue("optexprsize", len(self.get_opt_help_optexpr(curopt))+1)
+		hs.SetValue("opthelpsize", len(self.get_opt_help_opthelp(curopt))+1)
+	}
+
+	if recursive != 0 {
+		for _, chldparser = range self.SubCommands {
+			if recursive > 0 {
+				hs = chldparser.GetHelpSize(hs, recursive-1)
+			} else {
+				hs = chldparser.GetHelpSize(hs, recursive)
+			}
+		}
+	}
+
+	for _, chldparser = range self.SubCommands {
+		hs.SetValue("cmdnamesize", len(chldparser.CmdName)+2)
+		hs.SetValue("cmdhelpsize", len(chldparser.HelpInfo))
+	}
+
+	return hs
+}
+
+func (self *parserCompat) get_indent_string(s string, indentsize int, maxsize int) string {
+	var rets string = ""
+	var curs string = ""
+	var ncurs string
+	var i int
+	var j int
+	i = 0
+	curs = ""
+	for i = 0; i < indentsize; i++ {
+		curs += " "
+	}
+
+	for j = 0; j < len(s); j++ {
+		if (s[j:(j+1)] == " " || s[j:(j+1)] == "\t") && len(curs) >= maxsize {
+			rets += curs + "\n"
+			curs = ""
+			for i = 0; i < indentsize; i++ {
+				curs += " "
+			}
+			continue
+		}
+		curs += s[j:(j + 1)]
+	}
+
+	ncurs = strings.Trim(curs, "\t ")
+	if len(ncurs) > 0 {
+		rets += curs + "\n"
+	}
+	return rets
 }

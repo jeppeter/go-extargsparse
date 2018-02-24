@@ -378,3 +378,38 @@ func (self *parseState) find_key_cls() (retkey *ExtKeyParse, err error) {
 	retkey = nil
 	return
 }
+
+func (self *parseState) StepOne() (validx int, optval interface{}, keycls *ExtKeyParse, err error) {
+	if self.ended != 0 {
+		validx = self.curidx
+		optval = self.leftargs
+		keycls = nil
+		err = nil
+		return
+	}
+
+	keycls, err = self.find_key_cls()
+	if err != nil {
+		return
+	}
+
+	if keycls == nil {
+		validx = self.curidx
+		optval = self.leftargs
+		err = nil
+		return
+	}
+
+	if !keycls.IsCmd() {
+		optval = keycls.Optdest()
+	} else if keycls.IsCmd() {
+		optval = self.FormatCmdnamePath(self.cmdpaths)
+	}
+	validx = self.validx
+	err = nil
+	return
+}
+
+func (self *parseState) GetCmdPaths() []*parserCompat {
+	return self.cmdpaths
+}

@@ -231,6 +231,9 @@ func (self *parserCompat) GetHelpInfo(hs *helpSize, parentcmds []*parserCompat) 
 	var curopt *ExtKeyParse
 	var curs string
 	var curint int
+	var optname string
+	var optexpr string
+	var opthelp string
 	if hs == nil {
 		hs = self.GetHelpSize(hs, 0)
 	}
@@ -302,7 +305,62 @@ func (self *parserCompat) GetHelpInfo(hs *helpSize, parentcmds []*parserCompat) 
 
 	if len(self.CmdOpts) > 0 {
 		rets += "[OPTIONS]\n"
+
+		for _, curopt = range self.CmdOpts {
+			if curopt.TypeName() == "args" {
+				continue
+			}
+			curs = ""
+			curs += "    "
+			optname = self.get_opt_help_optname(curopt)
+			optexpr = self.get_opt_help_optexpr(curopt)
+			opthelp = self.get_opt_help_opthelp(curopt)
+			curs += fmt.Sprintf("%-*s %-*s %-*s\n", hs.GetValue("optnamesize"), optname, hs.GetValue("optexprsize"), optexpr, hs.GetValue("opthelpsize"), opthelp)
+			if len(curs) < self.ScreenWidth {
+				rets += curs
+			} else {
+				curs = ""
+				curs += "    "
+				curs += fmt.Sprintf("%-*s %-*s", hs.GetValue("optnamesize"), optname, hs.GetValue("optexprsize"), optexpr)
+				rets += curs + "\n"
+				if self.ScreenWidth > 60 {
+					rets += self.get_indent_string(opthelp, 20, self.ScreenWidth)
+				} else {
+					rets += self.get_indent_string(opthelp, 15, self.ScreenWidth)
+				}
+			}
+		}
+	}
+
+	if len(self.Epilog) > 0 {
+		rets += fmt.Sprintf("\n%s\n", self.Epilog)
 	}
 
 	return rets
+}
+
+func (self *parserCompat) Format() string {
+	var s string
+	var i int = 0
+	var curcmd *parserCompat
+	var curopt *ExtKeyParse
+	s = fmt.Sprintf("@%s|", self.CmdName)
+	if len(self.SubCommands) > 0 {
+		s += fmt.Sprintf("subcommands[%d]<", len(self.SubCommands))
+		for i, curcmd = range self.SubCommands {
+			if i > 0 {
+				s += "|"
+			}
+			s += fmt.Sprintf("%s", curcmd.CmdName)
+		}
+		s += ">"
+	}
+	if len(self.CmdOpts) > 0 {
+		s += fmt.Sprintf("cmdopts[%d]<", len(self.CmdOpts))
+		for _, curopt = range self.CmdOpts {
+			s += fmt.Sprintf("%s", curopt.Format())
+		}
+		s += ">"
+	}
+	return s
 }

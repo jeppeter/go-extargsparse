@@ -37,6 +37,18 @@ func (p *ExtArgsOptions) SetValue(k string, v interface{}) error {
 	return nil
 }
 
+func (p *ExtArgsOptions) SetString(k string, v string) error {
+	return p.SetValue(k, v)
+}
+
+func (p *ExtArgsOptions) SetInt(k string, v int) error {
+	return p.SetValue(k, v)
+}
+
+func (p *ExtArgsOptions) SetBool(k string, v bool) error {
+	return p.SetValue(k, v)
+}
+
 func (p *ExtArgsOptions) GetValue(k string) interface{} {
 	var v interface{}
 	var ok bool
@@ -45,6 +57,55 @@ func (p *ExtArgsOptions) GetValue(k string) interface{} {
 		return nil
 	}
 	return v
+}
+
+func (p *ExtArgsOptions) GetString(k string) string {
+	var v interface{}
+	v = p.GetValue(k)
+	if v == nil {
+		return ""
+	}
+	switch v.(type) {
+	case string:
+		return v.(string)
+	}
+	return fmt.Sprintf("%v", v)
+}
+
+func (p *ExtArgsOptions) GetBool(k string) bool {
+	var v interface{}
+	v = p.GetValue(k)
+	if v == nil {
+		return false
+	}
+
+	switch v.(type) {
+	case bool:
+		return v.(bool)
+	}
+	return false
+}
+
+func (p *ExtArgsOptions) GetInt(k string) int {
+	var v interface{}
+	v = p.GetValue(k)
+	if v == nil {
+		return 0
+	}
+
+	switch v.(type) {
+	case int:
+		return v.(int)
+	case int32:
+		return int(v.(int32))
+	case int64:
+		return int(v.(int64))
+	case uint32:
+		return int(v.(uint32))
+	case uint64:
+		return int(v.(uint64))
+	}
+	return 0
 }
 
 func (p *ExtArgsOptions) Format() string {

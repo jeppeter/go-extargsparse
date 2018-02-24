@@ -3,6 +3,7 @@ package extargsparse
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -218,7 +219,90 @@ func (self *parserCompat) get_indent_string(s string, indentsize int, maxsize in
 
 	ncurs = strings.Trim(curs, "\t ")
 	if len(ncurs) > 0 {
-		rets += curs + "\n"
+		rets += strings.TrimRight(curs, "\t ") + "\n"
 	}
+	return rets
+}
+
+func (self *parserCompat) GetHelpInfo(hs *helpSize, parentcmds []*parserCompat) string {
+	var rets string = ""
+	var rootcmds *parserCompat = nil
+	var curcmd *parserCompat
+	var curopt *ExtKeyParse
+	var curs string
+	var curint int
+	if hs == nil {
+		hs = self.GetHelpSize(hs, 0)
+	}
+	if len(self.Usage) > 0 {
+		rets += fmt.Sprintf("%s", self.Usage)
+	} else {
+		rootcmds = self
+		if len(parentcmds) > 0 {
+			rootcmds = parentcmds[0]
+		}
+
+		if len(rootcmds.Prog) > 0 {
+			rets += fmt.Sprintf("%s", rootcmds.Prog)
+		} else {
+			rets += fmt.Sprintf("%s", os.Args[0])
+		}
+
+		if len(rootcmds.Version) > 0 {
+			rets += fmt.Sprintf(" %s", rootcmds.Version)
+		}
+
+		if len(parentcmds) > 0 {
+			for _, curcmd = range parentcmds {
+				rets += fmt.Sprintf(" %s", curcmd.CmdName)
+			}
+		}
+		rets += fmt.Sprintf(" %s", self.CmdName)
+
+		if len(self.CmdOpts) > 0 {
+			rets += fmt.Sprintf(" [OPTIONS]")
+		}
+
+		if len(self.SubCommands) > 0 {
+			rets += fmt.Sprintf(" [SUBCOMMANDS]")
+		}
+
+		for _, curopt = range self.CmdOpts {
+			if curopt.TypeName() == "args" {
+				switch curopt.Nargs().(type) {
+				case string:
+					curs = curopt.Nargs().(string)
+					if curs == "+" {
+						rets += fmt.Sprintf(" args...")
+					} else if curs == "*" {
+						rets += fmt.Sprintf(" [args...]'")
+					} else if curs == "?" {
+						rets += fmt.Sprintf(" arg")
+					}
+				case int:
+					curint = curopt.Nargs().(int)
+					if curint > 1 {
+						rets += " args..."
+					} else if curint == 1 {
+						rets += " arg"
+					} else {
+						rets += ""
+					}
+				default:
+					assert_test(false == true, "%s nargs not valid", curopt.Format())
+				}
+			}
+		}
+		rets += "\n"
+	}
+
+	if len(self.Description) > 0 {
+		rets += fmt.Sprintf("%s\n", self.Description)
+	}
+
+	if len(self.CmdOpts) > 0 {
+		rets += "[OPTIONS]\n"
+	}
+
 	return rets
 }

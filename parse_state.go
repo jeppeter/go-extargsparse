@@ -111,6 +111,7 @@ func (self *parseState) find_key_cls() (retkey *ExtKeyParse, err error) {
 	var curch string
 	var cmd *parserCompat
 	var opt *ExtKeyParse
+	var keycls *ExtKeyParse
 	retkey = nil
 	err = nil
 
@@ -304,11 +305,75 @@ func (self *parseState) find_key_cls() (retkey *ExtKeyParse, err error) {
 						return
 					}
 				}
-
+				idx -= 1
+			}
+			idx = len(self.cmdpaths) - 1
+			for idx >= 0 {
+				cmd = self.cmdpaths[idx]
+				for _, opt = range cmd.CmdOpts {
+					if !opt.IsFlag() {
+						continue
+					}
+					if opt.FlagName() == "$" {
+						continue
+					}
+					self.Info("[%d](%s) curarg [%s]", idx, opt.Shortopt(), curarg)
+					if len(opt.Shortopt()) > 0 && opt.Shortopt() == curarg {
+						self.keyidx = oldidx
+						self.validx = (oldidx + 1)
+						self.shortcharargs = -1
+						self.longargs = -1
+						self.curidx = oldidx
+						self.curcharidx = len(opt.Shortopt())
+						retkey = opt
+						err = nil
+						return
+					}
+				}
 				idx -= 1
 			}
 		}
 	}
+
+	keycls = self.find_sub_command(self.args[oldidx])
+	if keycls != nil {
+		self.Info("find %s", self.args[oldidx])
+		self.keyidx = oldidx
+		self.curidx = (oldidx + 1)
+		self.validx = (oldidx + 1)
+		self.curcharidx = -1
+		self.shortcharargs = -1
+		self.longargs = -1
+		retkey = keycls
+		err = nil
+		return
+	}
+
+	if self.parseall {
+		self.leftargs = append(self.leftargs, self.args[oldidx])
+		oldidx += 1
+		self.keyidx = -1
+		self.validx = oldidx
+		self.curidx = oldidx
+		self.curcharidx = -1
+		self.shortcharargs = -1
+		self.longargs = -1
+		return self.find_key_cls()
+	} else {
+		self.ended = 1
+		for idx = oldidx; idx < len(self.args); idx++ {
+			self.leftargs = append(self.leftargs, self.args[idx])
+		}
+		self.keyidx = -1
+		self.curidx = oldidx
+		self.curcharidx = -1
+		self.shortcharargs = -1
+		self.longargs = -1
+		retkey = nil
+		err = nil
+		return
+	}
+
 	err = nil
 	retkey = nil
 	return

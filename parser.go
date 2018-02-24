@@ -256,11 +256,48 @@ func NewExtArgsParse(options *ExtArgsOptions, priority interface{}) (self *ExtAr
 	return
 }
 
+func (self *ExtArgsParse) loadCommandLineJsonAdded(parsers []*parserCompat) error {
+	return nil
+}
+
+func (self *ExtArgsParse) loadCommandLineHelpAdded(parsers []*parserCompat) error {
+	return nil
+}
+
+func (self *ExtArgsParse) loadCommandLineInner(prefix string, vmap map[string]interface{}, parsers []*parserCompat) error {
+	var err error
+	var parentpath []*parserCompat
+	if !self.noJsonOption {
+		err = self.loadCommandLineJsonAdded(parsers)
+		if err != nil {
+			return err
+		}
+	}
+
+	if !self.noHelpOption {
+		err = self.loadCommandLineHelpAdded(parsers)
+		if err != nil {
+			return err
+		}
+	}
+
+	parentpath = make([]*parserCompat, 0)
+	parentpath = append(parentpath, self.mainCmd)
+	if len(parsers) > 0 {
+		parentpath = parsers
+	}
+
+	return nil
+}
+
 func (self *ExtArgsParse) loadCommandLine(vmap map[string]interface{}) error {
+	var parsers []*parserCompat
 	if self.ended != 0 {
 		return fmt.Errorf("%s", format_error("you have call ParseCommandLine before call LoadCommandLineString"))
 	}
-	return nil
+	parsers = make([]*parserCompat, 0)
+
+	return self.loadCommandLineInner("", vmap, parsers)
 }
 
 func (self *ExtArgsParse) LoadCommandLineString(s string) error {

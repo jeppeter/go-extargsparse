@@ -27,7 +27,7 @@ func Test_key_A002(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	js = `{"code" : []}`
 	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
@@ -49,7 +49,7 @@ func Test_key_A002(t *testing.T) {
 }
 
 func Test_key_A003(t *testing.T) {
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	var err error
 	flags, err = newExtKeyParse("", "flag|f", false, false)
 	check_equal(t, err, nil)
@@ -72,7 +72,7 @@ func Test_key_A004(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	js = `{"code" : {}}`
 	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
@@ -93,7 +93,7 @@ func Test_key_A004(t *testing.T) {
 
 func Test_key_A005(t *testing.T) {
 	var err error
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	flags, err = newExtKeyParse("", "flag<flag.main>##help for flag##", "", true)
 	check_equal(t, err, nil)
 	check_equal(t, flags.CmdName(), "")
@@ -116,7 +116,7 @@ func Test_key_A006(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	js = `{"code" : {"new": false}}`
 	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
@@ -139,7 +139,7 @@ func Test_key_A007(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	js = `{"code" : {}}`
 	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
@@ -186,7 +186,7 @@ func Test_key_A012(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	js = `{"code" : {}}`
 	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
@@ -210,7 +210,7 @@ func Test_key_A012(t *testing.T) {
 
 func Test_key_A013(t *testing.T) {
 	var err error
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	flags, err = newExtKeyParse("", "$flag|f+cc<flag.main>", nil, false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.Prefix(), "cc")
@@ -245,7 +245,7 @@ func Test_key_A016(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	js = `{"code" : {"nargs" : "+"}}`
 	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
@@ -268,7 +268,7 @@ func Test_key_A017(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	js = `{"code" : 3.3}`
 	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
@@ -294,7 +294,7 @@ func Test_key_A018(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	js = `{"code" : {}}`
 	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
@@ -317,7 +317,7 @@ func Test_key_A019(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	js = `{"code" : { "prefix" : "good", "value": false}}`
 	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
@@ -348,7 +348,7 @@ func Test_key_A021(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	js = `{"code" : { "nargs" : "?", "value": null}}`
 	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
@@ -370,7 +370,7 @@ func Test_key_A022(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	js = `{"code" : {}}`
 	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
@@ -393,7 +393,7 @@ func Test_key_A023(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	js = `{"code" : {"prefix": "good","value": 3.9, "nargs": 1}}`
 	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
@@ -429,7 +429,7 @@ func Test_key_A024(t *testing.T) {
 
 func Test_key_A027(t *testing.T) {
 	var err error
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	flags, err = newExtKeyParse("dep", "verbose|v", "+", false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.FlagName(), "verbose")
@@ -451,7 +451,7 @@ func Test_key_A027(t *testing.T) {
 
 func Test_key_A028(t *testing.T) {
 	var err error
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	flags, err = newExtKeyParse("", "verbose|v## new help info ##", "+", false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.FlagName(), "verbose")
@@ -473,7 +473,7 @@ func Test_key_A028(t *testing.T) {
 
 func Test_key_A029(t *testing.T) {
 	var err error
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	flags, err = newExtKeyParse("", "rollback|R## rollback not set ##", true, false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.FlagName(), "rollback")
@@ -495,7 +495,7 @@ func Test_key_A029(t *testing.T) {
 
 func Test_key_A030(t *testing.T) {
 	var err error
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	flags, err = newExtKeyParse("", "maxval|m##max value set ##", 0xffffffff, false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.FlagName(), "maxval")
@@ -519,7 +519,7 @@ func Test_key_A031(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	js = `{"code" : ["maxval"]}`
 	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
@@ -544,7 +544,7 @@ func Test_key_A031(t *testing.T) {
 
 func Test_key_A032(t *testing.T) {
 	var err error
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	flags, err = newExtKeyParse("", "$<numargs>", "+", false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.FlagName(), "$")
@@ -561,7 +561,7 @@ func Test_key_A032(t *testing.T) {
 
 func Test_key_A033(t *testing.T) {
 	var err error
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	flags, err = newExtKeyParse("", "$", "+", false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.FlagName(), "$")
@@ -578,7 +578,7 @@ func Test_key_A033(t *testing.T) {
 
 func Test_key_A034(t *testing.T) {
 	var err error
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	flags, err = newExtKeyParse("prefix", "$", "+", false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.FlagName(), "$")
@@ -595,7 +595,7 @@ func Test_key_A034(t *testing.T) {
 
 func Test_key_A035(t *testing.T) {
 	var err error
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	flags, err = newExtKeyParse("prefix", "$<newargs>", "+", false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.FlagName(), "$")
@@ -612,7 +612,7 @@ func Test_key_A035(t *testing.T) {
 
 func Test_key_A036(t *testing.T) {
 	var err error
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	flags, err = newExtKeyParse("prefix", "$<newargs>!func=args_opt_func;wait=cc!", "+", false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.FlagName(), "$")
@@ -631,7 +631,7 @@ func Test_key_A036(t *testing.T) {
 
 func Test_key_A037(t *testing.T) {
 	var err error
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	flags, err = newExtKeyParse_long("prefix", "help|h!func=args_opt_func;wait=cc!", nil, false, true, false, "--", "-", false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.FlagName(), "help")
@@ -653,7 +653,7 @@ func Test_key_A037(t *testing.T) {
 
 func Test_key_A038(t *testing.T) {
 	var err error
-	var flag1, flag2 *extKeyParse
+	var flag1, flag2 *ExtKeyParse
 	flag1, err = newExtKeyParse_long("prefix", "help|h!func=args_opt_func;wait=cc!", nil, false, true, false, "--", "-", false)
 	check_equal(t, err, nil)
 	flag2, err = newExtKeyParse_long("prefix", "help|h!func=args_opt_func;wait=cc!", nil, false, false, false, "--", "-", false)
@@ -675,7 +675,7 @@ func Test_key_A039(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	js = `{"code" : {"modules": [],"$<NARGS>" : "+"}}`
 	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
@@ -700,7 +700,7 @@ func Test_key_A039(t *testing.T) {
 
 func Test_key_A040(t *testing.T) {
 	var err error
-	var flag1, flag2 *extKeyParse
+	var flag1, flag2 *ExtKeyParse
 	flag1, err = newExtKeyParse_long("prefix", "json!func=args_opt_func;wait=cc!", nil, false, false, true, "--", "-", false)
 	check_equal(t, err, nil)
 	flag2, err = newExtKeyParse("prefix", "json!func=args_opt_func;wait=cc!", nil, false)
@@ -719,7 +719,7 @@ func Test_key_A041(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	js = `{"code" : {"nargs": 1,"attr" : {"func":"args_opt_func","wait": "cc"}}}`
 	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
@@ -741,7 +741,7 @@ func Test_key_A042(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	js = `{"code" : {}}`
 	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
@@ -759,7 +759,7 @@ func Test_key_A043(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	js = `{"code" : true}`
 	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
@@ -784,7 +784,7 @@ func Test_key_A044(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	js = `{"code" : true}`
 	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
@@ -811,7 +811,7 @@ func Test_key_A045(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
-	var flags *extKeyParse
+	var flags *ExtKeyParse
 	js = `{"code" : false}`
 	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)

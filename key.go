@@ -117,7 +117,7 @@ func setAttr(attr interface{}) (kattr map[string]string, err error) {
 	return
 }
 
-type extKeyParse struct {
+type ExtKeyParse struct {
 	/*this are the inner member*/
 	longPrefix  string
 	shortPrefix string
@@ -138,7 +138,7 @@ type extKeyParse struct {
 	attr        map[string]string
 }
 
-func (self *extKeyParse) getType(value interface{}) string {
+func (self *ExtKeyParse) getType(value interface{}) string {
 	switch value.(type) {
 	case string:
 		return "string"
@@ -175,7 +175,7 @@ func (self *extKeyParse) getType(value interface{}) string {
 	return ""
 }
 
-func (self *extKeyParse) setFlag(prefix, key string, value interface{}) error {
+func (self *ExtKeyParse) setFlag(prefix, key string, value interface{}) error {
 	var vmap map[string]interface{}
 	var findvalue bool = false
 	var v interface{}
@@ -289,7 +289,7 @@ func (self *extKeyParse) setFlag(prefix, key string, value interface{}) error {
 	return nil
 }
 
-func (self *extKeyParse) Optdest() string {
+func (self *ExtKeyParse) Optdest() string {
 	var optdest string
 	if !self.isFlag || len(self.flagName) == 0 || self.typeName == "args" {
 		s := fmt.Sprintf("can not set (%s) optdest", self.origKey)
@@ -311,23 +311,23 @@ func (self *extKeyParse) Optdest() string {
 	return optdest
 }
 
-func (self *extKeyParse) ShortFlag() string {
+func (self *ExtKeyParse) ShortFlag() string {
 	return self.shortFlag
 }
 
-func (self *extKeyParse) IsFlag() bool {
+func (self *ExtKeyParse) IsFlag() bool {
 	return self.isFlag
 }
 
-func (self *extKeyParse) IsCmd() bool {
+func (self *ExtKeyParse) IsCmd() bool {
 	return self.isCmd
 }
 
-func (self *extKeyParse) TypeName() string {
+func (self *ExtKeyParse) TypeName() string {
 	return self.typeName
 }
 
-func (self *extKeyParse) validate() error {
+func (self *ExtKeyParse) validate() error {
 	if self.isFlag {
 		assert_test(!self.isCmd, "cmdmode setted")
 		if len(self.function) > 0 {
@@ -429,7 +429,7 @@ func (self *extKeyParse) validate() error {
 	return nil
 }
 
-func (self *extKeyParse) parse(prefix string, key string, value interface{}, isflag bool, ishelp bool, isjsonfile bool, longprefix string, shortprefix string, nochange bool) error {
+func (self *ExtKeyParse) parse(prefix string, key string, value interface{}, isflag bool, ishelp bool, isjsonfile bool, longprefix string, shortprefix string, nochange bool) error {
 	var flagmode bool = false
 	var cmdmode bool = false
 	var flags string = ""
@@ -641,7 +641,7 @@ func (self *extKeyParse) parse(prefix string, key string, value interface{}, isf
 	return self.validate()
 }
 
-func (self *extKeyParse) Format() string {
+func (self *ExtKeyParse) Format() string {
 	var s string
 	s = "{"
 	s += fmt.Sprintf("<type:%s>", self.typeName)
@@ -694,7 +694,7 @@ func (self *extKeyParse) Format() string {
 	return s
 }
 
-func (self *extKeyParse) Longopt() string {
+func (self *ExtKeyParse) Longopt() string {
 	var longopt string
 	if !self.isFlag || len(self.flagName) == 0 || self.typeName == "args" {
 		s := fmt.Sprintf("can not set (%s) longopt", self.origKey)
@@ -718,7 +718,7 @@ func (self *extKeyParse) Longopt() string {
 	return longopt
 }
 
-func (self *extKeyParse) Shortopt() string {
+func (self *ExtKeyParse) Shortopt() string {
 	var shortopt string = ""
 	if !self.isFlag || len(self.flagName) == 0 || self.typeName == "args" {
 		s := fmt.Sprintf("can not set (%s) shortopt", self.origKey)
@@ -731,15 +731,15 @@ func (self *extKeyParse) Shortopt() string {
 	return shortopt
 }
 
-func (self *extKeyParse) LongPrefix() string {
+func (self *ExtKeyParse) LongPrefix() string {
 	return self.longPrefix
 }
 
-func (self *extKeyParse) ShortPrefix() string {
+func (self *ExtKeyParse) ShortPrefix() string {
 	return self.shortPrefix
 }
 
-func (self *extKeyParse) NeedArg() int {
+func (self *ExtKeyParse) NeedArg() int {
 	if !self.isFlag {
 		return 0
 	}
@@ -751,27 +751,27 @@ func (self *extKeyParse) NeedArg() int {
 	return 0
 }
 
-func (self *extKeyParse) Prefix() string {
+func (self *ExtKeyParse) Prefix() string {
 	return self.prefix
 }
 
-func (self *extKeyParse) Value() interface{} {
+func (self *ExtKeyParse) Value() interface{} {
 	return self.value
 }
 
-func (self *extKeyParse) CmdName() string {
+func (self *ExtKeyParse) CmdName() string {
 	return self.cmdName
 }
 
-func (self *extKeyParse) HelpInfo() string {
+func (self *ExtKeyParse) HelpInfo() string {
 	return self.helpInfo
 }
 
-func (self *extKeyParse) Function() string {
+func (self *ExtKeyParse) Function() string {
 	return self.function
 }
 
-func (self *extKeyParse) Attr(k string) string {
+func (self *ExtKeyParse) Attr(k string) string {
 	if k == "" {
 		return formatMap(self.attr)
 	}
@@ -783,27 +783,27 @@ func (self *extKeyParse) Attr(k string) string {
 	return v
 }
 
-func (self *extKeyParse) FlagName() string {
+func (self *ExtKeyParse) FlagName() string {
 	return self.flagName
 }
 
-func (self *extKeyParse) VarName() string {
+func (self *ExtKeyParse) VarName() string {
 	return self.varName
 }
 
-func (self *extKeyParse) Nargs() interface{} {
+func (self *ExtKeyParse) Nargs() interface{} {
 	return self.nargs
 }
 
-func (self *extKeyParse) Equal(other *extKeyParse) bool {
+func (self *ExtKeyParse) Equal(other *ExtKeyParse) bool {
 	if self.Format() != other.Format() {
 		return false
 	}
 	return true
 }
 
-func newExtKeyParse_long(prefix string, key string, value interface{}, isflag bool, ishelp bool, isjsonfile bool, longprefix string, shortprefix string, nochange bool) (k *extKeyParse, err error) {
-	p := &extKeyParse{}
+func newExtKeyParse_long(prefix string, key string, value interface{}, isflag bool, ishelp bool, isjsonfile bool, longprefix string, shortprefix string, nochange bool) (k *ExtKeyParse, err error) {
+	p := &ExtKeyParse{}
 	p.nargs = nil
 	p.value = nil
 	p.isFlag = false
@@ -818,6 +818,6 @@ func newExtKeyParse_long(prefix string, key string, value interface{}, isflag bo
 	return
 }
 
-func newExtKeyParse(prefix string, key string, value interface{}, isflag bool) (k *extKeyParse, err error) {
+func newExtKeyParse(prefix string, key string, value interface{}, isflag bool) (k *ExtKeyParse, err error) {
 	return newExtKeyParse_long(prefix, key, value, isflag, false, false, "--", "-", false)
 }

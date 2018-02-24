@@ -18,10 +18,14 @@ func format_out_stack(level int) string {
 	return fmt.Sprintf("[%s:%d]", f, l)
 }
 
-func format_error(level int, fmtstr string, a ...interface{}) string {
+func format_error_ex(level int, fmtstr string, a ...interface{}) string {
 	s := format_out_stack(level + 1)
 	s += fmt.Sprintf(fmtstr, a...)
 	return s
+}
+
+func format_error(fmtstr string, a ...interface{}) string {
+	return format_error_ex(2, fmtstr, a...)
 }
 
 func formatMap(kattr map[string]string) string {

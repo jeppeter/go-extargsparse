@@ -1,6 +1,7 @@
 package extargsparse
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 )
@@ -163,11 +164,11 @@ func NewExtArgsParse(options *ExtArgsOptions, priority interface{}) (self *ExtAr
 				pr = append(pr, iv)
 			}
 		default:
-			return nil, fmt.Errorf("%s", format_error(1, "unknown type [%s] [%v]", reflect.ValueOf(priority).Type().Name(), priority))
+			return nil, fmt.Errorf("%s", format_error("unknown type [%s] [%v]", reflect.ValueOf(priority).Type().Name(), priority))
 		}
 		for _, iv = range pr {
 			if !is_valid_priority(iv) {
-				return nil, fmt.Errorf("%s", format_error(1, "not valid priority [%d]", iv))
+				return nil, fmt.Errorf("%s", format_error("not valid priority [%d]", iv))
 			}
 		}
 	}
@@ -253,4 +254,21 @@ func NewExtArgsParse(options *ExtArgsOptions, priority interface{}) (self *ExtAr
 
 	err = nil
 	return
+}
+
+func (self *ExtArgsParse) loadCommandLine(vmap map[string]interface{}) error {
+	if self.ended != 0 {
+		return fmt.Errorf("%s", format_error("you have call ParseCommandLine before call LoadCommandLineString"))
+	}
+	return nil
+}
+
+func (self *ExtArgsParse) LoadCommandLineString(s string) error {
+	var vmap map[string]interface{}
+	var err error
+	err = json.Unmarshal([]byte(s), &vmap)
+	if err != nil {
+		return fmt.Errorf("%s", format_error("parse [%s] error [%s]", s, err.Error()))
+	}
+	return self.loadCommandLine(vmap)
 }

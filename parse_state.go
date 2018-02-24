@@ -87,7 +87,7 @@ func (self *parseState) find_sub_command(name string) *ExtKeyParse {
 func (self *parseState) AddParseArgs(nargs int) error {
 	if self.curcharidx >= 0 {
 		if nargs > 0 && self.shortcharargs > 0 {
-			return fmt.Errorf("%s", format_error(1, "[%s] already set args", self.args[self.curidx]))
+			return fmt.Errorf("%s", format_error("[%s] already set args", self.args[self.curidx]))
 		}
 		if self.shortcharargs < 0 {
 			self.shortcharargs = 0
@@ -95,7 +95,7 @@ func (self *parseState) AddParseArgs(nargs int) error {
 		self.shortcharargs += nargs
 	} else {
 		if self.longargs > 0 {
-			return fmt.Errorf("%s", format_error(1, "[%s] not handled ", self.args[self.curidx]))
+			return fmt.Errorf("%s", format_error("[%s] not handled ", self.args[self.curidx]))
 		}
 		if self.longargs < 0 {
 			self.longargs = 0
@@ -189,7 +189,7 @@ func (self *parseState) find_key_cls() (retkey *ExtKeyParse, err error) {
 			idx -= 1
 		}
 		retkey = nil
-		err = fmt.Errorf("%s", format_error(1, "can not parse (%s)", self.args[oldidx]))
+		err = fmt.Errorf("%s", format_error("can not parse (%s)", self.args[oldidx]))
 		return
 	} else {
 		if self.bundlemode {
@@ -239,7 +239,7 @@ func (self *parseState) find_key_cls() (retkey *ExtKeyParse, err error) {
 					idx -= 1
 				}
 				retkey = nil
-				err = fmt.Errorf("%s", format_error(1, "can not parse (%s)", self.args[oldidx]))
+				err = fmt.Errorf("%s", format_error("can not parse (%s)", self.args[oldidx]))
 				return
 			} else if len(self.shortprefix) > 0 && strings.HasPrefix(curarg, self.shortprefix) {
 				if curarg == self.shortprefix {

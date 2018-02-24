@@ -143,7 +143,7 @@ func NewExtArgsOptions(s string) (p *ExtArgsOptions, err error) {
 	p = nil
 	err = json.Unmarshal([]byte(s), &vmap)
 	if err != nil {
-		err = fmt.Errorf("%s", format_error(1, "parse [%s] error[%s]", err.Error()))
+		err = fmt.Errorf("%s", format_error("parse [%s] error[%s]", err.Error()))
 		return
 	}
 

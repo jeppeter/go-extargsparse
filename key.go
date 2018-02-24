@@ -58,7 +58,7 @@ func parseAttr(attr string) (kattr map[string]string, err error) {
 		case "@":
 			splitchar = "@"
 		default:
-			return nil, fmt.Errorf(format_error(1, "unknown splitchar [%s]", splitchar))
+			return nil, fmt.Errorf(format_error("unknown splitchar [%s]", splitchar))
 		}
 	}
 	splitexpr, err = regexp.Compile(splitchar)
@@ -110,7 +110,7 @@ func setAttr(attr interface{}) (kattr map[string]string, err error) {
 			kattr[k] = vstr
 		}
 	default:
-		return kattr, fmt.Errorf(format_error(1, "not valid type [%s]", reflect.TypeOf(attr)))
+		return kattr, fmt.Errorf(format_error("not valid type [%s]", reflect.TypeOf(attr)))
 	}
 
 	err = nil
@@ -217,7 +217,7 @@ func (self *ExtKeyParse) setFlag(prefix, key string, value interface{}) error {
 			default:
 				if k != "nargs" {
 					if v != nil {
-						return fmt.Errorf(format_error(1, "not value type"))
+						return fmt.Errorf(format_error("not value type"))
 					} else {
 						vstr = ""
 					}
@@ -241,7 +241,7 @@ func (self *ExtKeyParse) setFlag(prefix, key string, value interface{}) error {
 			case "varname":
 				self.varName = vstr
 			default:
-				return fmt.Errorf(format_error(1, "[%s] not recognize", k))
+				return fmt.Errorf(format_error("[%s] not recognize", k))
 			}
 
 		} else {
@@ -271,7 +271,7 @@ func (self *ExtKeyParse) setFlag(prefix, key string, value interface{}) error {
 					self.value = v
 					self.typeName = self.getType(v)
 				default:
-					return fmt.Errorf(format_error(1, "[%s] not valid specialword", k))
+					return fmt.Errorf(format_error("[%s] not valid specialword", k))
 				}
 			} else if k == "attr" {
 				self.attr, err = setAttr(v)
@@ -331,59 +331,59 @@ func (self *ExtKeyParse) validate() error {
 	if self.isFlag {
 		assert_test(!self.isCmd, "cmdmode setted")
 		if len(self.function) > 0 {
-			return fmt.Errorf(format_error(1, "(%s) can not accept function", self.origKey))
+			return fmt.Errorf(format_error("(%s) can not accept function", self.origKey))
 		}
 
 		if self.typeName == "dict" && len(self.flagName) > 0 {
-			return fmt.Errorf(format_error(1, "(%s) flag can not accept dict", self.origKey))
+			return fmt.Errorf(format_error("(%s) flag can not accept dict", self.origKey))
 		}
 
 		if self.typeName != self.getType(self.value) && self.typeName != "count" && self.typeName != "help" && self.typeName != "jsonfile" {
-			return fmt.Errorf(format_error(1, "(%s) value (%v) not match type (%s)", self.origKey, self.value, self.typeName))
+			return fmt.Errorf(format_error("(%s) value (%v) not match type (%s)", self.origKey, self.value, self.typeName))
 		}
 
 		if len(self.flagName) == 0 {
 			if len(self.prefix) == 0 {
-				return fmt.Errorf(format_error(1, "(%s) should at least for prefix", self.origKey))
+				return fmt.Errorf(format_error("(%s) should at least for prefix", self.origKey))
 			}
 			self.typeName = "prefix"
 			if self.getType(self.value) != "dict" {
-				return fmt.Errorf(format_error(1, "(%s) should used dict to make prefix", self.origKey))
+				return fmt.Errorf(format_error("(%s) should used dict to make prefix", self.origKey))
 			}
 			if len(self.helpInfo) > 0 {
-				return fmt.Errorf(format_error(1, "(%s) should not have help info", self.origKey))
+				return fmt.Errorf(format_error("(%s) should not have help info", self.origKey))
 			}
 			if len(self.shortFlag) > 0 {
-				return fmt.Errorf(format_error(1, "(%s) should not set shortflag", self.origKey))
+				return fmt.Errorf(format_error("(%s) should not set shortflag", self.origKey))
 			}
 		} else if self.flagName == "$" {
 			self.typeName = "args"
 			if len(self.shortFlag) > 0 {
-				return fmt.Errorf(format_error(1, "(%s) can not set shortflag for args", self.origKey))
+				return fmt.Errorf(format_error("(%s) can not set shortflag for args", self.origKey))
 			}
 		} else {
 			if len(self.flagName) < 0 {
-				return fmt.Errorf(format_error(1, "(%s) can not accept (%s)short flag in flagname", self.origKey, self.flagName))
+				return fmt.Errorf(format_error("(%s) can not accept (%s)short flag in flagname", self.origKey, self.flagName))
 			}
 		}
 
 		if len(self.shortFlag) > 1 {
-			return fmt.Errorf(format_error(1, "(%s) can not accept (%s) for shortflag", self.origKey, self.shortFlag))
+			return fmt.Errorf(format_error("(%s) can not accept (%s) for shortflag", self.origKey, self.shortFlag))
 		}
 
 		if self.typeName == "bool" {
 			if self.nargs != nil && self.nargs.(int) != 0 {
-				return fmt.Errorf(format_error(1, "bool type (%s) can not accept not 0 nargs", self.origKey))
+				return fmt.Errorf(format_error("bool type (%s) can not accept not 0 nargs", self.origKey))
 			}
 			self.nargs = 0
 		} else if self.typeName == "help" {
 			if self.nargs != nil && self.nargs.(int) != 0 {
-				return fmt.Errorf(format_error(1, "help type (%s) can not accept not 0 nargs", self.origKey))
+				return fmt.Errorf(format_error("help type (%s) can not accept not 0 nargs", self.origKey))
 			}
 			self.nargs = 0
 		} else if self.typeName != "prefix" && self.flagName != "$" && self.typeName != "count" {
 			if self.typeName != "$" && self.nargs != nil && self.nargs.(int) != 1 {
-				return fmt.Errorf(format_error(1, "(%s)only $ can accept nargs option", self.origKey))
+				return fmt.Errorf(format_error("(%s)only $ can accept nargs option", self.origKey))
 			}
 			self.nargs = 1
 		} else {
@@ -393,19 +393,19 @@ func (self *ExtKeyParse) validate() error {
 		}
 	} else {
 		if len(self.cmdName) == 0 {
-			return fmt.Errorf(format_error(1, "(%s) not set cmdname", self.origKey))
+			return fmt.Errorf(format_error("(%s) not set cmdname", self.origKey))
 		}
 
 		if len(self.shortFlag) > 0 {
-			return fmt.Errorf(format_error(1, "(%s) has shortflag (%s)", self.origKey, self.shortFlag))
+			return fmt.Errorf(format_error("(%s) has shortflag (%s)", self.origKey, self.shortFlag))
 		}
 
 		if self.nargs != nil {
-			return fmt.Errorf(format_error(1, "(%s) has nargs (%v)", self.origKey, self.nargs))
+			return fmt.Errorf(format_error("(%s) has nargs (%v)", self.origKey, self.nargs))
 		}
 
 		if self.typeName != "dict" {
-			return fmt.Errorf(format_error(1, "(%s) command must be dict", self.origKey))
+			return fmt.Errorf(format_error("(%s) command must be dict", self.origKey))
 		}
 
 		if len(self.prefix) == 0 {
@@ -447,14 +447,14 @@ func (self *ExtKeyParse) parse(prefix string, key string, value interface{}, isf
 	/*now to test whether it is the flag one*/
 	if strings.Contains(self.origKey, "$") {
 		if self.origKey[0:1] != "$" {
-			return fmt.Errorf(format_error(1, "(%s) not right format for ($)", self.origKey))
+			return fmt.Errorf(format_error("(%s) not right format for ($)", self.origKey))
 		}
 		ok = 1
 		if strings.Contains(self.origKey[1:], "$") {
 			ok = 0
 		}
 		if ok != 1 {
-			return fmt.Errorf(format_error(1, "(%s) has ($) more than one", self.origKey))
+			return fmt.Errorf(format_error("(%s) has ($) more than one", self.origKey))
 		}
 	}
 
@@ -481,7 +481,7 @@ func (self *ExtKeyParse) parse(prefix string, key string, value interface{}, isf
 				hexpr = regexp.MustCompile(`\|`)
 				sarr = hexpr.Split(flags, -1)
 				if len(sarr) > 2 || len(sarr[1]) != 1 || len(sarr[0]) <= 1 {
-					return fmt.Errorf(format_error(1, "(%s) (%s)flag only accept (longop|l) format", self.origKey, flags))
+					return fmt.Errorf(format_error("(%s) (%s)flag only accept (longop|l) format", self.origKey, flags))
 				}
 				self.flagName = sarr[0]
 				self.shortFlag = sarr[1]
@@ -499,7 +499,7 @@ func (self *ExtKeyParse) parse(prefix string, key string, value interface{}, isf
 				hexpr = regexp.MustCompile(`\|`)
 				sarr = hexpr.Split(flags, -1)
 				if len(sarr) > 2 || len(sarr[1]) != 1 || len(sarr[0]) <= 1 {
-					return fmt.Errorf(format_error(1, "(%s) (%s)flag only accept (longop|l) format", self.origKey, flags))
+					return fmt.Errorf(format_error("(%s) (%s)flag only accept (longop|l) format", self.origKey, flags))
 				}
 				self.flagName = sarr[0]
 				self.shortFlag = sarr[1]
@@ -521,7 +521,7 @@ func (self *ExtKeyParse) parse(prefix string, key string, value interface{}, isf
 					hexpr = regexp.MustCompile(`\|`)
 					sarr = hexpr.Split(flags, -1)
 					if len(sarr) > 2 || len(sarr[1]) != 1 || len(sarr[0]) <= 1 {
-						return fmt.Errorf(format_error(1, "(%s) (%s)flag only accept (longop|l) format", self.origKey, flags))
+						return fmt.Errorf(format_error("(%s) (%s)flag only accept (longop|l) format", self.origKey, flags))
 					}
 					self.flagName = sarr[0]
 					self.shortFlag = sarr[1]
@@ -587,7 +587,7 @@ func (self *ExtKeyParse) parse(prefix string, key string, value interface{}, isf
 	}
 
 	if self.typeName == "help" && value != nil {
-		return fmt.Errorf(format_error(1, "help type must be value None"))
+		return fmt.Errorf(format_error("help type must be value None"))
 	}
 
 	if cmdmode && self.typeName != "dict" {
@@ -607,7 +607,7 @@ func (self *ExtKeyParse) parse(prefix string, key string, value interface{}, isf
 
 	if self.isFlag && self.flagName == "$" && self.typeName != "dict" {
 		if !((self.typeName == "string" && self.value != nil && strings.Contains("?+*", self.value.(string))) || self.typeName == "int") {
-			return fmt.Errorf(format_error(1, "(%s)(%s)(%s) for $ should option dict set opt or +?* specialcase or type int", prefix, self.origKey, fmt.Sprintf("%v", self.value)))
+			return fmt.Errorf(format_error("(%s)(%s)(%s) for $ should option dict set opt or +?* specialcase or type int", prefix, self.origKey, fmt.Sprintf("%v", self.value)))
 		} else {
 			self.nargs = self.value
 			self.value = nil

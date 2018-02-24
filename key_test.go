@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func Test_A001(t *testing.T) {
+func Test_key_A001(t *testing.T) {
 	flags, err := NewExtKeyParse("", "$flag|f+type", "string", false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.FlagName(), "flag")
@@ -23,16 +23,14 @@ func Test_A001(t *testing.T) {
 	check_equal(t, flags.VarName(), "type_flag")
 }
 
-func Test_A002(t *testing.T) {
-	var v interface{}
+func Test_key_A002(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
 	var flags *extKeyParse
 	js = `{"code" : []}`
-	err = json.Unmarshal([]byte(js), &v)
+	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
-	vmap = v.(map[string]interface{})
 	flags, err = NewExtKeyParse("", "$flag|f+type", vmap["code"], true)
 	check_equal(t, err, nil)
 	check_equal(t, flags.FlagName(), "flag")
@@ -50,7 +48,7 @@ func Test_A002(t *testing.T) {
 	check_equal(t, flags.VarName(), "type_flag")
 }
 
-func Test_A003(t *testing.T) {
+func Test_key_A003(t *testing.T) {
 	var flags *extKeyParse
 	var err error
 	flags, err = NewExtKeyParse("", "flag|f", false, false)
@@ -70,16 +68,14 @@ func Test_A003(t *testing.T) {
 	check_equal(t, flags.VarName(), "flag")
 }
 
-func Test_A004(t *testing.T) {
-	var v interface{}
+func Test_key_A004(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
 	var flags *extKeyParse
 	js = `{"code" : {}}`
-	err = json.Unmarshal([]byte(js), &v)
+	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
-	vmap = v.(map[string]interface{})
 	flags, err = NewExtKeyParse("newtype", "flag<flag.main>##help for flag##", vmap["code"], false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.CmdName(), "flag")
@@ -95,7 +91,7 @@ func Test_A004(t *testing.T) {
 	check_equal(t, flags.VarName(), "")
 }
 
-func Test_A005(t *testing.T) {
+func Test_key_A005(t *testing.T) {
 	var err error
 	var flags *extKeyParse
 	flags, err = NewExtKeyParse("", "flag<flag.main>##help for flag##", "", true)
@@ -116,16 +112,14 @@ func Test_A005(t *testing.T) {
 	check_equal(t, flags.Optdest(), "flag")
 }
 
-func Test_A006(t *testing.T) {
-	var v interface{}
+func Test_key_A006(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
 	var flags *extKeyParse
 	js = `{"code" : {"new": false}}`
-	err = json.Unmarshal([]byte(js), &v)
+	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
-	vmap = v.(map[string]interface{})
 	flags, err = NewExtKeyParse("", "flag+type<flag.main>##main", vmap["code"], false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.CmdName(), "flag")
@@ -141,16 +135,14 @@ func Test_A006(t *testing.T) {
 	check_equal(t, flags.VarName(), "")
 }
 
-func Test_A007(t *testing.T) {
-	var v interface{}
+func Test_key_A007(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
 	var flags *extKeyParse
 	js = `{"code" : {}}`
-	err = json.Unmarshal([]byte(js), &v)
+	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
-	vmap = v.(map[string]interface{})
 	flags, err = NewExtKeyParse("", "+flag", vmap["code"], false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.Prefix(), "flag")
@@ -166,40 +158,38 @@ func Test_A007(t *testing.T) {
 	check_equal(t, flags.VarName(), "")
 }
 
-func Test_A008(t *testing.T) {
+func Test_key_A008(t *testing.T) {
 	var err error
 	_, err = NewExtKeyParse("", "+flag## help ##", nil, false)
 	check_not_equal(t, err, nil)
 }
 
-func Test_A009(t *testing.T) {
+func Test_key_A009(t *testing.T) {
 	var err error
 	_, err = NewExtKeyParse("", "+flag<flag.main>", nil, false)
 	check_not_equal(t, err, nil)
 }
 
-func Test_A010(t *testing.T) {
+func Test_key_A010(t *testing.T) {
 	var err error
 	_, err = NewExtKeyParse("", "flag|f2", "", false)
 	check_not_equal(t, err, nil)
 }
 
-func Test_A011(t *testing.T) {
+func Test_key_A011(t *testing.T) {
 	var err error
 	_, err = NewExtKeyParse("", "f|f2", "", false)
 	check_not_equal(t, err, nil)
 }
 
-func Test_A012(t *testing.T) {
-	var v interface{}
+func Test_key_A012(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
 	var flags *extKeyParse
 	js = `{"code" : {}}`
-	err = json.Unmarshal([]byte(js), &v)
+	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
-	vmap = v.(map[string]interface{})
 	flags, err = NewExtKeyParse("", "$flag|f<flag.main>", vmap["code"], false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.Prefix(), "")
@@ -218,7 +208,7 @@ func Test_A012(t *testing.T) {
 	check_equal(t, flags.Optdest(), "flag")
 }
 
-func Test_A013(t *testing.T) {
+func Test_key_A013(t *testing.T) {
 	var err error
 	var flags *extKeyParse
 	flags, err = NewExtKeyParse("", "$flag|f+cc<flag.main>", nil, false)
@@ -239,28 +229,26 @@ func Test_A013(t *testing.T) {
 	check_equal(t, flags.Optdest(), "cc_flag")
 }
 
-func Test_A014(t *testing.T) {
+func Test_key_A014(t *testing.T) {
 	var err error
 	_, err = NewExtKeyParse("", "c$", "", false)
 	check_not_equal(t, err, nil)
 }
 
-func Test_A015(t *testing.T) {
+func Test_key_A015(t *testing.T) {
 	var err error
 	_, err = NewExtKeyParse("", "$$", "", false)
 	check_not_equal(t, err, nil)
 }
 
-func Test_A016(t *testing.T) {
-	var v interface{}
+func Test_key_A016(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
 	var flags *extKeyParse
 	js = `{"code" : {"nargs" : "+"}}`
-	err = json.Unmarshal([]byte(js), &v)
+	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
-	vmap = v.(map[string]interface{})
 	flags, err = NewExtKeyParse("", "$", vmap["code"], false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.FlagName(), "$")
@@ -276,16 +264,14 @@ func Test_A016(t *testing.T) {
 	check_equal(t, flags.IsCmd(), false)
 }
 
-func Test_A017(t *testing.T) {
-	var v interface{}
+func Test_key_A017(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
 	var flags *extKeyParse
 	js = `{"code" : 3.3}`
-	err = json.Unmarshal([]byte(js), &v)
+	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
-	vmap = v.(map[string]interface{})
 	flags, err = NewExtKeyParse("type", "flag+app## flag help ##", vmap["code"], false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.FlagName(), "flag")
@@ -304,16 +290,14 @@ func Test_A017(t *testing.T) {
 	check_equal(t, flags.VarName(), "type_app_flag")
 }
 
-func Test_A018(t *testing.T) {
-	var v interface{}
+func Test_key_A018(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
 	var flags *extKeyParse
 	js = `{"code" : {}}`
-	err = json.Unmarshal([]byte(js), &v)
+	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
-	vmap = v.(map[string]interface{})
 	flags, err = NewExtKeyParse("", "flag+app<flag.main>## flag help ##", vmap["code"], false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.FlagName(), "")
@@ -329,16 +313,14 @@ func Test_A018(t *testing.T) {
 	check_equal(t, flags.IsCmd(), true)
 }
 
-func Test_A019(t *testing.T) {
-	var v interface{}
+func Test_key_A019(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
 	var flags *extKeyParse
 	js = `{"code" : { "prefix" : "good", "value": false}}`
-	err = json.Unmarshal([]byte(js), &v)
+	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
-	vmap = v.(map[string]interface{})
 	flags, err = NewExtKeyParse("", "$flag## flag help ##", vmap["code"], false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.FlagName(), "flag")
@@ -356,22 +338,20 @@ func Test_A019(t *testing.T) {
 	check_equal(t, flags.Optdest(), "good_flag")
 }
 
-func Test_A020(t *testing.T) {
+func Test_key_A020(t *testing.T) {
 	var err error
 	_, err = NewExtKeyParse("", "$", nil, false)
 	check_not_equal(t, err, nil)
 }
 
-func Test_A021(t *testing.T) {
-	var v interface{}
+func Test_key_A021(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
 	var flags *extKeyParse
 	js = `{"code" : { "nargs" : "?", "value": null}}`
-	err = json.Unmarshal([]byte(js), &v)
+	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
-	vmap = v.(map[string]interface{})
 	flags, err = NewExtKeyParse("command", "$## self define ##", vmap["code"], false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.IsCmd(), false)
@@ -386,16 +366,14 @@ func Test_A021(t *testing.T) {
 	check_equal(t, flags.HelpInfo(), " self define ")
 }
 
-func Test_A022(t *testing.T) {
-	var v interface{}
+func Test_key_A022(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
 	var flags *extKeyParse
 	js = `{"code" : {}}`
-	err = json.Unmarshal([]byte(js), &v)
+	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
-	vmap = v.(map[string]interface{})
 	flags, err = NewExtKeyParse("command", "+flag", vmap["code"], false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.Prefix(), "command_flag")
@@ -411,16 +389,14 @@ func Test_A022(t *testing.T) {
 	check_equal(t, flags.TypeName(), "prefix")
 }
 
-func Test_A023(t *testing.T) {
-	var v interface{}
+func Test_key_A023(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
 	var flags *extKeyParse
 	js = `{"code" : {"prefix": "good","value": 3.9, "nargs": 1}}`
-	err = json.Unmarshal([]byte(js), &v)
+	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
-	vmap = v.(map[string]interface{})
 	flags, err = NewExtKeyParse("", "$flag## flag help ##", vmap["code"], false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.FlagName(), "flag")
@@ -440,20 +416,18 @@ func Test_A023(t *testing.T) {
 	check_equal(t, flags.IsCmd(), false)
 }
 
-func Test_A024(t *testing.T) {
-	var v interface{}
+func Test_key_A024(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
 	js = `{"code" : {"prefix": "good","value": false, "nargs": 2}}`
-	err = json.Unmarshal([]byte(js), &v)
+	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
-	vmap = v.(map[string]interface{})
 	_, err = NewExtKeyParse("", "$flag## flag help ##", vmap["code"], false)
 	check_not_equal(t, err, nil)
 }
 
-func Test_A027(t *testing.T) {
+func Test_key_A027(t *testing.T) {
 	var err error
 	var flags *extKeyParse
 	flags, err = NewExtKeyParse("dep", "verbose|v", "+", false)
@@ -475,7 +449,7 @@ func Test_A027(t *testing.T) {
 	check_equal(t, flags.Optdest(), "dep_verbose")
 }
 
-func Test_A028(t *testing.T) {
+func Test_key_A028(t *testing.T) {
 	var err error
 	var flags *extKeyParse
 	flags, err = NewExtKeyParse("", "verbose|v## new help info ##", "+", false)
@@ -497,7 +471,7 @@ func Test_A028(t *testing.T) {
 	check_equal(t, flags.Shortopt(), "-v")
 }
 
-func Test_A029(t *testing.T) {
+func Test_key_A029(t *testing.T) {
 	var err error
 	var flags *extKeyParse
 	flags, err = NewExtKeyParse("", "rollback|R## rollback not set ##", true, false)
@@ -519,7 +493,7 @@ func Test_A029(t *testing.T) {
 	check_equal(t, flags.Shortopt(), "-R")
 }
 
-func Test_A030(t *testing.T) {
+func Test_key_A030(t *testing.T) {
 	var err error
 	var flags *extKeyParse
 	flags, err = NewExtKeyParse("", "maxval|m##max value set ##", 0xffffffff, false)
@@ -541,16 +515,14 @@ func Test_A030(t *testing.T) {
 	check_equal(t, flags.Shortopt(), "-m")
 }
 
-func Test_A031(t *testing.T) {
-	var v interface{}
+func Test_key_A031(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
 	var flags *extKeyParse
 	js = `{"code" : ["maxval"]}`
-	err = json.Unmarshal([]byte(js), &v)
+	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
-	vmap = v.(map[string]interface{})
 	flags, err = NewExtKeyParse("", "maxval|m", vmap["code"], false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.FlagName(), "maxval")
@@ -570,7 +542,7 @@ func Test_A031(t *testing.T) {
 	check_equal(t, flags.IsCmd(), false)
 }
 
-func Test_A032(t *testing.T) {
+func Test_key_A032(t *testing.T) {
 	var err error
 	var flags *extKeyParse
 	flags, err = NewExtKeyParse("", "$<numargs>", "+", false)
@@ -587,7 +559,7 @@ func Test_A032(t *testing.T) {
 	check_equal(t, flags.VarName(), "numargs")
 }
 
-func Test_A033(t *testing.T) {
+func Test_key_A033(t *testing.T) {
 	var err error
 	var flags *extKeyParse
 	flags, err = NewExtKeyParse("", "$", "+", false)
@@ -604,7 +576,7 @@ func Test_A033(t *testing.T) {
 	check_equal(t, flags.VarName(), "args")
 }
 
-func Test_A034(t *testing.T) {
+func Test_key_A034(t *testing.T) {
 	var err error
 	var flags *extKeyParse
 	flags, err = NewExtKeyParse("prefix", "$", "+", false)
@@ -621,7 +593,7 @@ func Test_A034(t *testing.T) {
 	check_equal(t, flags.VarName(), "subnargs")
 }
 
-func Test_A035(t *testing.T) {
+func Test_key_A035(t *testing.T) {
 	var err error
 	var flags *extKeyParse
 	flags, err = NewExtKeyParse("prefix", "$<newargs>", "+", false)
@@ -638,7 +610,7 @@ func Test_A035(t *testing.T) {
 	check_equal(t, flags.VarName(), "newargs")
 }
 
-func Test_A036(t *testing.T) {
+func Test_key_A036(t *testing.T) {
 	var err error
 	var flags *extKeyParse
 	flags, err = NewExtKeyParse("prefix", "$<newargs>!func=args_opt_func;wait=cc!", "+", false)
@@ -657,7 +629,7 @@ func Test_A036(t *testing.T) {
 	check_equal(t, flags.Attr("wait"), "cc")
 }
 
-func Test_A037(t *testing.T) {
+func Test_key_A037(t *testing.T) {
 	var err error
 	var flags *extKeyParse
 	flags, err = NewExtKeyParse_long("prefix", "help|h!func=args_opt_func;wait=cc!", nil, false, true, false, "--", "-", false)
@@ -679,7 +651,7 @@ func Test_A037(t *testing.T) {
 	check_equal(t, flags.Optdest(), "prefix_help")
 }
 
-func Test_A038(t *testing.T) {
+func Test_key_A038(t *testing.T) {
 	var err error
 	var flag1, flag2 *extKeyParse
 	flag1, err = NewExtKeyParse_long("prefix", "help|h!func=args_opt_func;wait=cc!", nil, false, true, false, "--", "-", false)
@@ -699,25 +671,22 @@ func Test_A038(t *testing.T) {
 	check_equal(t, flag1.Equal(flag2), false)
 }
 
-func Test_A039(t *testing.T) {
-	var v interface{}
+func Test_key_A039(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
 	var flags *extKeyParse
 	js = `{"code" : {"modules": [],"$<NARGS>" : "+"}}`
-	err = json.Unmarshal([]byte(js), &v)
+	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
-	vmap = v.(map[string]interface{})
 	flags, err = NewExtKeyParse("rdep", "ip", vmap["code"], false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.IsCmd(), true)
 	check_equal(t, flags.CmdName(), "ip")
 	check_equal(t, flags.Prefix(), "rdep")
 	js = `{"code" : []}`
-	err = json.Unmarshal([]byte(js), &v)
+	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
-	vmap = v.(map[string]interface{})
 	flags, err = NewExtKeyParse("rdep_ip", "modules", vmap["code"], false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.IsFlag(), true)
@@ -729,7 +698,7 @@ func Test_A039(t *testing.T) {
 	check_equal(t, flags.VarName(), "rdep_ip_modules")
 }
 
-func Test_A040(t *testing.T) {
+func Test_key_A040(t *testing.T) {
 	var err error
 	var flag1, flag2 *extKeyParse
 	flag1, err = NewExtKeyParse_long("prefix", "json!func=args_opt_func;wait=cc!", nil, false, false, true, "--", "-", false)
@@ -746,16 +715,14 @@ func Test_A040(t *testing.T) {
 	check_equal(t, flag1.Longopt(), "--prefix-json")
 }
 
-func Test_A041(t *testing.T) {
-	var v interface{}
+func Test_key_A041(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
 	var flags *extKeyParse
 	js = `{"code" : {"nargs": 1,"attr" : {"func":"args_opt_func","wait": "cc"}}}`
-	err = json.Unmarshal([]byte(js), &v)
+	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
-	vmap = v.(map[string]interface{})
 	flags, err = NewExtKeyParse("prefix", "$json", vmap["code"], false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.Prefix(), "prefix")
@@ -770,16 +737,14 @@ func Test_A041(t *testing.T) {
 	check_equal(t, flags.VarName(), "prefix_json")
 }
 
-func Test_A042(t *testing.T) {
-	var v interface{}
+func Test_key_A042(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
 	var flags *extKeyParse
 	js = `{"code" : {}}`
-	err = json.Unmarshal([]byte(js), &v)
+	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
-	vmap = v.(map[string]interface{})
 	flags, err = NewExtKeyParse("", "main", vmap["code"], false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.Prefix(), "main")
@@ -790,16 +755,14 @@ func Test_A042(t *testing.T) {
 	check_equal(t, flags.Function(), "")
 }
 
-func Test_A043(t *testing.T) {
-	var v interface{}
+func Test_key_A043(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
 	var flags *extKeyParse
 	js = `{"code" : true}`
-	err = json.Unmarshal([]byte(js), &v)
+	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
-	vmap = v.(map[string]interface{})
 	flags, err = NewExtKeyParse_long("", "rollback|R## rollback not set ##", vmap["code"], false, false, false, "++", "+", false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.FlagName(), "rollback")
@@ -817,16 +780,14 @@ func Test_A043(t *testing.T) {
 	check_equal(t, flags.Shortopt(), "+R")
 }
 
-func Test_A044(t *testing.T) {
-	var v interface{}
+func Test_key_A044(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
 	var flags *extKeyParse
 	js = `{"code" : true}`
-	err = json.Unmarshal([]byte(js), &v)
+	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
-	vmap = v.(map[string]interface{})
 	flags, err = NewExtKeyParse_long("", "rollback|R## rollback not set ##", vmap["code"], false, false, false, "++", "+", false)
 	check_equal(t, err, nil)
 	check_equal(t, flags.FlagName(), "rollback")
@@ -846,16 +807,14 @@ func Test_A044(t *testing.T) {
 	check_equal(t, flags.ShortPrefix(), "+")
 }
 
-func Test_A045(t *testing.T) {
-	var v interface{}
+func Test_key_A045(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error
 	var js string
 	var flags *extKeyParse
 	js = `{"code" : false}`
-	err = json.Unmarshal([]byte(js), &v)
+	err = json.Unmarshal([]byte(js), &vmap)
 	check_equal(t, err, nil)
-	vmap = v.(map[string]interface{})
 	flags, err = NewExtKeyParse_long("", "crl_CA_compromise", vmap["code"], false, false, false, "++", "+", true)
 	check_equal(t, err, nil)
 	check_equal(t, flags.FlagName(), "crl_CA_compromise")

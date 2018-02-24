@@ -802,7 +802,7 @@ func (self *extKeyParse) Equal(other *extKeyParse) bool {
 	return true
 }
 
-func NewExtKeyParse_long(prefix string, key string, value interface{}, isflag bool, ishelp bool, isjsonfile bool, longprefix string, shortprefix string, nochange bool) (k *extKeyParse, err error) {
+func newExtKeyParse_long(prefix string, key string, value interface{}, isflag bool, ishelp bool, isjsonfile bool, longprefix string, shortprefix string, nochange bool) (k *extKeyParse, err error) {
 	p := &extKeyParse{}
 	p.nargs = nil
 	p.value = nil
@@ -818,6 +818,6 @@ func NewExtKeyParse_long(prefix string, key string, value interface{}, isflag bo
 	return
 }
 
-func NewExtKeyParse(prefix string, key string, value interface{}, isflag bool) (k *extKeyParse, err error) {
-	return NewExtKeyParse_long(prefix, key, value, isflag, false, false, "--", "-", false)
+func newExtKeyParse(prefix string, key string, value interface{}, isflag bool) (k *extKeyParse, err error) {
+	return newExtKeyParse_long(prefix, key, value, isflag, false, false, "--", "-", false)
 }

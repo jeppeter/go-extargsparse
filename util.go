@@ -40,6 +40,15 @@ func formatMap(kattr map[string]string) string {
 	return s
 }
 
+func check_in_array(sarr []string, s string) bool {
+	for _, k := range sarr {
+		if k == s {
+			return true
+		}
+	}
+	return false
+}
+
 const (
 	COMMAND_SET              = 10
 	SUB_COMMAND_JSON_SET     = 20

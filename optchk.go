@@ -35,30 +35,21 @@ func (self *optCheck) Copy(other *optCheck) {
 	return
 }
 
-func (self *optCheck) check_in_array(sarr []string, s string) bool {
-	for _, k := range sarr {
-		if k == s {
-			return true
-		}
-	}
-	return false
-}
-
 func (self *optCheck) AddAndCheck(typename string, value string) bool {
 	if typename == "longopt" {
-		if self.check_in_array(self.longopt, value) {
+		if check_in_array(self.longopt, value) {
 			return false
 		}
 		self.longopt = append(self.longopt, value)
 		return true
 	} else if typename == "shortopt" {
-		if self.check_in_array(self.shortopt, value) {
+		if check_in_array(self.shortopt, value) {
 			return false
 		}
 		self.shortopt = append(self.shortopt, value)
 		return true
 	} else if typename == "varname" {
-		if self.check_in_array(self.varname, value) {
+		if check_in_array(self.varname, value) {
 			return false
 		}
 		self.varname = append(self.varname, value)

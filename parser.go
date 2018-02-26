@@ -366,7 +366,7 @@ func (self *ExtArgsParse) PrintHelp(out *os.File, cmdname string) error {
 }
 
 func (self *ExtArgsParse) helpAction(ns *NameSpaceEx, validx int, keycls *ExtKeyParse, params []string) (step int, err error) {
-	err = self.PrintHelp(os.Stdout, params[validx])
+	err = self.PrintHelp(os.Stdout, params[0])
 	if err != nil {
 		return 0, err
 	}
@@ -764,11 +764,92 @@ func (self *ExtArgsParse) LoadCommandLineString(s string) error {
 }
 
 func (self *ExtArgsParse) setArgs(ns *NameSpaceEx, cmdpaths []*parserCompat, vals interface{}) error {
+	var params []string
+	var argskeycls *ExtKeyParse
+	var cmdname string
+	var vstr string
+	var vint int
+	params = vals.([]string)
+	cmdname = self.formatCmdNamePath(cmdpaths)
+	argskeycls = nil
+	for _, c := range cmdpaths[len(cmdpaths)-1].CmdOpts {
+		if c.FlagName() == "$" {
+			argskeycls = c
+			break
+		}
+	}
+	if argskeycls == nil {
+		return fmt.Errorf("%s", format_error("can not find [%s]", cmdname))
+	}
+
+	vstr = ""
+	switch argskeycls.Value().(type) {
+	case string:
+		vstr = argskeycls.Value().(string)
+	case int:
+		vint = argskeycls.Value().(int)
+	default:
+		return fmt.Errorf("%s", format_error("cmd [%s] [%v] unknown type[%s]", cmdname, argskeycls.Value(), reflect.ValueOf(argskeycls.Value()).Type().Name()))
+	}
+
+	if len(vstr) != 0 {
+		switch vstr {
+		case "*":
+			break
+		case "+":
+			if len(params) < 1 {
+				return fmt.Errorf("%s", format_error("[%s] args [%s] < 1", cmdname, vstr))
+			}
+		case "?":
+			if len(params) > 1 {
+				return fmt.Errorf("%s", format_error("[%s] args [%s] > 1", cmdname, vstr))
+			}
+		default:
+			return fmt.Errorf("%s", format_error("[%s] args [%s] unknown", cmdname, vstr))
+		}
+	} else {
+		if len(params) != vint {
+			return fmt.Errorf("%s", format_error("[%s] args [%d] != %d", cmdname, len(params), vint))
+		}
+	}
+	if len(cmdname) > 0 {
+		ns.SetValue("subnargs", params)
+		ns.SetValue("subcommand", cmdname)
+	} else {
+		ns.SetValue("args", params)
+	}
+
 	return nil
 }
 
-func (self *ExtArgsParse) callOptMethod(ns *NameSpaceEx, validx int, keycls *ExtKeyParse, vals interface{}) (step int, err error) {
-	return 0, nil
+func (self *ExtArgsParse) callOptMethodFunc(ns *NameSpaceEx, validx int, keycls *ExtKeyParse, params []string) (step int, err error) {
+	var in []reflect.Value
+	var out []reflect.Value
+	in = make([]reflect.Value, 4)
+	in[0] = reflect.ValueOf(ns)
+	in[1] = reflect.ValueOf(validx)
+	in[2] = reflect.ValueOf(keycls)
+	in[3] = reflect.ValueOf(params)
+	out = self.optParseHandleMap[keycls.TypeName()].Call(in)
+	step = out[0].Interface().(int)
+	err = out[1].Interface().(error)
+	return
+}
+
+func (self *ExtArgsParse) callKeyOptMethodFunc(ns *NameSpaceEx, validx int, keycls *ExtKeyParse, params []string) (step int, err error) {
+	var callfunc func(ns *NameSpaceEx, valid int, keycls *ExtKeyParse, params []string) (step int, err error)
+	err = self.GetFuncPtr(keycls.Attr("optparse"), &callfunc)
+	if err != nil {
+		return 0, err
+	}
+	return callfunc(ns, validx, keycls, params)
+}
+
+func (self *ExtArgsParse) callOptMethod(ns *NameSpaceEx, validx int, keycls *ExtKeyParse, params []string) (step int, err error) {
+	if keycls.Attr("optparse") != "" {
+
+	}
+	return self.callOptMethodFunc(ns, validx, keycls, params)
 }
 
 func (self *ExtArgsParse) parseArgs(params []string) (ns *NameSpaceEx, err error) {
@@ -779,6 +860,7 @@ func (self *ExtArgsParse) parseArgs(params []string) (ns *NameSpaceEx, err error
 	var cmdpaths []*parserCompat
 	var helpcmdname string
 	var step int
+	var helpparams []string
 	pstate = newParseState(params, self.mainCmd, self.options)
 	ns = newNameSpaceEx()
 	for {
@@ -796,7 +878,8 @@ func (self *ExtArgsParse) parseArgs(params []string) (ns *NameSpaceEx, err error
 		} else if keycls.TypeName() == "help" {
 			cmdpaths = pstate.GetCmdPaths()
 			helpcmdname = self.formatCmdFromCmdArray(cmdpaths)
-			step, err = self.callOptMethod(ns, validx, keycls, helpcmdname)
+			helpparams = []string{helpcmdname}
+			step, err = self.callOptMethod(ns, validx, keycls, helpparams)
 		} else {
 			step, err = self.callOptMethod(ns, validx, keycls, params)
 		}

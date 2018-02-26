@@ -437,14 +437,52 @@ func (self *ExtArgsParse) parseSubCommandJsonSet(ns *NameSpaceEx) error {
 }
 
 func (self *ExtArgsParse) parseCommandJsonSet(ns *NameSpaceEx) error {
+	var jsonfile string
+	if !self.noJsonOption && len(self.jsonLong) > 0 {
+		jsonfile = ns.GetString(self.jsonLong)
+		if len(jsonfile) > 0 {
+			return self.loadJsonFile(ns, "", jsonfile)
+		}
+	}
+	return nil
+}
+
+func (self *ExtArgsParse) setEnvironValue(ns *NameSpaceEx) error {
 	return nil
 }
 
 func (self *ExtArgsParse) parseEnvironmentSet(ns *NameSpaceEx) error {
-	return nil
+	return self.setEnvironValue(ns)
 }
 
 func (self *ExtArgsParse) parseEnvSubCommandJsonSet(ns *NameSpaceEx) error {
+	var s string
+	var cmds []*parserCompat
+	var parsers []*parserCompat
+	var prefix string
+	var subname string
+	var jsondst string
+	var jsonfile string
+	var err error
+	var idx int
+	s = ns.GetString("subcommand")
+	if len(s) > 0 && !self.noJsonOption {
+		parsers = make([]*parserCompat, 0)
+		cmds = self.findCommandsInPath(s, parsers)
+		for idx = len(cmds); idx >= 2; idx-- {
+			subname = self.formatCmdFromCmdArray(cmds[:idx])
+			prefix = strings.Replace(subname, ".", "_", -1)
+			jsondst = strings.ToUpper(prefix)
+			jsonfile = os.Getenv(jsondst)
+			if len(jsonfile) > 0 {
+				err = self.loadJsonFile(ns, subname, jsonfile)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
 	return nil
 }
 

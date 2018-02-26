@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strings"
 )
 
 var parser_reserver_args = []string{"subcommand", "subnargs", "nargs", "extargs", "args"}
@@ -75,19 +76,59 @@ func (self *ExtArgsParse) bindParsePrioritySetMap(iv int, fn interface{}) {
 	return
 }
 
-func (self *ExtArgsParse) loadCommandLineBase(prefix string, keycls *ExtKeyParse, curparser []*parserCompat) error {
+func (self *ExtArgsParse) loadCommandLineBase(prefix string, keycls *ExtKeyParse, parsers []*parserCompat) error {
+	if keycls.IsFlag() && keycls.FlagName() != "$" && check_in_array(parser_reserver_args, keycls.FlagName()) {
+		return fmt.Errorf("%s", format_error("%s in the [%v]", keycls.FlagName(), parser_reserver_args))
+	}
+	return self.checkFlagInsert(keycls, parsers)
+}
+
+func (self *ExtArgsParse) loadCommandLineArgs(prefix string, keycls *ExtKeyParse, parsers []*parserCompat) error {
+	return self.checkFlagInsert(keycls, parsers)
+}
+
+func (self *ExtArgsParse) getSubparserInner(keycls *ExtKeyParse, parsers []*parserCompat) *parserCompat {
 	return nil
 }
 
-func (self *ExtArgsParse) loadCommandLineArgs(prefix string, keycls *ExtKeyParse, curparser []*parserCompat) error {
-	return nil
+func (self *ExtArgsParse) loadCommandSubparser(prefix string, keycls *ExtKeyParse, parsers []*parserCompat) error {
+	var parser *parserCompat
+	var nextparser []*parserCompat
+	var newprefix string
+	var err error
+	var vmap map[string]interface{}
+	if keycls.TypeName() != "dict" {
+		return fmt.Errorf("%s", format_error("%s not valid dict", keycls.Format()))
+	}
+	vmap = keycls.Value().(map[string]interface{})
+	if keycls.IsCmd() && check_in_array(parser_reserver_args, keycls.CmdName()) {
+		return fmt.Errorf("%s", format_error("cmdname [%s] in [%v] reserved", keycls.CmdName(), parser_reserver_args))
+	}
+	parser = self.getSubparserInner(keycls, parsers)
+	if parser == nil {
+		return fmt.Errorf("%s", format_error("can not find [%s] ", keycls.Format()))
+	}
+	nextparser = make([]*parserCompat, 0)
+	nextparser = append(nextparser, self.mainCmd)
+	if len(parsers) > 0 {
+		nextparser = parsers
+	}
+	nextparser = append(nextparser, parser)
+	if self.cmdPrefixAdded {
+		newprefix = prefix
+		if len(newprefix) > 0 {
+			newprefix += "_"
+		}
+		newprefix += keycls.CmdName()
+	} else {
+		newprefix = ""
+	}
+	err = self.loadCommandLineInner(newprefix, vmap, nextparser)
+	nextparser = nextparser[:(len(nextparser) - 2)]
+	return err
 }
 
-func (self *ExtArgsParse) loadCommandLineSubparser(prefix string, keycls *ExtKeyParse, curparser []*parserCompat) error {
-	return nil
-}
-
-func (self *ExtArgsParse) loadCommandLinePrefix(prefix string, keycls *ExtKeyParse, curparser []*parserCompat) error {
+func (self *ExtArgsParse) loadCommandLinePrefix(prefix string, keycls *ExtKeyParse, parsers []*parserCompat) error {
 	return nil
 }
 
@@ -211,7 +252,7 @@ func NewExtArgsParse(options *ExtArgsOptions, priority interface{}) (self *ExtAr
 	self.bindLoadCommandMap("list", self.loadCommandLineBase)
 	self.bindLoadCommandMap("bool", self.loadCommandLineBase)
 	self.bindLoadCommandMap("args", self.loadCommandLineArgs)
-	self.bindLoadCommandMap("command", self.loadCommandLineSubparser)
+	self.bindLoadCommandMap("command", self.loadCommandSubparser)
 	self.bindLoadCommandMap("prefix", self.loadCommandLinePrefix)
 	self.bindLoadCommandMap("count", self.loadCommandLineBase)
 	self.bindLoadCommandMap("help", self.loadCommandLineBase)
@@ -256,25 +297,105 @@ func NewExtArgsParse(options *ExtArgsOptions, priority interface{}) (self *ExtAr
 	return
 }
 
-func (self *ExtArgsParse) loadCommandLineJsonAdded(parsers []*parserCompat) error {
+func (self *ExtArgsParse) checkFlagInsert(keycls *ExtKeyParse, parsers []*parserCompat) error {
+	var lastparser *parserCompat
+	if len(parsers) > 0 {
+		lastparser = parsers[len(parsers)-1]
+	} else {
+		lastparser = self.mainCmd
+	}
+	for _, k := range lastparser.CmdOpts {
+		if k.FlagName() != "$" && keycls.FlagName() != "$" {
+			if k.TypeName() != "help" && keycls.TypeName() != "help" {
+				if k.Optdest() == keycls.Optdest() {
+					return fmt.Errorf("%s", format_error("[%s] already inserted", keycls.Optdest()))
+				}
+			} else if k.TypeName() == "help" && keycls.TypeName() == "help" {
+				return fmt.Errorf("%s", format_error("help [%s] had already inserted", keycls.Format()))
+			}
+		} else if k.FlagName() == "$" && keycls.FlagName() == "$" {
+			return fmt.Errorf("%s", format_error("args [%s] already inserted", keycls.Format()))
+		}
+	}
+	lastparser.CmdOpts = append(lastparser.CmdOpts, keycls)
 	return nil
 }
 
+func (self *ExtArgsParse) formatCmdFromCmdArray(parsers []*parserCompat) string {
+	var cmdname string
+	cmdname = ""
+	for _, c := range parsers {
+		if len(cmdname) > 0 {
+			cmdname += "."
+		}
+		cmdname += c.CmdName
+	}
+	return cmdname
+}
+
+func (self *ExtArgsParse) loadCommandLineJsonFile(keycls *ExtKeyParse, parsers []*parserCompat) error {
+	return self.checkFlagInsert(keycls, parsers)
+}
+
+func (self *ExtArgsParse) loadCommandLineJsonAdded(parsers []*parserCompat) error {
+	var prefix string
+	var key string
+	var value interface{}
+	var keycls *ExtKeyParse
+	var err error
+	prefix = ""
+	key = fmt.Sprintf("%s##json input file to get the value set##", self.jsonLong)
+	value = nil
+	prefix = self.formatCmdFromCmdArray(parsers)
+	prefix = strings.Replace(prefix, ".", "_", -1)
+	keycls, err = newExtKeyParse_long(prefix, key, value, true, false, true, self.longPrefix, self.shortPrefix, false)
+	assert_test(err == nil, "create json keycls error [%v]", err)
+	return self.loadCommandLineJsonFile(keycls, parsers)
+}
+
+func (self *ExtArgsParse) loadCommandLineHelp(keycls *ExtKeyParse, parsers []*parserCompat) error {
+	return self.checkFlagInsert(keycls, parsers)
+}
+
 func (self *ExtArgsParse) loadCommandLineHelpAdded(parsers []*parserCompat) error {
-	return nil
+	var key string
+	var keycls *ExtKeyParse
+	var err error
+	key = fmt.Sprintf("%s", self.helpLong)
+	if len(self.helpShort) > 0 {
+		key += fmt.Sprintf("|%s", self.helpShort)
+	}
+	keycls, err = newExtKeyParse_long("", key, nil, true, true, false, self.longPrefix, self.shortPrefix, false)
+	assert_test(err == nil, "create help keycls error [%v]", err)
+	return self.loadCommandLineHelp(keycls, parsers)
+}
+
+func (self *ExtArgsParse) callLoadCommandMapFunc(prefix string, keycls *ExtKeyParse, parsers []*parserCompat) error {
+	var out []reflect.Value
+	var in []reflect.Value
+	in = make([]reflect.Value, 3)
+	in[0] = reflect.ValueOf(prefix)
+	in[1] = reflect.ValueOf(keycls)
+	in[2] = reflect.ValueOf(parsers)
+	out = self.loadCommandMap[keycls.TypeName()].Call(in)
+	assert_test(len(out) == 1, format_error("out len [%d]", len(out)))
+	return out[0].Interface().(error)
 }
 
 func (self *ExtArgsParse) loadCommandLineInner(prefix string, vmap map[string]interface{}, parsers []*parserCompat) error {
 	var err error
 	var parentpath []*parserCompat
-	if !self.noJsonOption {
+	var k string
+	var v interface{}
+	var keycls *ExtKeyParse
+	if !self.noJsonOption && len(self.jsonLong) > 0 {
 		err = self.loadCommandLineJsonAdded(parsers)
 		if err != nil {
 			return err
 		}
 	}
 
-	if !self.noHelpOption {
+	if !self.noHelpOption && len(self.helpLong) > 0 {
 		err = self.loadCommandLineHelpAdded(parsers)
 		if err != nil {
 			return err
@@ -287,6 +408,18 @@ func (self *ExtArgsParse) loadCommandLineInner(prefix string, vmap map[string]in
 		parentpath = parsers
 	}
 
+	for k, v = range vmap {
+		self.Info("%s , %s , %v , False", prefix, k, v)
+		keycls, err = newExtKeyParse_long(prefix, k, v, false, false, false, self.longPrefix, self.shortPrefix, self.options.GetBool("flagnochange"))
+		if err != nil {
+			return err
+		}
+
+		err = self.callLoadCommandMapFunc(prefix, keycls, parsers)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

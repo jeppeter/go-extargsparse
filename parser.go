@@ -3,7 +3,9 @@ package extargsparse
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"reflect"
+	"strconv"
 	"strings"
 )
 
@@ -194,19 +196,98 @@ func (self *ExtArgsParse) loadCommandPrefix(prefix string, keycls *ExtKeyParse, 
 }
 
 func (self *ExtArgsParse) stringAction(ns *NameSpaceEx, validx int, keycls *ExtKeyParse, params []string) (step int, err error) {
+	if validx >= len(params) {
+		err = fmt.Errorf("%s", format_error("need args [%d] [%s] [%v]", validx, keycls.Format(), params))
+		return 1, err
+	}
+	ns.SetValue(keycls.Optdest(), params[validx])
 	return 1, nil
 }
 
 func (self *ExtArgsParse) boolAction(ns *NameSpaceEx, validx int, keycls *ExtKeyParse, params []string) (step int, err error) {
+	var b bool = false
+	if keycls.Value() != nil {
+		b = keycls.Value().(bool)
+	}
+	if b {
+		ns.SetValue(keycls.Optdest(), false)
+	} else {
+		ns.SetValue(keycls.Optdest(), true)
+	}
 	return 0, nil
 }
 
 func (self *ExtArgsParse) intAction(ns *NameSpaceEx, validx int, keycls *ExtKeyParse, params []string) (step int, err error) {
+	var base int = 10
+	var s string
+	var i int64
+	if validx >= len(params) {
+		err = fmt.Errorf("%s", format_error("need args [%d] [%s] [%v]", validx, keycls.Format(), params))
+		return 1, err
+	}
+
+	s = params[validx]
+	if strings.HasPrefix(s, "0x") || strings.HasPrefix(s, "0X") {
+		s = s[2:]
+		base = 16
+	} else if strings.HasPrefix(s, "x") || strings.HasPrefix(s, "X") {
+		s = s[1:]
+		base = 16
+	}
+
+	i, err = strconv.ParseInt(s, base, 64)
+	if err != nil {
+		err = fmt.Errorf("%s", format_error("parse [%s] error [%s]", params[validx], err.Error()))
+		return 1, err
+	}
+	ns.SetValue(keycls.Optdest(), int(i))
 	return 1, nil
 }
 
 func (self *ExtArgsParse) appendAction(ns *NameSpaceEx, validx int, keycls *ExtKeyParse, params []string) (step int, err error) {
+	var sarr []string
+	if validx >= len(params) {
+		err = fmt.Errorf("%s", format_error("need args [%d] [%s] [%v]", validx, keycls.Format(), params))
+		return 1, err
+	}
+	sarr = ns.GetArray(keycls.Optdest())
+	sarr = append(sarr, params[validx])
+	ns.SetValue(keycls.Optdest(), sarr)
 	return 1, nil
+}
+
+func (self *ExtArgsParse) printHelp(parsers []*parserCompat) string {
+	var curcmd *parserCompat
+	var cmdpaths []*parserCompat
+	var i int
+	if len(self.helpHandler) != "" && self.helpHandler == "nohelp" {
+		return "no help information"
+	}
+	curcmd = self.mainCmd
+	cmdpaths = make([]*parserCompat, 0)
+	if len(parsers) > 0 {
+		curcmd = parsers[len(parsers)-1]
+		for i = 0; i < (len(parsers) - 1); i++ {
+			cmdpaths = append(cmdpaths, parsers[i])
+		}
+	}
+	return curcmd.GetHelpInfo(nil, cmdpaths)
+}
+
+func (self *ExtArgsParse) setCommandLineSelfArgs() error {
+	return nil
+}
+
+func (self *ExtArgsParse) PrintHelp(out *io.Writer, cmdname string) error {
+	var err error
+	var parsers []*parserCompat
+	err = self.setCommandLineSelfArgs()
+	if err != nil {
+		return err
+	}
+
+	parsers = self.find
+
 }
 
 func (self *ExtArgsParse) helpAction(ns *NameSpaceEx, validx int, keycls *ExtKeyParse, params []string) (step int, err error) {

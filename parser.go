@@ -764,7 +764,23 @@ func (self *ExtArgsParse) LoadCommandLineString(s string) error {
 }
 
 func (self *ExtArgsParse) parseArgs(params []string) (ns *NameSpaceEx, err error) {
-	return nil, nil
+	var pstate *parseState
+	var validx int
+	var optval interface{}
+	var keycls *ExtKeyParse
+	var cmdpaths []*parserCompat
+	pstate = newParseState(params, self.mainCmd, self.options)
+	ns = newNameSpaceEx()
+	for {
+		validx, optval, keycls, err = pstate.StepOne()
+		if err != nil {
+			return nil, err
+		}
+		if keycls == nil {
+			cmdpaths = pstate.GetCmdPaths()
+		}
+	}
+	return ns, nil
 }
 
 func (self *ExtArgsParse) callParseSetMapFunc(idx int, ns *NameSpaceEx) error {
@@ -804,7 +820,6 @@ func (self *ExtArgsParse) ParseCommandLine(params interface{}, Context interface
 			self.outputMode = self.outputMode[:len(self.outputMode)-1]
 		}()
 	}
-	ns = newNameSpaceEx()
 	err = self.setCommandLineSelfArgs()
 	if err != nil {
 		return nil, err

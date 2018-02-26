@@ -3,7 +3,7 @@ package extargsparse
 import (
 	"encoding/json"
 	"fmt"
-	"io"
+	"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -260,7 +260,7 @@ func (self *ExtArgsParse) printHelp(parsers []*parserCompat) string {
 	var curcmd *parserCompat
 	var cmdpaths []*parserCompat
 	var i int
-	if len(self.helpHandler) != "" && self.helpHandler == "nohelp" {
+	if self.helpHandler == "nohelp" {
 		return "no help information"
 	}
 	curcmd = self.mainCmd
@@ -278,23 +278,107 @@ func (self *ExtArgsParse) setCommandLineSelfArgs() error {
 	return nil
 }
 
-func (self *ExtArgsParse) PrintHelp(out *io.Writer, cmdname string) error {
+func (self *ExtArgsParse) findCommandInner(cmdname string, parsers []*parserCompat) *parserCompat {
+	var sarr []string
+	var curroot *parserCompat
+	var nextparsers []*parserCompat
+	sarr = strings.Split(cmdname, ".")
+	curroot = self.mainCmd
+	nextparsers = make([]*parserCompat, 0)
+	if len(parsers) > 0 {
+		nextparsers = parsers
+		curroot = nextparsers[len(nextparsers)-1]
+	}
+
+	if len(sarr) > 1 {
+		nextparsers = append(nextparsers, curroot)
+		for _, c := range curroot.SubCommands {
+			if c.CmdName == sarr[0] {
+				nextparsers = make([]*parserCompat, 0)
+				if len(parsers) > 0 {
+					nextparsers = parsers
+				}
+				nextparsers = append(nextparsers, c)
+				return self.findCommandInner(strings.Join(sarr[1:], "."), nextparsers)
+			}
+		}
+	} else {
+		for _, c := range curroot.SubCommands {
+			if c.CmdName == sarr[0] {
+				return c
+			}
+		}
+	}
+	return nil
+}
+
+func (self *ExtArgsParse) findCommandsInPath(cmdname string, parsers []*parserCompat) []*parserCompat {
+	var commands []*parserCompat
+	var i int
+	var sarr []string
+	var curcommand *parserCompat
+	commands = make([]*parserCompat, 0)
+	sarr = []string{""}
+	if len(cmdname) > 0 {
+		sarr = strings.Split(cmdname, ".")
+	}
+	if self.mainCmd != nil {
+		commands = append(commands, self.mainCmd)
+	}
+	for i = 0; i < len(sarr) && len(cmdname) > 0; i++ {
+		if i > 0 {
+			curcommand = self.findCommandInner(sarr[i-1], commands)
+			if curcommand == nil {
+				break
+			}
+			commands = append(commands, curcommand)
+		}
+	}
+	return commands
+}
+
+func (self *ExtArgsParse) PrintHelp(out *os.File, cmdname string) error {
 	var err error
 	var parsers []*parserCompat
+	var s string
+	var outs string
 	err = self.setCommandLineSelfArgs()
 	if err != nil {
 		return err
 	}
 
-	parsers = self.find
+	parsers = make([]*parserCompat, 0)
+	parsers = self.findCommandsInPath(cmdname, parsers)
+	if len(parsers) == 0 {
+		return fmt.Errorf("%s", format_error("can not find [%s] for help", cmdname))
+	}
 
+	s = self.printHelp(parsers)
+	if len(self.outputMode) > 0 {
+		if self.outputMode[len(self.outputMode)-1] == "bash" {
+			outs = fmt.Sprintf("cat <<EOFMM\n%s\nEOFMM\nexit 0", s)
+			os.Stdout.WriteString(outs)
+			os.Exit(0)
+		}
+	}
+	_, err = out.Write([]byte(s))
+	return err
 }
 
 func (self *ExtArgsParse) helpAction(ns *NameSpaceEx, validx int, keycls *ExtKeyParse, params []string) (step int, err error) {
+	err = self.PrintHelp(os.Stdout, params[validx])
+	if err != nil {
+		return 0, err
+	}
+	os.Exit(5)
 	return 0, nil
 }
 
 func (self *ExtArgsParse) incAction(ns *NameSpaceEx, validx int, keycls *ExtKeyParse, params []string) (step int, err error) {
+	var i int
+	i = ns.GetInt(keycls.Optdest())
+	i++
+	ns.SetValue(keycls.Optdest(), i)
 	return 0, nil
 }
 
@@ -303,6 +387,17 @@ func (self *ExtArgsParse) commandAction(ns *NameSpaceEx, validx int, keycls *Ext
 }
 
 func (self *ExtArgsParse) floatAction(ns *NameSpaceEx, validx int, keycls *ExtKeyParse, params []string) (step int, err error) {
+	var f64 float64
+	if validx >= len(params) {
+		err = fmt.Errorf("%s", format_error("need args [%d] [%s] [%v]", validx, keycls.Format(), params))
+		return 1, err
+	}
+	f64, err = strconv.ParseFloat(params[validx], 64)
+	if err != nil {
+		err = fmt.Errorf("%s", format_error("parse [%s] not float", params[validx]))
+		return 1, err
+	}
+	ns.SetValue(keycls.Optdest(), f64)
 	return 1, nil
 }
 

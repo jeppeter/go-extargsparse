@@ -87,8 +87,64 @@ func (self *ExtArgsParse) loadCommandLineArgs(prefix string, keycls *ExtKeyParse
 	return self.checkFlagInsert(keycls, parsers)
 }
 
-func (self *ExtArgsParse) getSubparserInner(keycls *ExtKeyParse, parsers []*parserCompat) *parserCompat {
+func (self *ExtArgsParse) formatCmdNamePath(parsers []*parserCompat) string {
+	var cmdname string
+	cmdname = ""
+	for _, c := range parsers {
+		if len(cmdname) > 0 {
+			cmdname += "."
+		}
+		cmdname += c.CmdName
+	}
+	return cmdname
+}
+
+func (self *ExtArgsParse) findSubparserInner(name string, parentcmd *parserCompat) *parserCompat {
+	var sarr []string
+	var findcmd *parserCompat
+	if parentcmd == nil {
+		parentcmd = self.mainCmd
+	}
+	if len(name) == 0 {
+		return parentcmd
+	}
+
+	sarr = strings.Split(name, ".")
+	for _, c := range parentcmd.SubCommands {
+		if c.CmdName == sarr[0] {
+			findcmd = self.findSubparserInner(strings.Join(sarr[1:], "."), c)
+			if findcmd != nil {
+				return findcmd
+			}
+		}
+	}
 	return nil
+}
+
+func (self *ExtArgsParse) getSubparserInner(keycls *ExtKeyParse, parsers []*parserCompat) *parserCompat {
+	var cmdname string
+	var parentname string
+	var cmdparser *parserCompat
+	var curparser *parserCompat
+	cmdname = ""
+	parentname = self.formatCmdNamePath(parsers)
+	cmdname += parentname
+	if len(cmdname) > 0 {
+		cmdname += "."
+	}
+	cmdname += keycls.CmdName()
+	cmdparser = self.findSubparserInner(cmdname, nil)
+	if cmdparser != nil {
+		return cmdparser
+	}
+	cmdparser = newParserCompat(keycls, self.options)
+	if len(parentname) > 0 {
+		curparser = self.mainCmd
+	} else {
+		curparser = parsers[len(parsers)-1]
+	}
+	curparser.SubCommands = append(curparser.SubCommands, cmdparser)
+	return cmdparser
 }
 
 func (self *ExtArgsParse) loadCommandSubparser(prefix string, keycls *ExtKeyParse, parsers []*parserCompat) error {
@@ -128,8 +184,13 @@ func (self *ExtArgsParse) loadCommandSubparser(prefix string, keycls *ExtKeyPars
 	return err
 }
 
-func (self *ExtArgsParse) loadCommandLinePrefix(prefix string, keycls *ExtKeyParse, parsers []*parserCompat) error {
-	return nil
+func (self *ExtArgsParse) loadCommandPrefix(prefix string, keycls *ExtKeyParse, parsers []*parserCompat) error {
+	var vmap map[string]interface{}
+	if len(prefix) > 0 && check_in_array(parser_reserver_args, prefix) {
+		return fmt.Errorf("%s", format_error("prefix [%s] in [%v]", prefix, parser_reserver_args))
+	}
+	vmap = keycls.Value().(map[string]interface{})
+	return self.loadCommandLineInner(prefix, vmap, parsers)
 }
 
 func (self *ExtArgsParse) stringAction(ns *NameSpaceEx, validx int, keycls *ExtKeyParse, params []string) (step int, err error) {
@@ -253,7 +314,7 @@ func NewExtArgsParse(options *ExtArgsOptions, priority interface{}) (self *ExtAr
 	self.bindLoadCommandMap("bool", self.loadCommandLineBase)
 	self.bindLoadCommandMap("args", self.loadCommandLineArgs)
 	self.bindLoadCommandMap("command", self.loadCommandSubparser)
-	self.bindLoadCommandMap("prefix", self.loadCommandLinePrefix)
+	self.bindLoadCommandMap("prefix", self.loadCommandPrefix)
 	self.bindLoadCommandMap("count", self.loadCommandLineBase)
 	self.bindLoadCommandMap("help", self.loadCommandLineBase)
 	self.bindLoadCommandMap("jsonfile", self.loadCommandLineBase)

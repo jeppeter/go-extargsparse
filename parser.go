@@ -763,12 +763,22 @@ func (self *ExtArgsParse) LoadCommandLineString(s string) error {
 	return self.loadCommandLine(vmap)
 }
 
+func (self *ExtArgsParse) setArgs(ns *NameSpaceEx, cmdpaths []*parserCompat, vals interface{}) error {
+	return nil
+}
+
+func (self *ExtArgsParse) callOptMethod(ns *NameSpaceEx, validx int, keycls *ExtKeyParse, vals interface{}) (step int, err error) {
+	return 0, nil
+}
+
 func (self *ExtArgsParse) parseArgs(params []string) (ns *NameSpaceEx, err error) {
 	var pstate *parseState
 	var validx int
 	var optval interface{}
 	var keycls *ExtKeyParse
 	var cmdpaths []*parserCompat
+	var helpcmdname string
+	var step int
 	pstate = newParseState(params, self.mainCmd, self.options)
 	ns = newNameSpaceEx()
 	for {
@@ -778,6 +788,24 @@ func (self *ExtArgsParse) parseArgs(params []string) (ns *NameSpaceEx, err error
 		}
 		if keycls == nil {
 			cmdpaths = pstate.GetCmdPaths()
+			err = self.setArgs(ns, cmdpaths, optval)
+			if err != nil {
+				return nil, err
+			}
+			break
+		} else if keycls.TypeName() == "help" {
+			cmdpaths = pstate.GetCmdPaths()
+			helpcmdname = self.formatCmdFromCmdArray(cmdpaths)
+			step, err = self.callOptMethod(ns, validx, keycls, helpcmdname)
+		} else {
+			step, err = self.callOptMethod(ns, validx, keycls, params)
+		}
+		if err != nil {
+			return nil, err
+		}
+		err = pstate.AddParseArgs(step)
+		if err != nil {
+			return nil, err
 		}
 	}
 	return ns, nil
@@ -800,7 +828,6 @@ func (self *ExtArgsParse) callbackFunc(funcname string, ns *NameSpaceEx, ostruct
 }
 
 func (self *ExtArgsParse) ParseCommandLine(params interface{}, Context interface{}, ostruct interface{}, mode interface{}) (ns *NameSpaceEx, err error) {
-	var pushmode bool = false
 	var s string
 	var realparams []string
 	var subcmd string
@@ -815,7 +842,6 @@ func (self *ExtArgsParse) ParseCommandLine(params interface{}, Context interface
 			return nil, fmt.Errorf("%s", format_error("mode [%v] type error", mode))
 		}
 		self.outputMode = append(self.outputMode, s)
-		pushmode = true
 		defer func() {
 			self.outputMode = self.outputMode[:len(self.outputMode)-1]
 		}()

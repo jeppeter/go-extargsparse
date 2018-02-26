@@ -909,8 +909,87 @@ func (self *ExtArgsParse) callParseSetMapFunc(idx int, ns *NameSpaceEx) error {
 	return out[0].Interface().(error)
 }
 
-func (self *ExtArgsParse) setDefaultValue(ns *NameSpaceEx) error {
+func (self *ExtArgsParse) setJsonValueNotDefined(ns *NameSpaceEx, parser *parserCompat, dest string, value interface{}) error {
+	var err error
+	for _, c := range parser.SubCommands {
+		err = self.setJsonValueNotDefined(ns, c, dest, value)
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, opt := range parser.CmdOpts {
+		if opt.IsFlag() && opt.TypeName() != "prefix" && opt.TypeName() != "args" && opt.TypeName() != "help" {
+			if opt.Optdest() == dest {
+				if !ns.IsAccessed(dest) {
+					if value != nil {
+						switch value.(type) {
+						case uint16:
+						case uint32:
+						case uint64:
+						case int16:
+						case int32:
+						case int64:
+						case int:
+							if opt.TypeName() != "int" {
+								return fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), value))
+							}
+							ns.SetValue(opt.Optdest(), value)
+						case float32:
+						case float64:
+							if opt.TypeName() != "float" {
+								return fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), value))
+							}
+							ns.SetValue(opt.Optdest(), value)
+						case string:
+							if opt.TypeName() != "string" {
+								return fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), value))
+							}
+						case []string:
+							if opt.TypeName() != "list" {
+								return fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), value))
+							}
+							ns.SetValue(opt.Optdest(), value)
+						default:
+							return fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), value))
+						}
+					} else {
+						if opt.TypeName() != "string" {
+							return fmt.Errorf("%s", format_error("[%s] not for nil set", opt.TypeName()))
+						}
+						ns.SetValue(opt.Optdest(), value)
+					}
+				}
+			}
+		}
+	}
+
 	return nil
+}
+
+func (self *ExtArgsParse) setParserDefaultValue(ns *NameSpaceEx, parser *parserCompat) error {
+	var err error
+	for _, c := range parser.SubCommands {
+		err = self.setParserDefaultValue(ns, c)
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, opt := range parser.CmdOpts {
+		if opt.IsFlag() && opt.TypeName() != "prefix" &&
+			opt.TypeName() != "help" && opt.TypeName() != "args" {
+			err = self.setJsonValueNotDefined(ns, parser, opt.Optdest(), opt.Value())
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (self *ExtArgsParse) setDefaultValue(ns *NameSpaceEx) error {
+	return self.setParserDefaultValue(ns, self.mainCmd)
 }
 
 func (self *ExtArgsParse) setStructPart(ns *NameSpaceEx, ostruct interface{}) error {

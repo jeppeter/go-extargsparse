@@ -895,7 +895,18 @@ func (self *ExtArgsParse) parseArgs(params []string) (ns *NameSpaceEx, err error
 }
 
 func (self *ExtArgsParse) callParseSetMapFunc(idx int, ns *NameSpaceEx) error {
-	return nil
+	var in []reflect.Value
+	var out []reflect.Value
+	in = make([]reflect.Value, 1)
+	in[0] = reflect.ValueOf(ns)
+	out = self.parsePrioritySetMap[idx].Call(in)
+	if len(out) < 1 {
+		return fmt.Errorf("%s", format_error("can not get error map return"))
+	}
+	if out[0].Interface() == nil {
+		return nil
+	}
+	return out[0].Interface().(error)
 }
 
 func (self *ExtArgsParse) setDefaultValue(ns *NameSpaceEx) error {
@@ -907,7 +918,13 @@ func (self *ExtArgsParse) setStructPart(ns *NameSpaceEx, ostruct interface{}) er
 }
 
 func (self *ExtArgsParse) callbackFunc(funcname string, ns *NameSpaceEx, ostruct interface{}, Context interface{}) error {
-	return nil
+	var callfunc func(ns *NameSpaceEx, ostruct interface{}, Context interface{}) error
+	var err error
+	err = self.GetFuncPtr(funcname, &callfunc)
+	if err != nil {
+		return err
+	}
+	return callfunc(ns, ostruct, Context)
 }
 
 func (self *ExtArgsParse) ParseCommandLine(params interface{}, Context interface{}, ostruct interface{}, mode interface{}) (ns *NameSpaceEx, err error) {

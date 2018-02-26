@@ -401,7 +401,38 @@ func (self *ExtArgsParse) floatAction(ns *NameSpaceEx, validx int, keycls *ExtKe
 	return 1, nil
 }
 
+func (self *ExtArgsParse) loadJsonFile(ns *NameSpaceEx, cmdname string, jsonfile string) error {
+	return nil
+}
+
 func (self *ExtArgsParse) parseSubCommandJsonSet(ns *NameSpaceEx) error {
+	var s string
+	var cmds []*parserCompat
+	var parsers []*parserCompat
+	var idx int
+	var subname string
+	var prefix string
+	var jsondst string
+	var jsonfile string
+	var err error
+	s = ns.GetString("subcommand")
+	if len(s) > 0 && !self.noJsonOption {
+		parsers = make([]*parserCompat, 0)
+		cmds = self.findCommandsInPath(s, parsers)
+		idx = len(cmds)
+		for idx = len(cmds); idx >= 2; idx-- {
+			subname = self.formatCmdFromCmdArray(cmds[:idx])
+			prefix = strings.Replace(subname, ".", "_", -1)
+			jsondst = fmt.Sprintf("%s_%s", prefix, self.jsonLong)
+			jsonfile = ns.GetString(jsondst)
+			if len(jsonfile) > 0 {
+				err = self.loadJsonFile(ns, subname, jsonfile)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
 	return nil
 }
 

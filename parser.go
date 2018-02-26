@@ -504,11 +504,12 @@ func (self *ExtArgsParse) parseEnvCommandJsonSet(ns *NameSpaceEx) error {
 }
 
 func (self *ExtArgsParse) jsonValueBase(ns *NameSpaceEx, keycls *ExtKeyParse, value interface{}) error {
+	ns.SetValue(keycls.Optdest(), value)
 	return nil
 }
 
 func (self *ExtArgsParse) jsonValueError(ns *NameSpaceEx, keycls *ExtKeyParse, value interface{}) error {
-	return nil
+	return fmt.Errorf("%s", format_error("set [%s] error", keycls.Format()))
 }
 
 func NewExtArgsParse(options *ExtArgsOptions, priority interface{}) (self *ExtArgsParse, err error) {
@@ -760,4 +761,95 @@ func (self *ExtArgsParse) LoadCommandLineString(s string) error {
 		return fmt.Errorf("%s", format_error("parse [%s] error [%s]", s, err.Error()))
 	}
 	return self.loadCommandLine(vmap)
+}
+
+func (self *ExtArgsParse) parseArgs(params []string) (ns *NameSpaceEx, err error) {
+	return nil, nil
+}
+
+func (self *ExtArgsParse) callParseSetMapFunc(idx int, ns *NameSpaceEx) error {
+	return nil
+}
+
+func (self *ExtArgsParse) setDefaultValue(ns *NameSpaceEx) error {
+	return nil
+}
+
+func (self *ExtArgsParse) setStructPart(ns *NameSpaceEx, ostruct interface{}) error {
+	return nil
+}
+
+func (self *ExtArgsParse) callbackFunc(funcname string, ns *NameSpaceEx, ostruct interface{}, Context interface{}) error {
+	return nil
+}
+
+func (self *ExtArgsParse) ParseCommandLine(params interface{}, Context interface{}, ostruct interface{}, mode interface{}) (ns *NameSpaceEx, err error) {
+	var pushmode bool = false
+	var s string
+	var realparams []string
+	var subcmd string
+	var cmds []*parserCompat
+	var parsers []*parserCompat
+	var funcname string
+	if mode != nil {
+		switch mode.(type) {
+		case string:
+			s = mode.(string)
+		default:
+			return nil, fmt.Errorf("%s", format_error("mode [%v] type error", mode))
+		}
+		self.outputMode = append(self.outputMode, s)
+		pushmode = true
+		defer func() {
+			self.outputMode = self.outputMode[:len(self.outputMode)-1]
+		}()
+	}
+	ns = newNameSpaceEx()
+	err = self.setCommandLineSelfArgs()
+	if err != nil {
+		return nil, err
+	}
+	if params == nil {
+		realparams = os.Args[1:]
+	} else {
+		realparams = params.([]string)
+	}
+
+	ns, err = self.parseArgs(realparams)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, idx := range self.loadPriority {
+		err = self.callParseSetMapFunc(idx, ns)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = self.setDefaultValue(ns)
+	if err != nil {
+		return nil, err
+	}
+
+	err = self.setStructPart(ns, ostruct)
+	if err != nil {
+		return nil, err
+	}
+
+	subcmd = ns.GetString("subcommand")
+	if len(subcmd) > 0 {
+		parsers = make([]*parserCompat, 0)
+		cmds = self.findCommandsInPath(subcmd, parsers)
+		if len(cmds) > 0 {
+			funcname = cmds[len(cmds)-1].KeyCls.Function()
+			if len(funcname) > 0 && (len(self.outputMode) == 0 || self.outputMode[len(self.outputMode)-1] == "") {
+				err = self.callbackFunc(funcname, ns, ostruct, Context)
+				if err != nil {
+					return nil, err
+				}
+			}
+		}
+	}
+	return ns, nil
 }

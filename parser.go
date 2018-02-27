@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -287,16 +288,6 @@ func (self *ExtArgsParse) setCommandLineSelfArgsInner(paths []*parserCompat) err
 		parentpaths = paths
 	}
 
-	for _, chld := range parentpaths[len(parentpaths)-1].SubCommands {
-		curpaths = parentpaths
-		curpaths = append(curpaths, chld)
-		err = self.setCommandLineSelfArgsInner(curpaths)
-		if err != nil {
-			return err
-		}
-		curpaths = curpaths[:(len(curpaths) - 1)]
-	}
-
 	setted = false
 	for _, opt := range parentpaths[len(parentpaths)-1].CmdOpts {
 		if opt.IsFlag() && opt.FlagName() == "$" {
@@ -316,6 +307,16 @@ func (self *ExtArgsParse) setCommandLineSelfArgsInner(paths []*parserCompat) err
 		if err != nil {
 			return err
 		}
+	}
+
+	for _, chld := range parentpaths[len(parentpaths)-1].SubCommands {
+		curpaths = parentpaths
+		curpaths = append(curpaths, chld)
+		err = self.setCommandLineSelfArgsInner(curpaths)
+		if err != nil {
+			return err
+		}
+		curpaths = curpaths[:(len(curpaths) - 1)]
 	}
 
 	return nil
@@ -1156,6 +1157,7 @@ func (self *ExtArgsParse) ParseCommandLine(params interface{}, Context interface
 	var cmds []*parserCompat
 	var parsers []*parserCompat
 	var funcname string
+	var idx int
 	if mode != nil {
 		switch mode.(type) {
 		case string:
@@ -1165,7 +1167,7 @@ func (self *ExtArgsParse) ParseCommandLine(params interface{}, Context interface
 		}
 		self.outputMode = append(self.outputMode, s)
 		defer func() {
-			self.outputMode = self.outputMode[:len(self.outputMode)-1]
+			self.outputMode = self.outputMode[:(len(self.outputMode) - 1)]
 		}()
 	}
 	err = self.setCommandLineSelfArgs()
@@ -1175,7 +1177,12 @@ func (self *ExtArgsParse) ParseCommandLine(params interface{}, Context interface
 	if params == nil {
 		realparams = os.Args[1:]
 	} else {
-		realparams = params.([]string)
+		switch params.(type) {
+		case []string:
+			realparams = params.([]string)
+		default:
+			return nil, fmt.Errorf("%s", format_error("params [%v] type error", params))
+		}
 	}
 
 	ns, err = self.parseArgs(realparams)
@@ -1183,7 +1190,7 @@ func (self *ExtArgsParse) ParseCommandLine(params interface{}, Context interface
 		return nil, err
 	}
 
-	for _, idx := range self.loadPriority {
+	for _, idx = range self.loadPriority {
 		err = self.callParseSetMapFunc(idx, ns)
 		if err != nil {
 			return nil, err
@@ -1215,4 +1222,43 @@ func (self *ExtArgsParse) ParseCommandLine(params interface{}, Context interface
 		}
 	}
 	return ns, nil
+}
+
+func (self *ExtArgsParse) getSubCommands(name string, cmdpaths []*parserCompat) []string {
+	var retnames []string
+	var c *parserCompat
+	var sarr []string
+	retnames = make([]string, 0)
+	if len(cmdpaths) == 0 {
+		cmdpaths = append(cmdpaths, self.mainCmd)
+	}
+	if len(name) == 0 {
+		for _, c = range cmdpaths[len(cmdpaths)-1].SubCommands {
+			retnames = append(retnames, c.CmdName)
+		}
+		sort.Strings(retnames)
+		return retnames
+	}
+	sarr = strings.Split(name, ".")
+	for _, c = range cmdpaths[len(cmdpaths)-1].SubCommands {
+		if c.CmdName == sarr[0] {
+			cmdpaths = append(cmdpaths, c)
+			return self.getSubCommands(strings.Join(sarr[1:], "."), cmdpaths)
+		}
+	}
+	return retnames
+}
+
+func (self *ExtArgsParse) GetSubCommands(name string) ([]string, error) {
+	var err error
+	var retnames []string
+	var cmdpaths []*parserCompat
+	retnames = []string{}
+	err = self.setCommandLineSelfArgs()
+	if err != nil {
+		return retnames, err
+	}
+	cmdpaths = make([]*parserCompat, 0)
+	retnames = self.getSubCommands(name, cmdpaths)
+	return retnames, nil
 }

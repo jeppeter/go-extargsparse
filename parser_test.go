@@ -62,6 +62,20 @@ func Test_parser_A001(t *testing.T) {
         }
 	`
 	var params = []string{"-vvvv", "-f", "-n", "30", "-l", "bar1", "-l", "bar2", "var1", "var2"}
-	parser := NewExtArgsParse(nil, nil)
+	var parser *ExtArgsParse
+	var args *NameSpaceEx
+	var err error
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(loads)
+	check_equal(t, err, nil)
+	args, err = parser.ParseCommandLine(params, nil, nil, nil)
+	check_equal(t, err, nil)
+	check_equal(t, args.GetInt("verbose"), 4)
+	check_equal(t, args.GetBool("flag"), true)
+	check_equal(t, args.GetInt("number"), 30)
+	check_equal(t, args.GetArray("list"), []string{"bar1", "bar2"})
+	check_equal(t, args.GetString("string"), "string_var")
+	check_equal(t, args.GetArray("args"), []string{"var1", "var2"})
 	return
 }

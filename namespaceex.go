@@ -38,6 +38,22 @@ func (self *NameSpaceEx) IsAccessed(k string) bool {
 	return ok
 }
 
+func (self *NameSpaceEx) GetBool(k string) bool {
+	var v bool = false
+	var ok bool
+	var val interface{}
+	val, ok = self.obj[k]
+	if !ok {
+		return v
+	}
+
+	switch val.(type) {
+	case bool:
+		v = val.(bool)
+	}
+	return v
+}
+
 func (self *NameSpaceEx) GetString(k string) string {
 	var v interface{}
 	v = self.GetValue(k)

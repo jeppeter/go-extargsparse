@@ -1137,6 +1137,11 @@ func (self *ExtArgsParse) setDefaultValue(ns *NameSpaceEx) error {
 }
 
 func (self *ExtArgsParse) setStructPart(ns *NameSpaceEx, ostruct interface{}) error {
+	/*nothing to handle*/
+	if ostruct == nil {
+		return nil
+	}
+
 	return nil
 }
 

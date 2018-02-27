@@ -1297,3 +1297,53 @@ func (self *ExtArgsParse) GetCmdKey(cmdname string) (*ExtKeyParse, error) {
 	cmdpaths = make([]*parserCompat, 0)
 	return self.getCmdKey(cmdname, cmdpaths), nil
 }
+
+func (self *ExtArgsParse) sortCmdOpts(opts []*ExtKeyParse) []*ExtKeyParse {
+	sort.Slice(opts, func(i, j int) bool {
+		return opts[i].CmdName() < opts[j].CmdName()
+	})
+	return opts
+}
+
+func (self *ExtArgsParse) getCmdOpts(cmdname string, cmdpaths []*parserCompat) []*ExtKeyParse {
+	var retkeys []*ExtKeyParse
+	var opt *ExtKeyParse
+	var c *parserCompat
+	var sarr []string
+	retkeys = make([]*ExtKeyParse, 0)
+	if len(cmdpaths) == 0 {
+		cmdpaths = append(cmdpaths, self.mainCmd)
+	}
+
+	if len(cmdname) == 0 {
+		for _, opt = range cmdpaths[len(cmdpaths)-1].CmdOpts {
+			if opt.IsFlag() {
+				retkeys = append(retkeys, opt)
+			}
+		}
+		return self.sortCmdOpts(retkeys)
+	}
+
+	sarr = strings.Split(cmdname, ".")
+	for _, c = range cmdpaths[len(cmdpaths)-1].SubCommands {
+		if c.CmdName == sarr[0] {
+			cmdpaths = append(cmdpaths, c)
+			return self.getCmdOpts(strings.Join(sarr[1:], "."), cmdpaths)
+		}
+	}
+
+	return retkeys
+}
+
+func (self *ExtArgsParse) GetCmdOpts(cmdname string) ([]*ExtKeyParse, error) {
+	var retkeys []*ExtKeyParse
+	var err error
+	var cmdpaths []*parserCompat
+	retkeys = make([]*ExtKeyParse, 0)
+	cmdpaths = make([]*parserCompat, 0)
+	err = self.setCommandLineSelfArgs()
+	if err != nil {
+		return retkeys, err
+	}
+	return self.getCmdOpts(cmdname, cmdpaths), nil
+}

@@ -202,6 +202,8 @@ func (self *ExtArgsParse) stringAction(ns *NameSpaceEx, validx int, keycls *ExtK
 		return 1, err
 	}
 	ns.SetValue(keycls.Optdest(), params[validx])
+	keyDebug("[%s]=[%s]", keycls.Optdest(), params[validx])
+	keyDebug("%s", ns.Format())
 	return 1, nil
 }
 
@@ -975,7 +977,7 @@ func (self *ExtArgsParse) callKeyOptMethodFunc(ns *NameSpaceEx, validx int, keyc
 
 func (self *ExtArgsParse) callOptMethod(ns *NameSpaceEx, validx int, keycls *ExtKeyParse, params []string) (step int, err error) {
 	if keycls.Attr("optparse") != "" {
-
+		return self.callKeyOptMethodFunc(ns, validx, keycls, params)
 	}
 	return self.callOptMethodFunc(ns, validx, keycls, params)
 }
@@ -1009,6 +1011,7 @@ func (self *ExtArgsParse) parseArgs(params []string) (ns *NameSpaceEx, err error
 			helpparams = []string{helpcmdname}
 			step, err = self.callOptMethod(ns, validx, keycls, helpparams)
 		} else {
+			keyDebug("ns [%s] validx [%d] keycls [%s] params %v", ns.Format(), validx, keycls.Format(), params)
 			step, err = self.callOptMethod(ns, validx, keycls, params)
 		}
 		if err != nil {

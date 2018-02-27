@@ -140,18 +140,21 @@ func (self *NameSpaceEx) GetFloat(k string) float64 {
 }
 
 func (self *NameSpaceEx) GetArray(k string) []string {
-	var v, ve interface{}
-	var va []interface{}
+	var v interface{}
+	var ve string
+	var va []string
 	var varr []string
 	var vstr string
 	v = self.GetValue(k)
 	varr = make([]string, 0)
 	if v == nil {
+		keyDebug("[%s]v nil", k)
 		return varr
 	}
+
 	switch v.(type) {
-	case []interface{}:
-		va = v.([]interface{})
+	case []string:
+		va = v.([]string)
 		for _, ve = range va {
 			vstr = fmt.Sprintf("%s", ve)
 			varr = append(varr, vstr)

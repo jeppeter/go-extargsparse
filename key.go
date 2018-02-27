@@ -23,13 +23,6 @@ var attrExpr *regexp.Regexp = regexp.MustCompile(`\!([^\<\>\$!\#\|]+)\!`)
 var flagwords = []string{"flagname", "helpinfo", "shortflag", "nargs", "varname"}
 var flagspecial = []string{"value", "prefix"}
 
-func keyDebug(fmtstr string, a ...interface{}) {
-	s := format_out_stack(2)
-	s += fmt.Sprintf(fmtstr, a...)
-	fmt.Printf("%s\n", s)
-	return
-}
-
 func parseAttr(attr string) (kattr map[string]string, err error) {
 	var lattr string
 	var splitchar string = ";"

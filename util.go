@@ -62,3 +62,10 @@ const (
 	ENV_COMMAND_JSON_SET     = 60
 	DEFAULT_SET              = 70
 )
+
+func keyDebug(fmtstr string, a ...interface{}) {
+	s := format_out_stack(2)
+	s += fmt.Sprintf(fmtstr, a...)
+	fmt.Printf("%s\n", s)
+	return
+}

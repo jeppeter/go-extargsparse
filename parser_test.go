@@ -39,6 +39,29 @@ func beforeParser(t *testing.T) {
 	return
 }
 
+type parserTest1 struct {
+	Verbose int
+	Flag    bool
+	Number  int
+	String  string
+	Args    []string
+}
+
 func Test_parser_A001(t *testing.T) {
+	var loads = `        {
+            "verbose|v##increment verbose mode##" : "+",
+            "flag|f## flag set##" : false,
+            "number|n" : 0,
+            "list|l" : [],
+            "string|s" : "string_var",
+            "$" : {
+                "value" : [],
+                "nargs" : "*",
+                "type" : "string"
+            }
+        }
+	`
+	var params = []string{"-vvvv", "-f", "-n", "30", "-l", "bar1", "-l", "bar2", "var1", "var2"}
+	parser := NewExtArgsParse(nil, nil)
 	return
 }

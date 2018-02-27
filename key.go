@@ -139,14 +139,27 @@ type ExtKeyParse struct {
 }
 
 func (self *ExtKeyParse) getType(value interface{}) string {
+	var vstr string
+	var mzeros *regexp.Regexp
+
 	switch value.(type) {
 	case string:
 		return "string"
 	case bool:
 		return "bool"
 	case float32:
+		vstr = fmt.Sprintf("%v", value)
+		mzeros = regexp.MustCompile("^[0-9]+$")
+		if mzeros.MatchString(vstr) {
+			return "int"
+		}
 		return "float"
 	case float64:
+		vstr = fmt.Sprintf("%v", value)
+		mzeros = regexp.MustCompile("^[0-9]+$")
+		if mzeros.MatchString(vstr) {
+			return "int"
+		}
 		return "float"
 	case int:
 		return "int"
@@ -173,6 +186,45 @@ func (self *ExtKeyParse) getType(value interface{}) string {
 	s := fmt.Sprintf("not valid type [%v]", value)
 	panic(s)
 	return ""
+}
+
+func (self *ExtKeyParse) getValue(value interface{}) interface{} {
+	var vstr string
+	var mzeros *regexp.Regexp
+	var iv int
+	if value == nil {
+		return nil
+	}
+	switch value.(type) {
+	case float64:
+		vstr = fmt.Sprintf("%v", value)
+		mzeros = regexp.MustCompile("^[0-9]+$")
+		if mzeros.MatchString(vstr) {
+			iv, _ = strconv.Atoi(vstr)
+			return iv
+		}
+	case float32:
+		vstr = fmt.Sprintf("%v", value)
+		mzeros = regexp.MustCompile("^[0-9]+$")
+		if mzeros.MatchString(vstr) {
+			iv, _ = strconv.Atoi(vstr)
+			return iv
+		}
+		return float64(value.(float32))
+	case int16:
+		return int(value.(int16))
+	case int32:
+		return int(value.(int32))
+	case int64:
+		return int(value.(int64))
+	case uint16:
+		return int(value.(uint16))
+	case uint32:
+		return int(value.(uint32))
+	case uint64:
+		return int(value.(uint64))
+	}
+	return value
 }
 
 func (self *ExtKeyParse) setFlag(prefix, key string, value interface{}) error {
@@ -268,7 +320,7 @@ func (self *ExtKeyParse) setFlag(prefix, key string, value interface{}) error {
 					}
 					self.prefix = newprefix
 				case "value":
-					self.value = v
+					self.value = self.getValue(v)
 					self.typeName = self.getType(v)
 				default:
 					return fmt.Errorf(format_error("[%s] not valid specialword", k))
@@ -575,7 +627,7 @@ func (self *ExtKeyParse) parse(prefix string, key string, value interface{}, isf
 		self.isCmd = false
 	}
 
-	self.value = value
+	self.value = self.getValue(value)
 	if !isjsonfile && !ishelp {
 		self.typeName = self.getType(value)
 	} else if isjsonfile {

@@ -81,7 +81,7 @@ func (self *ExtArgsParse) bindParsePrioritySetMap(iv int, fn interface{}) {
 
 func (self *ExtArgsParse) loadCommandLineBase(prefix string, keycls *ExtKeyParse, parsers []*parserCompat) error {
 	if keycls.IsFlag() && keycls.FlagName() != "$" && check_in_array(parser_reserver_args, keycls.FlagName()) {
-		return fmt.Errorf("%s", format_error("%s in the [%v]", keycls.FlagName(), parser_reserver_args))
+		return fmt.Errorf("%s", format_error("%s in the %v", keycls.FlagName(), parser_reserver_args))
 	}
 	return self.checkFlagInsert(keycls, parsers)
 }

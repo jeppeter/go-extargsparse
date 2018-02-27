@@ -48,6 +48,31 @@ func Test_key_A002(t *testing.T) {
 	check_equal(t, flags.VarName(), "type_flag")
 }
 
+func Test_key_A002_2(t *testing.T) {
+	var vmap map[string]interface{}
+	var err error
+	var js string
+	var flags *ExtKeyParse
+	js = `{"code" : 9}`
+	err = json.Unmarshal([]byte(js), &vmap)
+	check_equal(t, err, nil)
+	flags, err = newExtKeyParse("", "$flag|f+type", vmap["code"], true)
+	check_equal(t, err, nil)
+	check_equal(t, flags.FlagName(), "flag")
+	check_equal(t, flags.ShortFlag(), "f")
+	check_equal(t, flags.Longopt(), "--type-flag")
+	check_equal(t, flags.Shortopt(), "-f")
+	check_equal(t, flags.Optdest(), "type_flag")
+	check_equal(t, flags.TypeName(), "int")
+	check_equal(t, flags.Value(), 9)
+	check_equal(t, flags.HelpInfo(), "")
+	check_equal(t, flags.Function(), "")
+	check_equal(t, flags.CmdName(), "")
+	check_equal(t, flags.IsFlag(), true)
+	check_equal(t, flags.IsCmd(), false)
+	check_equal(t, flags.VarName(), "type_flag")
+}
+
 func Test_key_A003(t *testing.T) {
 	var flags *ExtKeyParse
 	var err error

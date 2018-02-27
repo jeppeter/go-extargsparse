@@ -1262,3 +1262,38 @@ func (self *ExtArgsParse) GetSubCommands(name string) ([]string, error) {
 	retnames = self.getSubCommands(name, cmdpaths)
 	return retnames, nil
 }
+
+func (self *ExtArgsParse) getCmdKey(cmdname string, cmdpaths []*parserCompat) *ExtKeyParse {
+	var retkey *ExtKeyParse = nil
+	var sarr []string
+	var c *parserCompat
+	if len(cmdpaths) == 0 {
+		cmdpaths = append(cmdpaths, self.mainCmd)
+	}
+	if len(cmdname) == 0 {
+		retkey = cmdpaths[len(cmdpaths)-1].KeyCls
+		return retkey
+	}
+
+	sarr = strings.Split(cmdname, ".")
+	for _, c = range cmdpaths[len(cmdpaths)-1].SubCommands {
+		if c.CmdName == sarr[0] {
+			cmdpaths = append(cmdpaths, c)
+			return self.getCmdKey(strings.Join(sarr[1:], "."), cmdpaths)
+		}
+	}
+
+	return nil
+}
+
+func (self *ExtArgsParse) GetCmdKey(cmdname string) (*ExtKeyParse, error) {
+	var err error
+	var cmdpaths []*parserCompat
+	err = self.setCommandLineSelfArgs()
+	if err != nil {
+		return nil, err
+	}
+
+	cmdpaths = make([]*parserCompat, 0)
+	return self.getCmdKey(cmdname, cmdpaths), nil
+}

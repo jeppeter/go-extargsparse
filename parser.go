@@ -1029,6 +1029,22 @@ func (self *ExtArgsParse) callParseSetMapFunc(idx int, ns *NameSpaceEx) error {
 	return out[0].Interface().(error)
 }
 
+func (self *ExtArgsParse) setFloatValue(ns *NameSpaceEx, opt *ExtKeyParse, fv float64) error {
+	if opt.TypeName() != "float" {
+		return fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), fv))
+	}
+	ns.SetValue(opt.Optdest(), fv)
+	return nil
+}
+
+func (self *ExtArgsParse) setIntValue(ns *NameSpaceEx, opt *ExtKeyParse, iv int) error {
+	if opt.TypeName() != "int" {
+		return fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), iv))
+	}
+	ns.SetValue(opt.Optdest(), iv)
+	return nil
+}
+
 func (self *ExtArgsParse) setJsonValueNotDefined(ns *NameSpaceEx, parser *parserCompat, dest string, value interface{}) error {
 	var err error
 	for _, c := range parser.SubCommands {
@@ -1045,33 +1061,40 @@ func (self *ExtArgsParse) setJsonValueNotDefined(ns *NameSpaceEx, parser *parser
 					if value != nil {
 						switch value.(type) {
 						case uint16:
+							err = self.setIntValue(ns, opt, int(value.(uint16)))
 						case uint32:
+							err = self.setIntValue(ns, opt, int(value.(uint32)))
 						case uint64:
+							err = self.setIntValue(ns, opt, int(value.(uint64)))
 						case int16:
+							err = self.setIntValue(ns, opt, int(value.(int16)))
 						case int32:
+							err = self.setIntValue(ns, opt, int(value.(int32)))
 						case int64:
+							err = self.setIntValue(ns, opt, int(value.(int64)))
 						case int:
-							if opt.TypeName() != "int" {
-								return fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), value))
-							}
-							ns.SetValue(opt.Optdest(), value)
+							err = self.setIntValue(ns, opt, int(value.(int)))
 						case float32:
+							err = self.setFloatValue(ns, opt, float64(value.(float32)))
 						case float64:
-							if opt.TypeName() != "float" {
-								return fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), value))
-							}
-							ns.SetValue(opt.Optdest(), value)
+							err = self.setFloatValue(ns, opt, float64(value.(float64)))
 						case string:
 							if opt.TypeName() != "string" {
 								return fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), value))
 							}
+							err = nil
 						case []string:
 							if opt.TypeName() != "list" {
 								return fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), value))
 							}
 							ns.SetValue(opt.Optdest(), value)
+							err = nil
 						default:
-							return fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), value))
+							err = fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), value))
+						}
+
+						if err != nil {
+							return err
 						}
 					} else {
 						if opt.TypeName() != "string" {

@@ -820,6 +820,9 @@ func (self *ExtArgsParse) callLoadCommandMapFunc(prefix string, keycls *ExtKeyPa
 	in[2] = reflect.ValueOf(parsers)
 	out = self.loadCommandMap[keycls.TypeName()].Call(in)
 	assert_test(len(out) == 1, format_error("out len [%d]", len(out)))
+	if out[0].IsNil() {
+		return nil
+	}
 	return out[0].Interface().(error)
 }
 
@@ -904,13 +907,13 @@ func (self *ExtArgsParse) setArgs(ns *NameSpaceEx, cmdpaths []*parserCompat, val
 	}
 
 	vstr = ""
-	switch argskeycls.Value().(type) {
+	switch argskeycls.Nargs().(type) {
 	case string:
-		vstr = argskeycls.Value().(string)
+		vstr = argskeycls.Nargs().(string)
 	case int:
-		vint = argskeycls.Value().(int)
+		vint = argskeycls.Nargs().(int)
 	default:
-		return fmt.Errorf("%s", format_error("cmd [%s] [%v] unknown type[%s]", cmdname, argskeycls.Value(), reflect.ValueOf(argskeycls.Value()).Type().Name()))
+		return fmt.Errorf("%s", format_error("cmd [%s] [%v] unknown type[%s]", cmdname, argskeycls.Nargs(), reflect.ValueOf(argskeycls.Nargs()).Type().Name()))
 	}
 
 	if len(vstr) != 0 {
@@ -953,7 +956,11 @@ func (self *ExtArgsParse) callOptMethodFunc(ns *NameSpaceEx, validx int, keycls 
 	in[3] = reflect.ValueOf(params)
 	out = self.optParseHandleMap[keycls.TypeName()].Call(in)
 	step = out[0].Interface().(int)
-	err = out[1].Interface().(error)
+	if out[1].IsNil() {
+		err = nil
+	} else {
+		err = out[1].Interface().(error)
+	}
 	return
 }
 
@@ -1039,7 +1046,7 @@ func (self *ExtArgsParse) setFloatValue(ns *NameSpaceEx, opt *ExtKeyParse, fv fl
 }
 
 func (self *ExtArgsParse) setIntValue(ns *NameSpaceEx, opt *ExtKeyParse, iv int) error {
-	if opt.TypeName() != "int" {
+	if opt.TypeName() != "int" && opt.TypeName() != "count" {
 		return fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), iv))
 	}
 	ns.SetValue(opt.Optdest(), iv)
@@ -1098,8 +1105,8 @@ func (self *ExtArgsParse) setJsonValueNotDefined(ns *NameSpaceEx, parser *parser
 							return err
 						}
 					} else {
-						if opt.TypeName() != "string" {
-							return fmt.Errorf("%s", format_error("[%s] not for nil set", opt.TypeName()))
+						if opt.TypeName() != "string" && opt.TypeName() != "jsonfile" {
+							return fmt.Errorf("%s", format_error("[%s] not for nil set [%s]", opt.TypeName(), opt.Optdest()))
 						}
 						ns.SetValue(opt.Optdest(), value)
 					}

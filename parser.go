@@ -274,7 +274,127 @@ func (self *ExtArgsParse) printHelp(parsers []*parserCompat) string {
 	return curcmd.GetHelpInfo(nil, cmdpaths)
 }
 
+func (self *ExtArgsParse) setCommandLineSelfArgsInner(paths []*parserCompat) error {
+	var parentpaths []*parserCompat
+	var curpaths []*parserCompat
+	var err error
+	var setted bool
+	var cmdname string
+	var prefix string
+	parentpaths = make([]*parserCompat, 0)
+	parentpaths = append(parentpaths, self.mainCmd)
+	if len(paths) > 0 {
+		parentpaths = paths
+	}
+
+	for _, chld := range parentpaths[len(parentpaths)-1].SubCommands {
+		curpaths = parentpaths
+		curpaths = append(curpaths, chld)
+		err = self.setCommandLineSelfArgsInner(curpaths)
+		if err != nil {
+			return err
+		}
+		curpaths = curpaths[:(len(curpaths) - 1)]
+	}
+
+	setted = false
+	for _, opt := range parentpaths[len(parentpaths)-1].CmdOpts {
+		if opt.IsFlag() && opt.FlagName() == "$" {
+			setted = true
+			break
+		}
+	}
+
+	if !setted {
+		cmdname = self.formatCmdFromCmdArray(parentpaths)
+		prefix = strings.Replace(cmdname, ".", "_", -1)
+		curkey, err := newExtKeyParse_long("", "$", "*", true, false, false, self.longPrefix, self.shortPrefix, self.options.GetBool("flagnochange"))
+		if err != nil {
+			return err
+		}
+		err = self.loadCommandLineArgs(prefix, curkey, parentpaths)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (self *ExtArgsParse) checkVarNameInner(paths []*parserCompat, optchk *optCheck) error {
+	var parentpaths []*parserCompat
+	var curpaths []*parserCompat
+	var opt *ExtKeyParse
+	var c *parserCompat
+	var copychk *optCheck
+	var bval bool
+	var err error
+
+	if optchk == nil {
+		optchk = newOptCheck()
+	}
+	parentpaths = make([]*parserCompat, 0)
+	parentpaths = append(parentpaths, self.mainCmd)
+	if len(paths) > 0 {
+		parentpaths = paths
+	}
+
+	for _, opt = range parentpaths[len(parentpaths)-1].CmdOpts {
+		if opt.IsFlag() {
+			if opt.TypeName() == "help" || opt.TypeName() == "args" {
+				continue
+			}
+			bval = optchk.AddAndCheck("varname", opt.VarName())
+			if !bval {
+				return fmt.Errorf("%s", format_error("opt varname[%s] is already", opt.VarName()))
+			}
+
+			bval = optchk.AddAndCheck("longopt", opt.Longopt())
+			if !bval {
+				return fmt.Errorf("%s", format_error("opt longopt[%s] is already", opt.Longopt()))
+			}
+
+			if len(opt.Shortopt()) > 0 {
+				bval = optchk.AddAndCheck("shortopt", opt.Shortopt())
+				if !bval {
+					return fmt.Errorf("%s", format_error("opt shortopt[%s] is already", opt.Shortopt()))
+				}
+			}
+		}
+	}
+
+	for _, c = range parentpaths[len(parentpaths)-1].SubCommands {
+		curpaths = parentpaths
+		curpaths = append(curpaths, c)
+		copychk = newOptCheck()
+		copychk.Copy(optchk)
+		err = self.checkVarNameInner(curpaths, copychk)
+		if err != nil {
+			return err
+		}
+		curpaths = curpaths[:(len(curpaths) - 1)]
+	}
+
+	return nil
+}
+
 func (self *ExtArgsParse) setCommandLineSelfArgs() error {
+	var paths []*parserCompat
+	var err error
+	if self.ended != 0 {
+		return nil
+	}
+	paths = make([]*parserCompat, 0)
+	err = self.setCommandLineSelfArgsInner(paths)
+	if err != nil {
+		return err
+	}
+
+	err = self.checkVarNameInner(paths, nil)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

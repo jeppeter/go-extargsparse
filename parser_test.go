@@ -23,15 +23,12 @@ func beforeParser(t *testing.T) {
 			if strings.HasPrefix(k, "EXTARGS_") ||
 				strings.HasPrefix(k, "DEP_") ||
 				strings.HasPrefix(k, "RDEP_") ||
-				strings.HasPrefix(k, "EXTARGSPARSE_") ||
 				strings.HasPrefix(k, "HTTP_") ||
 				strings.HasPrefix(k, "SSL_") {
 				err = os.Unsetenv(sarr[0])
 				if err == nil {
 					delone = true
 					break
-				} else {
-					keyDebug("delete [%s] error", sarr[0])
 				}
 			}
 		}

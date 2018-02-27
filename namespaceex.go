@@ -148,7 +148,6 @@ func (self *NameSpaceEx) GetArray(k string) []string {
 	v = self.GetValue(k)
 	varr = make([]string, 0)
 	if v == nil {
-		keyDebug("[%s]v nil", k)
 		return varr
 	}
 

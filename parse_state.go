@@ -41,7 +41,6 @@ func newParseState(args []string, maincmd *parserCompat, optattr *ExtArgsOptions
 	self.keyidx = -1
 	self.validx = -1
 	self.args = args
-	keyDebug("args %v", self.args)
 	self.ended = 0
 	self.longprefix = optattr.GetString("longprefix")
 	self.shortprefix = optattr.GetString("shortprefix")
@@ -131,7 +130,7 @@ func (self *parseState) find_key_cls() (retkey *ExtKeyParse, err error) {
 
 	oldcharidx = self.curcharidx
 	oldidx = self.curidx
-	keyDebug("oldcharidx [%d] oldidx [%d]", oldcharidx, oldidx)
+	self.Trace("oldcharidx [%d] oldidx [%d]", oldcharidx, oldidx)
 
 	if oldidx >= len(self.args) {
 		self.curidx = oldidx
@@ -148,11 +147,11 @@ func (self *parseState) find_key_cls() (retkey *ExtKeyParse, err error) {
 		c = self.args[oldidx]
 		if len(c) <= oldcharidx {
 			oldidx += 1
-			keyDebug("oldidx [%d] [%s] [%d]", oldidx, c, oldcharidx)
+			self.Trace("oldidx [%d] [%s] [%d]", oldidx, c, oldcharidx)
 			if self.shortcharargs > 0 {
 				oldidx += self.shortcharargs
 			}
-			keyDebug("oldidx [%d] __shortcharargs [%d]", oldidx, self.shortcharargs)
+			self.Trace("oldidx [%d] __shortcharargs [%d]", oldidx, self.shortcharargs)
 			self.curidx = oldidx
 			self.curcharidx = -1
 			self.shortcharargs = -1
@@ -162,7 +161,7 @@ func (self *parseState) find_key_cls() (retkey *ExtKeyParse, err error) {
 			return self.find_key_cls()
 		}
 		curch = c[oldcharidx:(oldcharidx + 1)]
-		keyDebug("argv[%d][%d] %s", oldidx, oldcharidx, curch)
+		self.Trace("argv[%d][%d] %s", oldidx, oldcharidx, curch)
 		idx = len(self.cmdpaths) - 1
 		for idx >= 0 {
 			cmd = self.cmdpaths[idx]

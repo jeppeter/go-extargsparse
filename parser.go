@@ -202,8 +202,6 @@ func (self *ExtArgsParse) stringAction(ns *NameSpaceEx, validx int, keycls *ExtK
 		return 1, err
 	}
 	ns.SetValue(keycls.Optdest(), params[validx])
-	keyDebug("[%s]=[%s]", keycls.Optdest(), params[validx])
-	keyDebug("%s", ns.Format())
 	return 1, nil
 }
 
@@ -1011,7 +1009,7 @@ func (self *ExtArgsParse) parseArgs(params []string) (ns *NameSpaceEx, err error
 			helpparams = []string{helpcmdname}
 			step, err = self.callOptMethod(ns, validx, keycls, helpparams)
 		} else {
-			keyDebug("ns [%s] validx [%d] keycls [%s] params %v", ns.Format(), validx, keycls.Format(), params)
+			self.Info("ns [%s] validx [%d] keycls [%s] params %v", ns.Format(), validx, keycls.Format(), params)
 			step, err = self.callOptMethod(ns, validx, keycls, params)
 		}
 		if err != nil {
@@ -1090,9 +1088,10 @@ func (self *ExtArgsParse) setJsonValueNotDefined(ns *NameSpaceEx, parser *parser
 						case float64:
 							err = self.setFloatValue(ns, opt, float64(value.(float64)))
 						case string:
-							if opt.TypeName() != "string" {
+							if opt.TypeName() != "string" && opt.TypeName() != "jsonfile" {
 								return fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), value))
 							}
+							ns.SetValue(opt.Optdest(), value)
 							err = nil
 						case []string:
 							if opt.TypeName() != "list" {

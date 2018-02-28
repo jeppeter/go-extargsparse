@@ -466,7 +466,6 @@ func Test_parser_A006(t *testing.T) {
 	check_equal(t, args.GetArray("subnargs"), []string{"zz", "64"})
 	return
 }
-*/
 
 func Test_parser_A007(t *testing.T) {
 	var loads = `        {
@@ -495,5 +494,50 @@ func Test_parser_A007(t *testing.T) {
 	check_equal(t, args.GetArray("dep_list"), []string{"cc"})
 	check_equal(t, args.GetString("dep_string"), "ee")
 	check_equal(t, args.GetArray("subnargs"), []string{"ww"})
+	return
+}
+
+*/
+
+type parserTest7 struct {
+	verbose    int
+	http_port  int
+	dep_list   []string
+	dep_string string
+	subnargs   []string
+}
+
+func Test_parser_A007_2(t *testing.T) {
+	var loads = `        {
+            "verbose|v" : "+",
+            "port|p+http" : 3000,
+            "dep" : {
+                "list|l" : [],
+                "string|s" : "s_var",
+                "$" : "+"
+            }
+        }`
+	var err error
+	var parser *ExtArgsParse
+	var params = []string{"-vvvv", "dep", "-l", "cc", "--dep-string", "ee", "ww"}
+	var args *NameSpaceEx
+	var options *ExtArgsOptions
+	var p *parserTest7
+	beforeParser(t)
+	options, err = NewExtArgsOptions(`{"varuppercase" : false}`)
+	check_equal(t, err, nil)
+	parser, err = NewExtArgsParse(options, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	check_equal(t, err, nil)
+	p = &parserTest7{}
+	args, err = parser.ParseCommandLineEx(params, nil, p, nil)
+	check_equal(t, err, nil)
+	check_equal(t, p.verbose, 4)
+	check_equal(t, p.http_port, 3000)
+	check_equal(t, args.GetString("subcommand"), "dep")
+	check_equal(t, p.dep_list, []string{"cc"})
+	check_equal(t, p.dep_string, "ee")
+	check_equal(t, p.subnargs, []string{"ww"})
 	return
 }

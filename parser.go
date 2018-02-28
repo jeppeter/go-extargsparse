@@ -1288,14 +1288,14 @@ func (self *ExtArgsParse) setStructPartForSingle(ns *NameSpaceEx, ostruct interf
 						curname = self.varUcFirst(opt.FlagName())
 					} else {
 						if len(parsers) > 1 {
-							curname = name + "." + self.varUcFirst("subnargs")
+							curname = self.varUcFirst("subnargs")
 						} else {
-							curname = name + "." + self.varUcFirst("args")
+							curname = self.varUcFirst("args")
 						}
 					}
 					err = setMemberValue(ostruct, curname, value)
 					if err != nil {
-						self.Warn("can not set [%s] [%s] [%v]", name, opt.Format(), value)
+						self.Warn("can not set [%s] [%s] [%v] [%s]", curname, opt.Format(), value, err.Error())
 					} else {
 						self.Trace("set [%s]=[%v]", curname, value)
 					}

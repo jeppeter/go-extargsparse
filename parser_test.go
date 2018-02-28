@@ -365,7 +365,6 @@ func Test_parser_A004_2(t *testing.T) {
 	check_equal(t, p.Args, []string{})
 	return
 }
-*/
 
 type parserTest5Ctx struct {
 	has_called_args string
@@ -373,11 +372,11 @@ type parserTest5Ctx struct {
 
 func Debug_args_function(ns *NameSpaceEx, ostruct interface{}, Context interface{}) error {
 	var p *parserTest5Ctx
-	if Context == nil {
+	if Context == nil || ns == nil {
 		return nil
 	}
 	p = Context.(*parserTest5Ctx)
-	if ns != nil && ns.GetString("subcommand") != "" {
+	if ns.GetString("subcommand") != "" {
 		p.has_called_args = ns.GetString("subcommand")
 	} else {
 		p.has_called_args = ""
@@ -407,8 +406,7 @@ func Test_parser_A005(t *testing.T) {
 	var params = []string{"-p", "7003", "-vvvvv", "dep", "-l", "foo1", "-s", "new_var", "zz"}
 	var args *NameSpaceEx
 	var pc *parserTest5Ctx
-	/*we add this function here ,for it will give the compiling for the */
-	Debug_args_function(nil, nil, nil)
+	Debug_args_function(nil, nil, nil) // we call this function here because this function will compiled when call
 	pc = &parserTest5Ctx{}
 	pkgname = getCallerPackage(1)
 	beforeParser(t)
@@ -428,4 +426,74 @@ func Test_parser_A005(t *testing.T) {
 	check_equal(t, args.GetArray("subnargs"), []string{"zz"})
 	return
 
+}
+
+func Test_parser_A006(t *testing.T) {
+	var load1 = `        {
+            "verbose|v" : "+",
+            "port|p" : 3000,
+            "dep" : {
+                "list|l" : [],
+                "string|s" : "s_var",
+                "$" : "+"
+            }
+        }`
+	var load2 = `        {
+            "rdep" : {
+                "list|L" : [],
+                "string|S" : "s_rdep",
+                "$" : 2
+            }
+        }`
+	var err error
+	var parser *ExtArgsParse
+	var params = []string{"-p", "7003", "-vvvvv", "rdep", "-L", "foo1", "-S", "new_var", "zz", "64"}
+	var args *NameSpaceEx
+	beforeParser(t)
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(fmt.Sprintf("%s", load1))
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(load2)
+	check_equal(t, err, nil)
+	args, err = parser.ParseCommandLine(params, nil)
+	check_equal(t, err, nil)
+	check_equal(t, args.GetInt("port"), 7003)
+	check_equal(t, args.GetInt("verbose"), 5)
+	check_equal(t, args.GetString("subcommand"), "rdep")
+	check_equal(t, args.GetArray("rdep_list"), []string{"foo1"})
+	check_equal(t, args.GetString("rdep_string"), "new_var")
+	check_equal(t, args.GetArray("subnargs"), []string{"zz", "64"})
+	return
+}
+*/
+
+func Test_parser_A007(t *testing.T) {
+	var loads = `        {
+            "verbose|v" : "+",
+            "port|p+http" : 3000,
+            "dep" : {
+                "list|l" : [],
+                "string|s" : "s_var",
+                "$" : "+"
+            }
+        }`
+	var err error
+	var parser *ExtArgsParse
+	var params = []string{"-vvvv", "dep", "-l", "cc", "--dep-string", "ee", "ww"}
+	var args *NameSpaceEx
+	beforeParser(t)
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	check_equal(t, err, nil)
+	args, err = parser.ParseCommandLine(params, nil)
+	check_equal(t, err, nil)
+	check_equal(t, args.GetInt("verbose"), 4)
+	check_equal(t, args.GetInt("http_port"), 3000)
+	check_equal(t, args.GetString("subcommand"), "dep")
+	check_equal(t, args.GetArray("dep_list"), []string{"cc"})
+	check_equal(t, args.GetString("dep_string"), "ee")
+	check_equal(t, args.GetArray("subnargs"), []string{"ww"})
+	return
 }

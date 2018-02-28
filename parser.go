@@ -795,7 +795,9 @@ func (self *ExtArgsParse) loadCommandLineJsonAdded(parsers []*parserCompat) erro
 	prefix = strings.Replace(prefix, ".", "_", -1)
 	keycls, err = newExtKeyParse_long(prefix, key, value, true, false, true, self.longPrefix, self.shortPrefix, false)
 	assert_test(err == nil, "create json keycls error [%v]", err)
-	return self.loadCommandLineJsonFile(keycls, parsers)
+	/*we do not check any because we will give added ok*/
+	self.loadCommandLineJsonFile(keycls, parsers)
+	return nil
 }
 
 func (self *ExtArgsParse) loadCommandLineHelp(keycls *ExtKeyParse, parsers []*parserCompat) error {
@@ -812,7 +814,9 @@ func (self *ExtArgsParse) loadCommandLineHelpAdded(parsers []*parserCompat) erro
 	}
 	keycls, err = newExtKeyParse_long("", key, nil, true, true, false, self.longPrefix, self.shortPrefix, false)
 	assert_test(err == nil, "create help keycls error [%v]", err)
-	return self.loadCommandLineHelp(keycls, parsers)
+	/*we do not check any because we will give added ok*/
+	self.loadCommandLineHelp(keycls, parsers)
+	return nil
 }
 
 func (self *ExtArgsParse) callLoadCommandMapFunc(prefix string, keycls *ExtKeyParse, parsers []*parserCompat) error {

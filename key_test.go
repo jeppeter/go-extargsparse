@@ -1,5 +1,7 @@
 package extargsparse
 
+/*
+
 import (
 	"encoding/json"
 	"fmt"
@@ -29,7 +31,6 @@ func Test_key_A001_2(t *testing.T) {
 	check_equal(t, flags.Function(), fmt.Sprintf("%s.debug_args_function", pkgname))
 }
 
-/*
 
 func Test_key_A001(t *testing.T) {
 	flags, err := newExtKeyParse("", "$flag|f+type", "string", false)

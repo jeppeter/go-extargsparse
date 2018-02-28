@@ -196,7 +196,7 @@ func (self *ExtArgsParse) loadCommandPrefix(prefix string, keycls *ExtKeyParse, 
 		return fmt.Errorf("%s", format_error("prefix [%s] in [%v]", prefix, parser_reserver_args))
 	}
 	vmap = keycls.Value().(map[string]interface{})
-	return self.loadCommandLineInner(prefix, vmap, parsers)
+	return self.loadCommandLineInner(keycls.Prefix(), vmap, parsers)
 }
 
 func (self *ExtArgsParse) stringAction(ns *NameSpaceEx, validx int, keycls *ExtKeyParse, params []string) (step int, err error) {

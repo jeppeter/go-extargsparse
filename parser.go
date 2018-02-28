@@ -1164,7 +1164,7 @@ func (self *ExtArgsParse) callbackFunc(funcname string, ns *NameSpaceEx, ostruct
 	return callfunc(ns, ostruct, Context)
 }
 
-func (self *ExtArgsParse) ParseCommandLine(params interface{}, Context interface{}, ostruct interface{}, mode interface{}) (ns *NameSpaceEx, err error) {
+func (self *ExtArgsParse) ParseCommandLineEx(params interface{}, Context interface{}, ostruct interface{}, mode interface{}) (ns *NameSpaceEx, err error) {
 	var s string
 	var realparams []string
 	var subcmd string
@@ -1236,6 +1236,10 @@ func (self *ExtArgsParse) ParseCommandLine(params interface{}, Context interface
 		}
 	}
 	return ns, nil
+}
+
+func (self *ExtArgsParse) ParseCommandLine(params interface{}, Context interface{}) (ns *NameSpaceEx, err error) {
+	return self.ParseCommandLineEx(params, Context, nil, nil)
 }
 
 func (self *ExtArgsParse) getSubCommands(name string, cmdpaths []*parserCompat) []string {

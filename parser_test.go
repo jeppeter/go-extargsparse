@@ -66,7 +66,7 @@ func Test_parser_A001(t *testing.T) {
 	check_equal(t, err, nil)
 	err = parser.LoadCommandLineString(loads)
 	check_equal(t, err, nil)
-	args, err = parser.ParseCommandLine(params, nil, nil, nil)
+	args, err = parser.ParseCommandLine(params, nil)
 	check_equal(t, err, nil)
 	check_equal(t, args.GetInt("verbose"), 4)
 	check_equal(t, args.GetBool("flag"), true)

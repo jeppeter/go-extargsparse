@@ -2,6 +2,7 @@ package extargsparse
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -37,6 +38,34 @@ func beforeParser(t *testing.T) {
 	return
 }
 
+func makeWriteTempFileInner(s string) (fname string, err error) {
+	var f *os.File
+	f, err = ioutil.TempFile("", "tmpfile")
+	if err != nil {
+
+		return "", err
+	}
+	defer f.Close()
+	_, err = f.WriteString(s)
+	if err != nil {
+		return "", err
+	}
+	return f.Name(), nil
+}
+
+func makeWriteTempFile(s string) string {
+	var err error
+	var fname string
+	for {
+		fname, err = makeWriteTempFileInner(s)
+		if err == nil {
+			return fname
+		}
+	}
+	return ""
+}
+
+/*
 type parserTest1 struct {
 	Verbose int
 	Flag    bool
@@ -626,7 +655,7 @@ func Test_parser_A009(t *testing.T) {
             "$port|p" : {
                 "value" : 3000,
                 "type" : "int",
-                "nargs" : 1 , 
+                "nargs" : 1 ,
                 "helpinfo" : "port to connect"
             },
             "dep" : {
@@ -654,6 +683,7 @@ func Test_parser_A009(t *testing.T) {
 	check_equal(t, args.GetArray("subnargs"), []string{"ww"})
 	return
 }
+*/
 
 type parserTest9 struct {
 	verbose int
@@ -704,5 +734,66 @@ func Test_parser_A009_2(t *testing.T) {
 	check_equal(t, p.dep.list, []string{"cc"})
 	check_equal(t, p.dep.strv, "ee")
 	check_equal(t, p.dep.subnargs, []string{"ww"})
+	return
+}
+
+type parserTest10 struct {
+	Verbose int
+	Port    int
+	Dep     struct {
+		List     []string
+		String   string
+		Subnargs []string
+	}
+	Args []string
+}
+
+func Test_parser_A010(t *testing.T) {
+	var loads = `        {
+            "verbose|v" : "+",
+            "$port|p" : {
+                "value" : 3000,
+                "type" : "int",
+                "nargs" : 1 , 
+                "helpinfo" : "port to connect"
+            },
+            "dep" : {
+                "list|l" : [],
+                "string|s" : "s_var",
+                "$" : "+"
+            }
+        }`
+	var err error
+	var parser *ExtArgsParse
+	var params []string
+	var args *NameSpaceEx
+	var option *ExtArgsOptions
+	var depjsonfile string = ""
+	var ok bool = false
+	var p *parserTest10
+	beforeParser(t)
+
+	depjsonfile = makeWriteTempFile(`"{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"}\n"`)
+	defer func() {
+		if ok {
+			os.Remove(depjsonfile)
+		}
+	}()
+	option, err = NewExtArgsOptions(`{"errorhandler" : "raise"}`)
+	check_equal(t, err, nil)
+	parser, err = NewExtArgsParse(option, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	check_equal(t, err, nil)
+	params = []string{"-vvvv", "-p", "9000", "dep", "--dep-json", depjsonfile, "--dep-string", "ee", "ww"}
+	p = &parserTest10{}
+	args, err = parser.ParseCommandLineEx(params, nil, p, nil)
+	check_equal(t, err, nil)
+	check_equal(t, p.Verbose, 4)
+	check_equal(t, p.Port, 9000)
+	check_equal(t, args.GetString("subcommand"), "dep")
+	check_equal(t, p.Dep.List, []string{"jsonval1", "jsonval2"})
+	check_equal(t, p.Dep.String, "ee")
+	check_equal(t, p.Dep.Subnargs, []string{"ww"})
 	return
 }

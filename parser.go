@@ -142,10 +142,10 @@ func (self *ExtArgsParse) getSubparserInner(keycls *ExtKeyParse, parsers []*pars
 		return cmdparser
 	}
 	cmdparser = newParserCompat(keycls, self.options)
-	if len(parentname) > 0 {
-		curparser = self.mainCmd
-	} else {
+	if len(parsers) > 0 {
 		curparser = parsers[len(parsers)-1]
+	} else {
+		curparser = self.mainCmd
 	}
 	curparser.SubCommands = append(curparser.SubCommands, cmdparser)
 	return cmdparser
@@ -158,7 +158,7 @@ func (self *ExtArgsParse) loadCommandSubparser(prefix string, keycls *ExtKeyPars
 	var err error
 	var vmap map[string]interface{}
 	if keycls.TypeName() != "command" {
-		return fmt.Errorf("%s", format_error("%s not valid dict", keycls.Format()))
+		return fmt.Errorf("%s", format_error("%s not valid command", keycls.Format()))
 	}
 	vmap = keycls.Value().(map[string]interface{})
 	if keycls.IsCmd() && check_in_array(parser_reserver_args, keycls.CmdName()) {

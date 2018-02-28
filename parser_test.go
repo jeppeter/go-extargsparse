@@ -45,6 +45,7 @@ type parserTest1 struct {
 	Args    []string
 }
 
+/*
 func Test_parser_A001(t *testing.T) {
 	var loads = `        {
             "verbose|v##increment verbose mode##" : "+",
@@ -63,6 +64,7 @@ func Test_parser_A001(t *testing.T) {
 	var parser *ExtArgsParse
 	var args *NameSpaceEx
 	var err error
+	beforeParser()
 	parser, err = NewExtArgsParse(nil, nil)
 	check_equal(t, err, nil)
 	err = parser.LoadCommandLineString(loads)
@@ -96,6 +98,7 @@ func Test_parser_A001_2(t *testing.T) {
 	var parser *ExtArgsParse
 	var err error
 	var p *parserTest1
+	beforeParser()
 	parser, err = NewExtArgsParse(nil, nil)
 	check_equal(t, err, nil)
 	err = parser.LoadCommandLineString(loads)
@@ -112,6 +115,17 @@ func Test_parser_A001_2(t *testing.T) {
 	return
 
 }
+*/
+
+type parserTest2 struct {
+	Verbose int
+	Port    int
+	Dep     struct {
+		List     []string
+		String   string
+		Subnargs []string
+	}
+}
 
 func Test_parser_A002(t *testing.T) {
 	var loads = `        {
@@ -127,6 +141,7 @@ func Test_parser_A002(t *testing.T) {
 	var err error
 	var args *NameSpaceEx
 	var params []string = []string{"-vvvv", "-p", "5000", "dep", "-l", "arg1", "--dep-list", "arg2", "cc", "dd"}
+	beforeParser(t)
 	parser, err = NewExtArgsParse(nil, nil)
 	check_equal(t, err, nil)
 	err = parser.LoadCommandLineString(loads)
@@ -140,5 +155,36 @@ func Test_parser_A002(t *testing.T) {
 	check_equal(t, args.GetString("dep_string"), "s_var")
 	check_equal(t, args.GetArray("subnargs"), []string{"cc", "dd"})
 	return
+}
 
+func Test_parser_A002_2(t *testing.T) {
+	var loads = `        {
+            "verbose|v" : "+",
+            "port|p" : 3000,
+            "dep" : {
+                "list|l" : [],
+                "string|s" : "s_var",
+                "$" : "+"
+            }
+        }`
+	var parser *ExtArgsParse
+	var err error
+	var args *NameSpaceEx
+	var params []string = []string{"-vvvv", "-p", "5000", "dep", "-l", "arg1", "--dep-list", "arg2", "cc", "dd"}
+	var p *parserTest2
+	beforeParser(t)
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(loads)
+	check_equal(t, err, nil)
+	p = &parserTest2{}
+	args, err = parser.ParseCommandLineEx(params, nil, p, nil)
+	check_equal(t, err, nil)
+	check_equal(t, p.Verbose, 4)
+	check_equal(t, p.Port, 5000)
+	check_equal(t, args.GetString("subcommand"), "dep")
+	check_equal(t, p.Dep.List, []string{"arg1", "arg2"})
+	check_equal(t, p.Dep.String, "s_var")
+	check_equal(t, p.Dep.Subnargs, []string{"cc", "dd"})
+	return
 }

@@ -1,5 +1,7 @@
 package extargsparse
 
+/*
+
 import (
 	"encoding/json"
 	"testing"
@@ -858,3 +860,4 @@ func Test_key_A045(t *testing.T) {
 	check_equal(t, flags.LongPrefix(), "++")
 	check_equal(t, flags.ShortPrefix(), "+")
 }
+*/

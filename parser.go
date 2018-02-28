@@ -663,7 +663,7 @@ func NewExtArgsParse(options *ExtArgsOptions, priority interface{}) (self *ExtAr
 		}
 	}
 
-	self = &ExtArgsParse{}
+	self = &ExtArgsParse{logObject: *newLogObject("extargsparse")}
 
 	self.options = options
 	self.mainCmd = newParserCompat(nil, options)
@@ -1171,6 +1171,25 @@ func (self *ExtArgsParse) varUcFirst(name string) string {
 	return name
 }
 
+func (self *ExtArgsParse) isCurrentParserCompat(parsers []*parserCompat) bool {
+	var i int
+	var cmpparsers []*parserCompat
+	if self.argState == nil {
+		return false
+	}
+	cmpparsers = self.argState.GetCmdPaths()
+	if len(cmpparsers) != len(parsers) {
+		return false
+	}
+
+	for i = 0; i < len(parsers); i++ {
+		if parsers[i].Format() != cmpparsers[i].Format() {
+			return false
+		}
+	}
+	return true
+}
+
 func (self *ExtArgsParse) setStructPartForSingle(ns *NameSpaceEx, ostruct interface{}, parser *parserCompat, parsers []*parserCompat) error {
 	var name string
 	var sarr []string
@@ -1186,6 +1205,7 @@ func (self *ExtArgsParse) setStructPartForSingle(ns *NameSpaceEx, ostruct interf
 	}
 	name = strings.Join(sarr, ".")
 	for _, opt = range parser.CmdOpts {
+		self.Trace("opt [%s]", opt.Format())
 		if opt.IsFlag() && opt.TypeName() != "help" && opt.TypeName() != "jsonfile" {
 			switch opt.TypeName() {
 			case "list":
@@ -1199,10 +1219,15 @@ func (self *ExtArgsParse) setStructPartForSingle(ns *NameSpaceEx, ostruct interf
 			case "count":
 				value = ns.GetInt(opt.Optdest())
 			case "args":
-				if len(parsers) > 1 {
-					value = ns.GetArray("subnargs")
+				/*not current parsers ,so we do this*/
+				if self.isCurrentParserCompat(parsers) {
+					if len(parsers) > 1 {
+						value = ns.GetArray("subnargs")
+					} else {
+						value = ns.GetArray("args")
+					}
 				} else {
-					value = ns.GetArray("args")
+					value = make([]string, 0)
 				}
 			case "bool":
 				value = ns.GetBool(opt.Optdest())
@@ -1226,6 +1251,26 @@ func (self *ExtArgsParse) setStructPartForSingle(ns *NameSpaceEx, ostruct interf
 						}
 					}
 					err = setMemberValue(ostruct, curname, value)
+					if err != nil {
+						if opt.TypeName() != "args" {
+							curname = name + "." + self.varUcFirst(opt.FlagName())
+						} else {
+							if len(parsers) > 1 {
+								curname = name + "." + self.varUcFirst("subnargs")
+							} else {
+								curname = name + "." + self.varUcFirst("args")
+							}
+						}
+						curname = strings.Replace(curname, ".", "_", -1)
+						err = setMemberValue(ostruct, curname, value)
+						if err == nil {
+							self.Trace("set [%s]=[%v]", curname, value)
+						}
+					} else {
+						self.Trace("set [%s]=[%v]", curname, value)
+					}
+				} else {
+					self.Trace("set [%s]=[%v]", curname, value)
 				}
 			}
 
@@ -1245,7 +1290,11 @@ func (self *ExtArgsParse) setStructPartForSingle(ns *NameSpaceEx, ostruct interf
 					err = setMemberValue(ostruct, curname, value)
 					if err != nil {
 						self.Warn("can not set [%s] [%s] [%v]", name, opt.Format(), value)
+					} else {
+						self.Trace("set [%s]=[%v]", curname, value)
 					}
+				} else {
+					self.Trace("set [%s]=[%v]", curname, value)
 				}
 			}
 		}

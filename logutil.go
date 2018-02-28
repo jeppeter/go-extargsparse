@@ -15,7 +15,7 @@ const (
 	log_INFO_LEVEL        = 3
 	log_DEBUG_LEVEL       = 4
 	log_TRACE_LEVEL       = 5
-	log_default_CALLSTACK = 1
+	log_default_CALLSTACK = 2
 )
 
 type logObject struct {
@@ -71,7 +71,7 @@ func (l *logObject) inner_call_msg(callstack int, needlevel int, fmtstr string, 
 }
 
 func (l *logObject) Fatal_long(callstack int, fmtstr string, a ...interface{}) {
-	l.inner_call_msg(callstack+1, log_FATAL_LEVEL, fmtstr, a...)
+	l.inner_call_msg(callstack+log_default_CALLSTACK, log_FATAL_LEVEL, fmtstr, a...)
 	return
 }
 
@@ -81,7 +81,7 @@ func (l *logObject) Fatal(fmtstr string, a ...interface{}) {
 }
 
 func (l *logObject) Error_long(callstack int, fmtstr string, a ...interface{}) {
-	l.inner_call_msg(callstack+1, log_ERROR_LEVEL, fmtstr, a...)
+	l.inner_call_msg(callstack+log_default_CALLSTACK, log_ERROR_LEVEL, fmtstr, a...)
 	return
 }
 
@@ -91,7 +91,7 @@ func (l *logObject) Error(fmtstr string, a ...interface{}) {
 }
 
 func (l *logObject) Warn_long(callstack int, fmtstr string, a ...interface{}) {
-	l.inner_call_msg(callstack+1, log_WARN_LEVEL, fmtstr, a...)
+	l.inner_call_msg(callstack+log_default_CALLSTACK, log_WARN_LEVEL, fmtstr, a...)
 	return
 }
 
@@ -101,7 +101,7 @@ func (l *logObject) Warn(fmtstr string, a ...interface{}) {
 }
 
 func (l *logObject) Info_long(callstack int, fmtstr string, a ...interface{}) {
-	l.inner_call_msg(callstack+1, log_INFO_LEVEL, fmtstr, a...)
+	l.inner_call_msg(callstack+log_default_CALLSTACK, log_INFO_LEVEL, fmtstr, a...)
 	return
 }
 
@@ -111,7 +111,7 @@ func (l *logObject) Info(fmtstr string, a ...interface{}) {
 }
 
 func (l *logObject) Debug_long(callstack int, fmtstr string, a ...interface{}) {
-	l.inner_call_msg(callstack+1, log_DEBUG_LEVEL, fmtstr, a...)
+	l.inner_call_msg(callstack+log_default_CALLSTACK, log_DEBUG_LEVEL, fmtstr, a...)
 	return
 }
 
@@ -124,7 +124,7 @@ func (l *logObject) Debug(fmtstr string, a ...interface{}) {
 	return
 }
 func (l *logObject) Trace_long(callstack int, fmtstr string, a ...interface{}) {
-	l.inner_call_msg(callstack+1, log_TRACE_LEVEL, fmtstr, a...)
+	l.inner_call_msg(callstack+log_default_CALLSTACK, log_TRACE_LEVEL, fmtstr, a...)
 	return
 }
 

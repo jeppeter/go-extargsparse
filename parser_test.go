@@ -112,3 +112,33 @@ func Test_parser_A001_2(t *testing.T) {
 	return
 
 }
+
+func Test_parser_A002(t *testing.T) {
+	var loads = `        {
+            "verbose|v" : "+",
+            "port|p" : 3000,
+            "dep" : {
+                "list|l" : [],
+                "string|s" : "s_var",
+                "$" : "+"
+            }
+        }`
+	var parser *ExtArgsParse
+	var err error
+	var args *NameSpaceEx
+	var params []string = []string{"-vvvv", "-p", "5000", "dep", "-l", "arg1", "--dep-list", "arg2", "cc", "dd"}
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(loads)
+	check_equal(t, err, nil)
+	args, err = parser.ParseCommandLine(params, nil)
+	check_equal(t, err, nil)
+	check_equal(t, args.GetInt("verbose"), 4)
+	check_equal(t, args.GetInt("port"), 5000)
+	check_equal(t, args.GetString("subcommand"), "dep")
+	check_equal(t, args.GetArray("dep_list"), []string{"arg1", "arg2"})
+	check_equal(t, args.GetString("dep_string"), "s_var")
+	check_equal(t, args.GetArray("subnargs"), []string{"cc", "dd"})
+	return
+
+}

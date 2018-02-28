@@ -157,7 +157,7 @@ func (self *ExtArgsParse) loadCommandSubparser(prefix string, keycls *ExtKeyPars
 	var newprefix string
 	var err error
 	var vmap map[string]interface{}
-	if keycls.TypeName() != "dict" {
+	if keycls.TypeName() != "command" {
 		return fmt.Errorf("%s", format_error("%s not valid dict", keycls.Format()))
 	}
 	vmap = keycls.Value().(map[string]interface{})

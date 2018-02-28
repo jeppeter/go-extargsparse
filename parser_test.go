@@ -115,7 +115,6 @@ func Test_parser_A001_2(t *testing.T) {
 	return
 
 }
-*/
 
 type parserTest2 struct {
 	Verbose int
@@ -187,4 +186,39 @@ func Test_parser_A002_2(t *testing.T) {
 	check_equal(t, p.Dep.String, "s_var")
 	check_equal(t, p.Dep.Subnargs, []string{"cc", "dd"})
 	return
+}
+
+*/
+
+func Test_parser_A003(t *testing.T) {
+	var loads = `{
+            "verbose|v" : "+",
+            "port|p" : 3000,
+            "dep" : {
+                "list|l" : [],
+                "string|s" : "s_var",
+                "$" : "+"
+            },
+            "rdep" : {
+                "list|L" : [],
+                "string|S" : "s_rdep",
+                "$" : 2
+            }
+        }`
+	var parser *ExtArgsParse
+	var args *NameSpaceEx
+	var err error
+	var params = []string{"-vvvv", "-p", "5000", "rdep", "-L", "arg1", "--rdep-list", "arg2", "cc", "dd"}
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(loads)
+	check_equal(t, err, nil)
+	args, err = parser.ParseCommandLine(params, nil)
+	check_equal(t, err, nil)
+	check_equal(t, args.GetInt("verbose"), 4)
+	check_equal(t, args.GetInt("port"), 5000)
+	check_equal(t, args.GetString("subcommand"), "rdep")
+	check_equal(t, args.GetArray("rdep_list"), []string{"arg1", "arg2"})
+	check_equal(t, args.GetString("rdep_string"), "s_rdep")
+	check_equal(t, args.GetArray("subnargs"), []string{"cc", "dd"})
 }

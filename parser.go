@@ -1059,6 +1059,8 @@ func (self *ExtArgsParse) setIntValue(ns *NameSpaceEx, opt *ExtKeyParse, iv int)
 
 func (self *ExtArgsParse) setJsonValueNotDefined(ns *NameSpaceEx, parser *parserCompat, dest string, value interface{}) error {
 	var err error
+	var sarr []string
+	var v interface{}
 	for _, c := range parser.SubCommands {
 		err = self.setJsonValueNotDefined(ns, c, dest, value)
 		if err != nil {
@@ -1100,10 +1102,24 @@ func (self *ExtArgsParse) setJsonValueNotDefined(ns *NameSpaceEx, parser *parser
 							if opt.TypeName() != "list" {
 								return fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), value))
 							}
-							ns.SetValue(opt.Optdest(), value)
+							sarr = make([]string, 0)
+							for _, v = range value.([]interface{}) {
+								sarr = append(sarr, fmt.Sprintf("%v", v))
+							}
+							ns.SetValue(opt.Optdest(), sarr)
+							err = nil
+						case []interface{}:
+							if opt.TypeName() != "list" {
+								return fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), value))
+							}
+							sarr = make([]string, 0)
+							for _, v = range value.([]interface{}) {
+								sarr = append(sarr, fmt.Sprintf("%v", v))
+							}
+							ns.SetValue(opt.Optdest(), sarr)
 							err = nil
 						default:
-							err = fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), value))
+							err = fmt.Errorf("%s", format_error("[%s] not for [%v] [%v] set", opt.TypeName(), value, reflect.ValueOf(value).Type()))
 						}
 
 						if err != nil {

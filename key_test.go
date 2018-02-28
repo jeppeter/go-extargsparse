@@ -1,11 +1,35 @@
 package extargsparse
 
-/*
-
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 )
+
+func Test_key_A001_2(t *testing.T) {
+	var vmap map[string]interface{}
+	var err error
+	var js string
+	var flags *ExtKeyParse
+	var key string
+	var pkgname string
+	pkgname = getCallerPackage(1)
+	key = fmt.Sprintf("dep<%s.debug_args_function>", pkgname)
+	js = `{"code" : {
+                "list|l" : [],
+                "string|s" : "s_var",
+                "$" : "+"
+            }}`
+	err = json.Unmarshal([]byte(js), &vmap)
+	check_equal(t, err, nil)
+	flags, err = newExtKeyParse("", key, vmap["code"], false)
+	check_equal(t, err, nil)
+	check_equal(t, flags.IsCmd(), true)
+	check_equal(t, flags.CmdName(), "dep")
+	check_equal(t, flags.Function(), fmt.Sprintf("%s.debug_args_function", pkgname))
+}
+
+/*
 
 func Test_key_A001(t *testing.T) {
 	flags, err := newExtKeyParse("", "$flag|f+type", "string", false)

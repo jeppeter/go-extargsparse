@@ -1,6 +1,7 @@
 package extargsparse
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -272,7 +273,6 @@ func Test_parser_A003_2(t *testing.T) {
 	check_equal(t, p.Dep_string, "s_var")
 	check_equal(t, p.Args, []string{})
 }
-*/
 
 func Test_parser_A004(t *testing.T) {
 	var loads = `        {
@@ -364,4 +364,68 @@ func Test_parser_A004_2(t *testing.T) {
 	check_equal(t, p.Dep.Subnargs, []string{})
 	check_equal(t, p.Args, []string{})
 	return
+}
+*/
+
+type parserTest5Ctx struct {
+	has_called_args string
+}
+
+func Debug_args_function(ns *NameSpaceEx, ostruct interface{}, Context interface{}) error {
+	var p *parserTest5Ctx
+	if Context == nil {
+		return nil
+	}
+	p = Context.(*parserTest5Ctx)
+	if ns != nil && ns.GetString("subcommand") != "" {
+		p.has_called_args = ns.GetString("subcommand")
+	} else {
+		p.has_called_args = ""
+	}
+	return nil
+}
+
+func Test_parser_A005(t *testing.T) {
+	var loads_fmt = `        {
+            "verbose|v" : "+",
+            "port|p" : 3000,
+            "dep<%s.debug_args_function>" : {
+                "list|l" : [],
+                "string|s" : "s_var",
+                "$" : "+"
+            },
+            "rdep" : {
+                "list|L" : [],
+                "string|S" : "s_rdep",
+                "$" : 2
+            }
+        }`
+	var parser *ExtArgsParse
+	var err error
+	var loads string
+	var pkgname string
+	var params = []string{"-p", "7003", "-vvvvv", "dep", "-l", "foo1", "-s", "new_var", "zz"}
+	var args *NameSpaceEx
+	var pc *parserTest5Ctx
+	/*we add this function here ,for it will give the compiling for the */
+	Debug_args_function(nil, nil, nil)
+	pc = &parserTest5Ctx{}
+	pkgname = getCallerPackage(1)
+	beforeParser(t)
+	loads = fmt.Sprintf(loads_fmt, pkgname)
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(loads)
+	check_equal(t, err, nil)
+	args, err = parser.ParseCommandLine(params, pc)
+	check_equal(t, err, nil)
+	check_equal(t, args.GetInt("port"), 7003)
+	check_equal(t, args.GetInt("verbose"), 5)
+	check_equal(t, args.GetString("subcommand"), "dep")
+	check_equal(t, args.GetArray("dep_list"), []string{"foo1"})
+	check_equal(t, args.GetString("dep_string"), "new_var")
+	check_equal(t, pc.has_called_args, "dep")
+	check_equal(t, args.GetArray("subnargs"), []string{"zz"})
+	return
+
 }

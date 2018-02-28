@@ -2,6 +2,7 @@ package extargsparse
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 	"runtime"
 	"sort"
@@ -70,7 +71,7 @@ const (
 func keyDebug(fmtstr string, a ...interface{}) {
 	s := format_out_stack(2)
 	s += fmt.Sprintf(fmtstr, a...)
-	fmt.Printf("%s\n", s)
+	fmt.Fprintf(os.Stderr, "%s\n", s)
 	return
 }
 
@@ -147,4 +148,47 @@ func lcFirst(str string) string {
 		return string(unicode.ToLower(v)) + str[i+1:]
 	}
 	return ""
+}
+
+func getCallerPackage(skip int) string {
+	/*to add skip this will give the caller package*/
+	skip = skip + 1
+	var pcs []uintptr
+	var ok bool = false
+	var size int = skip + 1
+	var ret int
+	var sarr []string
+	var curname string
+	var name string
+	var retname string
+	var i int
+	for !ok {
+		pcs = make([]uintptr, size)
+		ret = runtime.Callers(0, pcs)
+		if ret < size {
+			ok = true
+		} else {
+			size <<= 1
+		}
+	}
+
+	if ret < skip {
+		return ""
+	}
+
+	name = runtime.FuncForPC(pcs[skip]).Name()
+	sarr = strings.Split(name, ".")
+
+	retname = ""
+	for i, curname = range sarr {
+		if i < (len(sarr) - 1) {
+			if !strings.HasPrefix(curname, "(") {
+				if len(retname) > 0 {
+					retname += "."
+				}
+				retname += curname
+			}
+		}
+	}
+	return retname
 }

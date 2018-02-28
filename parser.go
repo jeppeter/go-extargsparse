@@ -142,6 +142,7 @@ func (self *ExtArgsParse) getSubparserInner(keycls *ExtKeyParse, parsers []*pars
 		return cmdparser
 	}
 	cmdparser = newParserCompat(keycls, self.options)
+	self.Info("%s", cmdparser.Format())
 	if len(parsers) > 0 {
 		curparser = parsers[len(parsers)-1]
 	} else {
@@ -160,6 +161,7 @@ func (self *ExtArgsParse) loadCommandSubparser(prefix string, keycls *ExtKeyPars
 	if keycls.TypeName() != "command" {
 		return fmt.Errorf("%s", format_error("%s not valid command", keycls.Format()))
 	}
+	self.Info("load [%s]", keycls.Format())
 	vmap = keycls.Value().(map[string]interface{})
 	if keycls.IsCmd() && check_in_array(parser_reserver_args, keycls.CmdName()) {
 		return fmt.Errorf("%s", format_error("cmdname [%s] in [%v] reserved", keycls.CmdName(), parser_reserver_args))
@@ -1364,13 +1366,35 @@ func (self *ExtArgsParse) setStructPart(ns *NameSpaceEx, ostruct interface{}) er
 	return nil
 }
 
+func (self *ExtArgsParse) funcUcFirst(name string) string {
+	if self.options.GetBool("funcuppercase") {
+		return ucFirst(name)
+	}
+	return name
+}
+
 func (self *ExtArgsParse) callbackFunc(funcname string, ns *NameSpaceEx, ostruct interface{}, Context interface{}) error {
 	var callfunc func(ns *NameSpaceEx, ostruct interface{}, Context interface{}) error
 	var err error
-	err = self.GetFuncPtr(funcname, &callfunc)
+	var realfuncname string
+	var sarr []string
+	sarr = strings.Split(funcname, ".")
+	if len(sarr) > 1 {
+		realfuncname = strings.Join(sarr[:(len(sarr)-1)], ".")
+		if len(realfuncname) > 0 {
+			realfuncname += "."
+		}
+		realfuncname += self.funcUcFirst(sarr[len(sarr)-1])
+	} else {
+		realfuncname = fmt.Sprintf("main.%s", self.funcUcFirst(funcname))
+	}
+
+	err = self.GetFuncPtr(realfuncname, &callfunc)
 	if err != nil {
+		self.Error("can not find [%s] [%s]", realfuncname, funcname)
 		return err
 	}
+	self.Error("call [%s] [%s] [%v]", funcname, realfuncname, callfunc)
 	return callfunc(ns, ostruct, Context)
 }
 
@@ -1379,7 +1403,6 @@ func (self *ExtArgsParse) ParseCommandLineEx(params interface{}, Context interfa
 	var realparams []string
 	var subcmd string
 	var cmds []*parserCompat
-	var parsers []*parserCompat
 	var funcname string
 	var idx int
 	if mode != nil {
@@ -1433,10 +1456,10 @@ func (self *ExtArgsParse) ParseCommandLineEx(params interface{}, Context interfa
 
 	subcmd = ns.GetString("subcommand")
 	if len(subcmd) > 0 {
-		parsers = make([]*parserCompat, 0)
-		cmds = self.findCommandsInPath(subcmd, parsers)
+		cmds = self.argState.GetCmdPaths()
 		if len(cmds) > 0 {
 			funcname = cmds[len(cmds)-1].KeyCls.Function()
+			self.Info("[%s]funcname [%s]", cmds[len(cmds)-1].KeyCls.Format(), funcname)
 			if len(funcname) > 0 && (len(self.outputMode) == 0 || self.outputMode[len(self.outputMode)-1] == "") {
 				err = self.callbackFunc(funcname, ns, ostruct, Context)
 				if err != nil {

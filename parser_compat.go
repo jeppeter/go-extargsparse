@@ -345,6 +345,11 @@ func (self *parserCompat) Format() string {
 	var curcmd *parserCompat
 	var curopt *ExtKeyParse
 	s = fmt.Sprintf("@%s|", self.CmdName)
+	if self.KeyCls != nil {
+		s += fmt.Sprintf("%s|", self.KeyCls.Format())
+	} else {
+		s += "nil|"
+	}
 	if len(self.SubCommands) > 0 {
 		s += fmt.Sprintf("subcommands[%d]<", len(self.SubCommands))
 		for i, curcmd = range self.SubCommands {

@@ -1188,6 +1188,8 @@ func (self *ExtArgsParse) setStructPartForSingle(ns *NameSpaceEx, ostruct interf
 				} else {
 					value = ns.GetArray("args")
 				}
+			case "bool":
+				value = ns.GetBool(opt.Optdest())
 			default:
 				return fmt.Errorf("%s", format_error("unknown type name [%s]", opt.TypeName()))
 			}

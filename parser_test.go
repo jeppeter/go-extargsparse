@@ -40,6 +40,7 @@ type parserTest1 struct {
 	Verbose int
 	Flag    bool
 	Number  int
+	List    []string
 	String  string
 	Args    []string
 }
@@ -75,4 +76,39 @@ func Test_parser_A001(t *testing.T) {
 	check_equal(t, args.GetString("string"), "string_var")
 	check_equal(t, args.GetArray("args"), []string{"var1", "var2"})
 	return
+}
+
+func Test_parser_A001_2(t *testing.T) {
+	var loads = `        {
+            "verbose|v##increment verbose mode##" : "+",
+            "flag|f## flag set##" : false,
+            "number|n" : 0,
+            "list|l" : [],
+            "string|s" : "string_var",
+            "$" : {
+                "value" : [],
+                "nargs" : "*",
+                "type" : "string"
+            }
+        }
+	`
+	var params = []string{"-vvvv", "-f", "-n", "30", "-l", "bar1", "-l", "bar2", "var1", "var2"}
+	var parser *ExtArgsParse
+	var err error
+	var p *parserTest1
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(loads)
+	check_equal(t, err, nil)
+	p = &parserTest1{}
+	_, err = parser.ParseCommandLineEx(params, nil, p, nil)
+	check_equal(t, err, nil)
+	check_equal(t, p.Verbose, 4)
+	check_equal(t, p.Flag, true)
+	check_equal(t, p.Number, 30)
+	check_equal(t, p.List, []string{"bar1", "bar2"})
+	check_equal(t, p.String, "string_var")
+	check_equal(t, p.Args, []string{"var1", "var2"})
+	return
+
 }

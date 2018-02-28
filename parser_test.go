@@ -46,7 +46,6 @@ type parserTest1 struct {
 	Args    []string
 }
 
-/*
 func Test_parser_A001(t *testing.T) {
 	var loads = `        {
             "verbose|v##increment verbose mode##" : "+",
@@ -65,7 +64,7 @@ func Test_parser_A001(t *testing.T) {
 	var parser *ExtArgsParse
 	var args *NameSpaceEx
 	var err error
-	beforeParser()
+	beforeParser(t)
 	parser, err = NewExtArgsParse(nil, nil)
 	check_equal(t, err, nil)
 	err = parser.LoadCommandLineString(loads)
@@ -99,7 +98,7 @@ func Test_parser_A001_2(t *testing.T) {
 	var parser *ExtArgsParse
 	var err error
 	var p *parserTest1
-	beforeParser()
+	beforeParser(t)
 	parser, err = NewExtArgsParse(nil, nil)
 	check_equal(t, err, nil)
 	err = parser.LoadCommandLineString(loads)
@@ -188,7 +187,6 @@ func Test_parser_A002_2(t *testing.T) {
 	check_equal(t, p.Dep.Subnargs, []string{"cc", "dd"})
 	return
 }
-
 
 func Test_parser_A003(t *testing.T) {
 	var loads = `{
@@ -497,7 +495,6 @@ func Test_parser_A007(t *testing.T) {
 	return
 }
 
-
 type parserTest7 struct {
 	verbose    int
 	http_port  int
@@ -622,7 +619,6 @@ func Test_parser_A008_2(t *testing.T) {
 	check_equal(t, p.subnargs, []string{"ww"})
 	return
 }
-*/
 
 func Test_parser_A009(t *testing.T) {
 	var loads = `        {

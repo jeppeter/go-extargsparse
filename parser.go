@@ -1398,7 +1398,7 @@ func (self *ExtArgsParse) callbackFunc(funcname string, ns *NameSpaceEx, ostruct
 		self.Error("can not find [%s] [%s]", realfuncname, funcname)
 		return err
 	}
-	self.Error("call [%s] [%s] [%v]", funcname, realfuncname, callfunc)
+	self.Info("call [%s] [%s] [%v]", funcname, realfuncname, callfunc)
 	return callfunc(ns, ostruct, Context)
 }
 

@@ -17,6 +17,7 @@ type ExtArgsParse struct {
 	logObject
 	options             *ExtArgsOptions
 	mainCmd             *parserCompat
+	argState            *parseState
 	errorHandler        string
 	helpHandler         string
 	outputMode          []string
@@ -666,6 +667,7 @@ func NewExtArgsParse(options *ExtArgsOptions, priority interface{}) (self *ExtAr
 
 	self.options = options
 	self.mainCmd = newParserCompat(nil, options)
+	self.argState = nil
 
 	self.helpHandler = options.GetString("helphandler")
 	self.outputMode = make([]string, 0)
@@ -1020,6 +1022,7 @@ func (self *ExtArgsParse) parseArgs(params []string) (ns *NameSpaceEx, err error
 			return nil, err
 		}
 	}
+	self.argState = pstate
 	return ns, nil
 }
 
@@ -1145,10 +1148,150 @@ func (self *ExtArgsParse) setDefaultValue(ns *NameSpaceEx) error {
 	return self.setParserDefaultValue(ns, self.mainCmd)
 }
 
+func (self *ExtArgsParse) varUcFirst(name string) string {
+	if self.options.GetBool("varuppercase") {
+		return ucFirst(name)
+	}
+	return name
+}
+
+func (self *ExtArgsParse) setStructPartForSingle(ns *NameSpaceEx, ostruct interface{}, parser *parserCompat, parsers []*parserCompat) error {
+	var name string
+	var sarr []string
+	var idx int
+	var curname string
+	var opt *ExtKeyParse
+	var err error
+	var value interface{}
+	name = self.formatCmdFromCmdArray(parsers)
+	sarr = strings.Split(name, ".")
+	for idx, _ = range sarr {
+		sarr[idx] = self.varUcFirst(sarr[idx])
+	}
+	name = strings.Join(sarr, ".")
+	for _, opt = range parser.CmdOpts {
+		if opt.IsFlag() && opt.TypeName() != "help" && opt.TypeName() != "jsonfile" {
+			switch opt.TypeName() {
+			case "list":
+				value = ns.GetArray(opt.Optdest())
+			case "string":
+				value = ns.GetString(opt.Optdest())
+			case "int":
+				value = ns.GetInt(opt.Optdest())
+			case "float":
+				value = ns.GetFloat(opt.Optdest())
+			case "count":
+				value = ns.GetInt(opt.Optdest())
+			case "args":
+				if len(parsers) > 1 {
+					value = ns.GetArray("subnargs")
+				} else {
+					value = ns.GetArray("args")
+				}
+			default:
+				return fmt.Errorf("%s", format_error("unknown type name [%s]", opt.TypeName()))
+			}
+
+			/*we make sure for the handle of len*/
+			err = fmt.Errorf("dummy error")
+			if len(name) > 0 {
+				curname = name + "." + self.varUcFirst(opt.VarName())
+				err = setMemberValue(ostruct, curname, value)
+				if err != nil {
+					if opt.TypeName() != "args" {
+						curname = name + "." + self.varUcFirst(opt.FlagName())
+					} else {
+						if len(parsers) > 1 {
+							curname = name + "." + self.varUcFirst("subnargs")
+						} else {
+							curname = name + "." + self.varUcFirst("args")
+						}
+					}
+					err = setMemberValue(ostruct, curname, value)
+				}
+			}
+
+			if err != nil {
+				curname = self.varUcFirst(opt.VarName())
+				err = setMemberValue(ostruct, curname, value)
+				if err != nil {
+					if opt.TypeName() != "args" {
+						curname = self.varUcFirst(opt.FlagName())
+					} else {
+						if len(parsers) > 1 {
+							curname = name + "." + self.varUcFirst("subnargs")
+						} else {
+							curname = name + "." + self.varUcFirst("args")
+						}
+					}
+					err = setMemberValue(ostruct, curname, value)
+					if err != nil {
+						self.Warn("can not set [%s] [%s] [%v]", name, opt.Format(), value)
+					}
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func (self *ExtArgsParse) setStructPartInner(ns *NameSpaceEx, ostruct interface{}, parsers []*parserCompat) error {
+	var curparsers []*parserCompat
+	var parser *parserCompat
+	var err error
+	/*now first to make the calling recursive*/
+	if len(parsers) > 0 {
+		curparsers = parsers
+	} else {
+		curparsers = make([]*parserCompat, 0)
+		curparsers = append(curparsers, self.mainCmd)
+	}
+
+	err = self.setStructPartForSingle(ns, ostruct, curparsers[len(curparsers)-1], curparsers)
+	if err != nil {
+		return err
+	}
+
+	for _, parser = range curparsers[len(curparsers)-1].SubCommands {
+		curparsers = append(curparsers, parser)
+		err = self.setStructPartInner(ns, ostruct, curparsers)
+		if err != nil {
+			return err
+		}
+		curparsers = curparsers[:(len(curparsers) - 1)]
+	}
+
+	return nil
+}
+
 func (self *ExtArgsParse) setStructPart(ns *NameSpaceEx, ostruct interface{}) error {
 	/*nothing to handle*/
+	var parsers []*parserCompat
+	var idx int
+	var curparsers []*parserCompat
+	var err error
+	if self.argState == nil {
+		return fmt.Errorf("%s", format_error("not parse args yet"))
+	}
+
 	if ostruct == nil {
 		return nil
+	}
+	parsers = make([]*parserCompat, 0)
+	err = self.setStructPartInner(ns, ostruct, parsers)
+	if err != nil {
+		return err
+	}
+
+	/*now we should make sure the cmdpath that for the command path*/
+	parsers = self.argState.GetCmdPaths()
+	curparsers = make([]*parserCompat, 0)
+	for idx = 0; idx < len(parsers); idx++ {
+		curparsers = append(curparsers, parsers[idx])
+		err = self.setStructPartForSingle(ns, ostruct, curparsers[len(curparsers)-1], curparsers)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

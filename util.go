@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"sort"
 	"strings"
+	"unicode"
 	"unsafe"
 )
 
@@ -132,4 +133,18 @@ func setMemberValue(a interface{}, name string, value interface{}) error {
 	var rf reflect.Value
 	rf = reflect.ValueOf(a).Elem()
 	return setMemberValueInner(&rf, name, value)
+}
+
+func ucFirst(str string) string {
+	for i, v := range str {
+		return string(unicode.ToUpper(v)) + str[i+1:]
+	}
+	return ""
+}
+
+func lcFirst(str string) string {
+	for i, v := range str {
+		return string(unicode.ToLower(v)) + str[i+1:]
+	}
+	return ""
 }

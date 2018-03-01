@@ -622,8 +622,101 @@ func (self *ExtArgsParse) parseCommandJsonSet(ns *NameSpaceEx) error {
 	return nil
 }
 
-func (self *ExtArgsParse) setEnvironValue(ns *NameSpaceEx) error {
+func (self *ExtArgsParse) setEnvironValueInner(ns *NameSpaceEx, prefix string, parser *parserCompat) error {
+	var chld *parserCompat
+	var err error
+	var opt *ExtKeyParse
+	var optdest string
+	var oldopt string
+	var valstr string
+	var valcode string
+	var vmap map[string]interface{}
+	var value interface{}
+	var base int
+	var iv64 int64
+	var fv float64
+
+	for _, chld = range parser.SubCommands {
+		err = self.setEnvironValueInner(ns, prefix, chld)
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, opt = range parser.CmdOpts {
+		if !opt.IsFlag() || opt.TypeName() == "prefix" || opt.TypeName() == "args" ||
+			opt.TypeName() == "help" {
+			continue
+		}
+
+		optdest = opt.Optdest()
+		oldopt = optdest
+		if ns.IsAccessed(oldopt) {
+			/*already set ,not set yet*/
+			continue
+		}
+		optdest = strings.ToUpper(oldopt)
+		optdest = strings.Replace(optdest, "-", "_", -1)
+		if !strings.Contains(optdest, "_") {
+			optdest = fmt.Sprintf("EXTARGS_%s", optdest)
+		}
+		valstr = os.Getenv(optdest)
+		if len(valstr) == 0 {
+			continue
+		}
+		self.Trace("[%s]=%s", optdest, valstr)
+
+		if opt.TypeName() == "string" || opt.TypeName() == "jsonfile" {
+			value = valstr
+			err = self.callJsonValue(ns, opt, value)
+		} else if opt.TypeName() == "bool" {
+			value = false
+			if strings.ToLower(valstr) == "true" {
+				value = true
+			}
+			err = self.callJsonValue(ns, opt, value)
+		} else if opt.TypeName() == "list" {
+			valcode = fmt.Sprintf(`{"code" : %s}`, valstr)
+			vmap = nil
+			err = json.Unmarshal([]byte(valcode), &vmap)
+			if err != nil {
+				return fmt.Errorf("%s", format_error("can not parse [%s] error [%s]", valstr, err.Error()))
+			}
+			self.Trace("[%s]=%v", opt.Format(), vmap["code"])
+			err = self.callJsonValue(ns, opt, vmap["code"])
+		} else if opt.TypeName() == "int" || opt.TypeName() == "count" || opt.TypeName() == "long" {
+			base = 10
+			valstr = strings.ToLower(valstr)
+			if strings.HasPrefix(valstr, "0x") {
+				valstr = valstr[2:]
+				base = 16
+			} else if strings.HasPrefix(valstr, "x") {
+				valstr = valstr[1:]
+				base = 16
+			}
+			iv64, err = strconv.ParseInt(valstr, base, 64)
+			if err != nil {
+				return fmt.Errorf("%s", format_error("can not parse [%s] error [%s]", valstr, err.Error()))
+			}
+			err = self.callJsonValue(ns, opt, int(iv64))
+		} else if opt.TypeName() == "float" {
+			fv, err = strconv.ParseFloat(valstr, 64)
+			if err != nil {
+				return fmt.Errorf("%s", format_error("parse [%s] float error[%s]", valstr, err.Error()))
+			}
+			err = self.callJsonValue(ns, opt, fv)
+		} else {
+			panic(format_error("unknown opt [%s]", opt.Format()))
+		}
+		if err != nil {
+			return err
+		}
+	}
 	return nil
+}
+
+func (self *ExtArgsParse) setEnvironValue(ns *NameSpaceEx) error {
+	return self.setEnvironValueInner(ns, "", self.mainCmd)
 }
 
 func (self *ExtArgsParse) parseEnvironmentSet(ns *NameSpaceEx) error {
@@ -679,8 +772,71 @@ func (self *ExtArgsParse) parseEnvCommandJsonSet(ns *NameSpaceEx) error {
 	return nil
 }
 
-func (self *ExtArgsParse) jsonValueBase(ns *NameSpaceEx, keycls *ExtKeyParse, value interface{}) error {
-	ns.SetValue(keycls.Optdest(), value)
+func (self *ExtArgsParse) jsonValueBase(ns *NameSpaceEx, opt *ExtKeyParse, value interface{}) error {
+	var err error
+	var sarr []string
+	var v interface{}
+	if value != nil {
+		switch value.(type) {
+		case uint16:
+			err = self.setIntValue(ns, opt, int(value.(uint16)))
+		case uint32:
+			err = self.setIntValue(ns, opt, int(value.(uint32)))
+		case uint64:
+			err = self.setIntValue(ns, opt, int(value.(uint64)))
+		case int16:
+			err = self.setIntValue(ns, opt, int(value.(int16)))
+		case int32:
+			err = self.setIntValue(ns, opt, int(value.(int32)))
+		case int64:
+			err = self.setIntValue(ns, opt, int(value.(int64)))
+		case int:
+			err = self.setIntValue(ns, opt, int(value.(int)))
+		case float32:
+			err = self.setFloatValue(ns, opt, float64(value.(float32)))
+		case float64:
+			err = self.setFloatValue(ns, opt, float64(value.(float64)))
+		case string:
+			if opt.TypeName() != "string" && opt.TypeName() != "jsonfile" {
+				return fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), value))
+			}
+			ns.SetValue(opt.Optdest(), value)
+			err = nil
+		case []string:
+			if opt.TypeName() != "list" {
+				return fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), value))
+			}
+			sarr = make([]string, 0)
+			for _, v = range value.([]interface{}) {
+				sarr = append(sarr, fmt.Sprintf("%v", v))
+			}
+			self.Trace("set [%s]=%v", opt.Optdest(), sarr)
+			ns.SetValue(opt.Optdest(), sarr)
+			err = nil
+		case []interface{}:
+			if opt.TypeName() != "list" {
+				return fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), value))
+			}
+			sarr = make([]string, 0)
+			for _, v = range value.([]interface{}) {
+				sarr = append(sarr, fmt.Sprintf("%v", v))
+			}
+			self.Trace("set [%s]=%v", opt.Optdest(), sarr)
+			ns.SetValue(opt.Optdest(), sarr)
+			err = nil
+		default:
+			err = fmt.Errorf("%s", format_error("[%s] not for [%v] [%v] set", opt.TypeName(), value, reflect.ValueOf(value).Type()))
+		}
+
+		if err != nil {
+			return err
+		}
+	} else {
+		if opt.TypeName() != "string" && opt.TypeName() != "jsonfile" {
+			return fmt.Errorf("%s", format_error("[%s] not for nil set [%s]", opt.TypeName(), opt.Optdest()))
+		}
+		ns.SetValue(opt.Optdest(), value)
+	}
 	return nil
 }
 
@@ -1132,10 +1288,55 @@ func (self *ExtArgsParse) setIntValue(ns *NameSpaceEx, opt *ExtKeyParse, iv int)
 	return nil
 }
 
+func (self *ExtArgsParse) callJsonBindMap(ns *NameSpaceEx, opt *ExtKeyParse, value interface{}) error {
+	var in []reflect.Value
+	var out []reflect.Value
+	var nilptr interface{}
+
+	in = make([]reflect.Value, 3)
+	in[0] = reflect.ValueOf(ns)
+	in[1] = reflect.ValueOf(opt)
+	if value != nil {
+		in[2] = reflect.ValueOf(value)
+	} else {
+		nilptr = nil
+		in[2] = reflect.ValueOf(&nilptr).Elem()
+	}
+	out = self.setJsonValueMap[opt.TypeName()].Call(in)
+	if len(out) != 1 {
+		return fmt.Errorf("%s", format_error("call [%s] return out [%v]", opt.Format(), out))
+	}
+	if out[0].IsNil() {
+		return nil
+	}
+	return out[0].Interface().(error)
+}
+
+func (self *ExtArgsParse) callJsonValue(ns *NameSpaceEx, opt *ExtKeyParse, value interface{}) error {
+	if opt.Attr("jsonfunc") != "" {
+		var jsonfunc func(ns *NameSpaceEx, opt *ExtKeyParse, value interface{}) error
+		var realfuncname string
+		var sarr []string
+		var err error
+		realfuncname = opt.Attr("jsonfunc")
+		sarr = strings.Split(realfuncname, ".")
+		if len(sarr) > 1 {
+			realfuncname = strings.Join(sarr[:len(sarr)-1], ".")
+			realfuncname += fmt.Sprintf(".%s", self.funcUcFirst(sarr[len(sarr)-1]))
+		} else {
+			realfuncname = fmt.Sprintf("main.%s", self.funcUcFirst(realfuncname))
+		}
+		err = self.GetFuncPtr(realfuncname, &jsonfunc)
+		if err != nil {
+			return err
+		}
+		return jsonfunc(ns, opt, value)
+	}
+	return self.callJsonBindMap(ns, opt, value)
+}
+
 func (self *ExtArgsParse) setJsonValueNotDefined(ns *NameSpaceEx, parser *parserCompat, dest string, value interface{}) error {
 	var err error
-	var sarr []string
-	var v interface{}
 	for _, c := range parser.SubCommands {
 		err = self.setJsonValueNotDefined(ns, c, dest, value)
 		if err != nil {
@@ -1145,67 +1346,10 @@ func (self *ExtArgsParse) setJsonValueNotDefined(ns *NameSpaceEx, parser *parser
 
 	for _, opt := range parser.CmdOpts {
 		if opt.IsFlag() && opt.TypeName() != "prefix" && opt.TypeName() != "args" && opt.TypeName() != "help" {
-			if opt.Optdest() == dest {
-				if !ns.IsAccessed(dest) {
-					if value != nil {
-						switch value.(type) {
-						case uint16:
-							err = self.setIntValue(ns, opt, int(value.(uint16)))
-						case uint32:
-							err = self.setIntValue(ns, opt, int(value.(uint32)))
-						case uint64:
-							err = self.setIntValue(ns, opt, int(value.(uint64)))
-						case int16:
-							err = self.setIntValue(ns, opt, int(value.(int16)))
-						case int32:
-							err = self.setIntValue(ns, opt, int(value.(int32)))
-						case int64:
-							err = self.setIntValue(ns, opt, int(value.(int64)))
-						case int:
-							err = self.setIntValue(ns, opt, int(value.(int)))
-						case float32:
-							err = self.setFloatValue(ns, opt, float64(value.(float32)))
-						case float64:
-							err = self.setFloatValue(ns, opt, float64(value.(float64)))
-						case string:
-							if opt.TypeName() != "string" && opt.TypeName() != "jsonfile" {
-								return fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), value))
-							}
-							ns.SetValue(opt.Optdest(), value)
-							err = nil
-						case []string:
-							if opt.TypeName() != "list" {
-								return fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), value))
-							}
-							sarr = make([]string, 0)
-							for _, v = range value.([]interface{}) {
-								sarr = append(sarr, fmt.Sprintf("%v", v))
-							}
-							ns.SetValue(opt.Optdest(), sarr)
-							err = nil
-						case []interface{}:
-							if opt.TypeName() != "list" {
-								return fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), value))
-							}
-							sarr = make([]string, 0)
-							for _, v = range value.([]interface{}) {
-								sarr = append(sarr, fmt.Sprintf("%v", v))
-							}
-							ns.SetValue(opt.Optdest(), sarr)
-							err = nil
-						default:
-							err = fmt.Errorf("%s", format_error("[%s] not for [%v] [%v] set", opt.TypeName(), value, reflect.ValueOf(value).Type()))
-						}
-
-						if err != nil {
-							return err
-						}
-					} else {
-						if opt.TypeName() != "string" && opt.TypeName() != "jsonfile" {
-							return fmt.Errorf("%s", format_error("[%s] not for nil set [%s]", opt.TypeName(), opt.Optdest()))
-						}
-						ns.SetValue(opt.Optdest(), value)
-					}
+			if opt.Optdest() == dest && !ns.IsAccessed(dest) {
+				err = self.callJsonValue(ns, opt, value)
+				if err != nil {
+					return err
 				}
 			}
 		}

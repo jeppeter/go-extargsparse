@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"reflect"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -1098,10 +1099,27 @@ func (self *ExtArgsParse) callParseSetMapFunc(idx int, ns *NameSpaceEx) error {
 }
 
 func (self *ExtArgsParse) setFloatValue(ns *NameSpaceEx, opt *ExtKeyParse, fv float64) error {
-	if opt.TypeName() != "float" {
+	var mzeros *regexp.Regexp
+	var vstr string
+	var err error
+	var iv int
+	if opt.TypeName() != "float" && opt.TypeName() != "count" && opt.TypeName() != "int" {
 		return fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), fv))
 	}
-	ns.SetValue(opt.Optdest(), fv)
+	if opt.TypeName() == "float" {
+		ns.SetValue(opt.Optdest(), fv)
+	} else if opt.TypeName() == "count" || opt.TypeName() == "int" {
+		mzeros = regexp.MustCompile(`^[0-9]+$`)
+		vstr = fmt.Sprintf("%v", fv)
+		if !mzeros.MatchString(vstr) {
+			return fmt.Errorf("%s", format_error("[%v] not match int type", fv))
+		}
+		iv, err = strconv.Atoi(vstr)
+		if err != nil {
+			return fmt.Errorf("%s", format_error("Atoi[%s] error [%s]", vstr, err.Error()))
+		}
+		ns.SetValue(opt.Optdest(), iv)
+	}
 	return nil
 }
 

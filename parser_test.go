@@ -1085,7 +1085,6 @@ func Test_parser_A015(t *testing.T) {
 	ok = true
 	return
 }
-*/
 
 func Test_parser_A016(t *testing.T) {
 	var loads = `        {
@@ -1093,7 +1092,7 @@ func Test_parser_A016(t *testing.T) {
             "$port|p" : {
                 "value" : 3000,
                 "type" : "int",
-                "nargs" : 1 , 
+                "nargs" : 1 ,
                 "helpinfo" : "port to connect"
             },
             "dep" : {
@@ -1156,5 +1155,74 @@ func Test_parser_A016(t *testing.T) {
 	check_equal(t, args.GetString("dep_string"), "ee")
 	check_equal(t, args.GetArray("subnargs"), []string{"ww"})
 	ok = true
+	return
+}
+
+func Test_parser_A017(t *testing.T) {
+	var loads = `        {
+            "+dpkg" : {
+                "dpkg" : "dpkg"
+            },
+            "verbose|v" : "+",
+            "$port|p" : {
+                "value" : 3000,
+                "type" : "int",
+                "nargs" : 1 ,
+                "helpinfo" : "port to connect"
+            }
+        }`
+	var err error
+	var parser *ExtArgsParse
+	var params []string
+	var args *NameSpaceEx
+	beforeParser(t)
+
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	check_equal(t, err, nil)
+	params = []string{}
+	args, err = parser.ParseCommandLine(params, nil)
+	check_equal(t, err, nil)
+	check_equal(t, args.GetInt("verbose"), 0)
+	check_equal(t, args.GetInt("port"), 3000)
+	check_equal(t, args.GetString("dpkg_dpkg"), "dpkg")
+	check_equal(t, args.GetArray("args"), []string{})
+	return
+}
+*/
+
+func Test_parser_A018(t *testing.T) {
+	var loads = `        {
+            "+dpkg" : {
+                "dpkg" : "dpkg"
+            },
+            "verbose|v" : "+",
+            "rollback|r": true,
+            "$port|p" : {
+                "value" : 3000,
+                "type" : "int",
+                "nargs" : 1 , 
+                "helpinfo" : "port to connect"
+            }
+        }`
+	var err error
+	var parser *ExtArgsParse
+	var params []string
+	var args *NameSpaceEx
+	beforeParser(t)
+
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	check_equal(t, err, nil)
+	params = []string{"-vvrvv"}
+	args, err = parser.ParseCommandLine(params, nil)
+	check_equal(t, err, nil)
+	check_equal(t, args.GetInt("verbose"), 4)
+	check_equal(t, args.GetBool("rollback"), false)
+	check_equal(t, args.GetInt("port"), 3000)
+	check_equal(t, args.GetString("dpkg_dpkg"), "dpkg")
+	check_equal(t, args.GetArray("args"), []string{})
 	return
 }

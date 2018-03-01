@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"regexp"
 	"runtime"
 	"sort"
+	"strconv"
 	"strings"
 	"unicode"
 	"unsafe"
@@ -191,4 +193,58 @@ func getCallerPackage(skip int) string {
 		}
 	}
 	return retname
+}
+
+func isFloatToInt(fv float64) (iv int, bret bool) {
+	var mzeros *regexp.Regexp
+	var cv *regexp.Regexp
+	var vstr string
+	var err error
+	var dotstring string
+	var numstr string
+	var basenum string
+	var cnt int
+	var ibase int
+	var li int
+	vstr = fmt.Sprintf("%v", fv)
+	mzeros = regexp.MustCompile(`^[0-9]+$`)
+	cv = regexp.MustCompile(`^([0-9])\.([0-9]+)[eE][\+]([0-9]+)$`)
+	iv = 0
+	bret = false
+	if mzeros.MatchString(vstr) {
+		iv, err = strconv.Atoi(vstr)
+		if err == nil {
+			bret = true
+		}
+		return
+	}
+	if cv.MatchString(vstr) {
+		matchstrings := cv.FindStringSubmatch(vstr)
+		if len(matchstrings) >= 3 {
+			basenum = matchstrings[1]
+			dotstring = matchstrings[2]
+			numstr = matchstrings[3]
+			li, err = strconv.Atoi(numstr)
+			if err == nil && li >= len(dotstring) {
+				ibase, err = strconv.Atoi(basenum)
+				if err == nil {
+					iv = ibase
+					for cnt = 0; cnt < li; cnt++ {
+						iv *= 10
+					}
+					cnt, err = strconv.Atoi(dotstring)
+					if err == nil {
+						for len(dotstring) < li {
+							cnt *= 10
+							li--
+						}
+						iv += cnt
+						bret = true
+						return
+					}
+				}
+			}
+		}
+	}
+	return
 }

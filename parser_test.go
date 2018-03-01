@@ -1337,3 +1337,24 @@ func Test_parser_A020(t *testing.T) {
 	check_equal(t, args.GetArray("args"), []string{})
 	return
 }
+
+func Test_parser_A021(t *testing.T) {
+	var loads = `        {
+            "maxval|m" : 392244922
+        }`
+	var err error
+	var parser *ExtArgsParse
+	var params []string
+	var args *NameSpaceEx
+	beforeParser(t)
+
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	check_equal(t, err, nil)
+	params = []string{"-m", "0xffcc"}
+	args, err = parser.ParseCommandLine(params, nil)
+	check_equal(t, err, nil)
+	check_equal(t, args.GetInt("maxval"), 0xffcc)
+	return
+}

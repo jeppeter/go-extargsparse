@@ -132,8 +132,7 @@ type ExtKeyParse struct {
 }
 
 func (self *ExtKeyParse) getType(value interface{}) string {
-	var vstr string
-	var mzeros *regexp.Regexp
+	var bret bool
 
 	switch value.(type) {
 	case string:
@@ -141,16 +140,14 @@ func (self *ExtKeyParse) getType(value interface{}) string {
 	case bool:
 		return "bool"
 	case float32:
-		vstr = fmt.Sprintf("%v", value)
-		mzeros = regexp.MustCompile("^[0-9]+$")
-		if mzeros.MatchString(vstr) {
+		_, bret = isFloatToInt(float64(value.(float32)))
+		if bret {
 			return "int"
 		}
 		return "float"
 	case float64:
-		vstr = fmt.Sprintf("%v", value)
-		mzeros = regexp.MustCompile("^[0-9]+$")
-		if mzeros.MatchString(vstr) {
+		_, bret = isFloatToInt(value.(float64))
+		if bret {
 			return "int"
 		}
 		return "float"
@@ -182,25 +179,20 @@ func (self *ExtKeyParse) getType(value interface{}) string {
 }
 
 func (self *ExtKeyParse) getValue(value interface{}) interface{} {
-	var vstr string
-	var mzeros *regexp.Regexp
 	var iv int
+	var bret bool
 	if value == nil {
 		return nil
 	}
 	switch value.(type) {
 	case float64:
-		vstr = fmt.Sprintf("%v", value)
-		mzeros = regexp.MustCompile("^[0-9]+$")
-		if mzeros.MatchString(vstr) {
-			iv, _ = strconv.Atoi(vstr)
+		iv, bret = isFloatToInt(value.(float64))
+		if bret {
 			return iv
 		}
 	case float32:
-		vstr = fmt.Sprintf("%v", value)
-		mzeros = regexp.MustCompile("^[0-9]+$")
-		if mzeros.MatchString(vstr) {
-			iv, _ = strconv.Atoi(vstr)
+		iv, bret = isFloatToInt(float64(value.(float32)))
+		if bret {
 			return iv
 		}
 		return float64(value.(float32))

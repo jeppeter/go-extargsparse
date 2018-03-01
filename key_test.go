@@ -8,6 +8,23 @@ import (
 	"testing"
 )
 
+func Test_key_A001_3(t *testing.T) {
+	var vmap map[string]interface{}
+	var err error
+	var js string
+	var flags *ExtKeyParse
+	js = `{"code" : 392244922}`
+	err = json.Unmarshal([]byte(js), &vmap)
+	check_equal(t, err, nil)
+	flags, err = newExtKeyParse("", fmt.Sprintf("%s", "maxval|m"), vmap["code"], false)
+	check_equal(t, err, nil)
+	check_equal(t, flags.IsCmd(), false)
+	check_equal(t, flags.FlagName(), "maxval")
+	check_equal(t, flags.Value(), 392244922)
+	check_equal(t, flags.TypeName(), "int")
+}
+
+
 func Test_key_A001_2(t *testing.T) {
 	var vmap map[string]interface{}
 	var err error

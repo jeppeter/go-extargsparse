@@ -84,6 +84,15 @@ func assertGetOpt(opts []*ExtKeyParse, optdest string) *ExtKeyParse {
 	return nil
 }
 
+func assertGetSubCommand(names []string, cmdname string) string {
+	for _, c := range names {
+		if c == cmdname {
+			return cmdname
+		}
+	}
+	return ""
+}
+
 /*
 type parserTest1 struct {
 	Verbose int
@@ -1354,7 +1363,6 @@ func Test_parser_A020(t *testing.T) {
 	check_equal(t, args.GetArray("args"), []string{})
 	return
 }
-*/
 
 func Test_parser_A021(t *testing.T) {
 	var loads = `        {
@@ -1376,6 +1384,7 @@ func Test_parser_A021(t *testing.T) {
 	check_equal(t, args.GetInt("maxval"), 0xffcc)
 	return
 }
+*/
 
 func Test_parser_A022(t *testing.T) {
 	var loads = `        {
@@ -1412,5 +1421,63 @@ func Test_parser_A022(t *testing.T) {
 	check_equal(t, curopt.Longopt(), "--help")
 	check_equal(t, curopt.Shortopt(), "-h")
 	check_equal(t, curopt.TypeName(), "help")
+	return
+}
+
+func Test_parser_A023(t *testing.T) {
+	var loads = `        {
+            "verbose|v" : "+",
+            "dep" : {
+                "new|n" : false,
+                "$<NARGS>" : "+"
+            },
+            "rdep" : {
+                "new|n" : true,
+                "$<NARGS>" : "?"
+            }
+        }`
+	var err error
+	var parser *ExtArgsParse
+	var params []string
+	var opts []*ExtKeyParse
+	var curopt *ExtKeyParse
+	beforeParser(t)
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	check_equal(t, err, nil)
+	params, err = parser.GetSubCommands("")
+	check_equal(t, err, nil)
+	check_equal(t, params, []string{"dep", "rdep"})
+	opts, err = parser.GetCmdOpts("")
+	check_equal(t, err, nil)
+	check_equal(t, len(opts), 4)
+	curopt = assertGetOpt(opts, "$")
+	check_not_equal(t, curopt, (*ExtKeyParse)(nil))
+	check_equal(t, curopt.Nargs().(string), "*")
+	curopt = assertGetOpt(opts, "verbose")
+	check_not_equal(t, curopt, (*ExtKeyParse)(nil))
+	check_equal(t, curopt.TypeName(), "count")
+	curopt = assertGetOpt(opts, "json")
+	check_not_equal(t, curopt, (*ExtKeyParse)(nil))
+	check_equal(t, curopt.TypeName(), "jsonfile")
+	curopt = assertGetOpt(opts, "help")
+	check_not_equal(t, curopt, (*ExtKeyParse)(nil))
+	check_equal(t, curopt.TypeName(), "help")
+	opts, err = parser.GetCmdOpts("dep")
+	check_equal(t, err, nil)
+	check_equal(t, len(opts), 4)
+	curopt = assertGetOpt(opts, "$")
+	check_not_equal(t, curopt, (*ExtKeyParse)(nil))
+	check_equal(t, curopt.VarName(), "NARGS")
+	curopt = assertGetOpt(opts, "help")
+	check_not_equal(t, curopt, (*ExtKeyParse)(nil))
+	check_equal(t, curopt.TypeName(), "help")
+	curopt = assertGetOpt(opts, "dep_json")
+	check_not_equal(t, curopt, (*ExtKeyParse)(nil))
+	check_equal(t, curopt.TypeName(), "jsonfile")
+	curopt = assertGetOpt(opts, "dep_new")
+	check_not_equal(t, curopt, (*ExtKeyParse)(nil))
+	check_equal(t, curopt.TypeName(), "bool")
 	return
 }

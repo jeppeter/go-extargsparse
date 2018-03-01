@@ -1,6 +1,7 @@
 package extargsparse
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -101,6 +102,12 @@ func safeRemoveFile(fname string, notice string, ok bool) {
 			keyDebug("%s %s", notice, fname)
 		}
 	}
+}
+
+func getCmdHelp(parser *ExtArgsParse, cmdname string) []string {
+	obuf := bytes.NewBufferString("")
+	parser.PrintHelp(obuf, cmdname)
+	return strings.Split(obuf.String(), "\n")
 }
 
 /*
@@ -1443,7 +1450,6 @@ func Test_parser_A024(t *testing.T) {
 	check_equal(t, args.GetArray("subnargs"), []string{})
 	return
 }
-*/
 
 func Test_parser_A025(t *testing.T) {
 	var loads = `        {
@@ -1455,7 +1461,7 @@ func Test_parser_A025(t *testing.T) {
             "$port|p" : {
                 "value" : 3000,
                 "type" : "int",
-                "nargs" : 1 , 
+                "nargs" : 1 ,
                 "helpinfo" : "port to connect"
             },
             "dep" : {
@@ -1516,5 +1522,53 @@ func Test_parser_A025(t *testing.T) {
 	check_equal(t, args.GetArray("rdep_ip_cc"), []string{"ee"})
 	check_equal(t, args.GetArray("rdep_ip_list"), []string{"rdepjson1", "rdepjson3"})
 	ok = true
+	return
+}
+*/
+
+func Test_parser_A026(t *testing.T) {
+	var loads = `        {
+            "verbose|v" : "+",
+            "+http" : {
+                "url|u" : "http://www.google.com",
+                "visual_mode|V": false
+            },
+            "$port|p" : {
+                "value" : 3000,
+                "type" : "int",
+                "nargs" : 1 , 
+                "helpinfo" : "port to connect"
+            },
+            "dep" : {
+                "list|l" : [],
+                "string|s" : "s_var",
+                "$" : "+",
+                "ip" : {
+                    "verbose" : "+",
+                    "list" : [],
+                    "cc" : []
+                }
+            },
+            "rdep" : {
+                "ip" : {
+                    "verbose" : "+",
+                    "list" : [],
+                    "cc" : []
+                }
+            }
+        }`
+	var err error
+	var parser *ExtArgsParse
+	var options *ExtArgsOptions
+	var sarr []string
+	beforeParser(t)
+	options, err = NewExtArgsOptions(`{"prog" : "cmd1"}`)
+	check_equal(t, err, nil)
+	parser, err = NewExtArgsParse(options, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	check_equal(t, err, nil)
+	sarr = getCmdHelp(parser, "")
+	sarr = sarr
 	return
 }

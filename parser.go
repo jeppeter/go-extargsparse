@@ -3,6 +3,7 @@ package extargsparse
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"reflect"
 	"sort"
@@ -525,14 +526,63 @@ func (self *ExtArgsParse) floatAction(ns *NameSpaceEx, validx int, keycls *ExtKe
 	return 1, nil
 }
 
-func (self *ExtArgsParse) loadJsonFile(ns *NameSpaceEx, cmdname string, jsonfile string) error {
+func (self *ExtArgsParse) loadJsonValue(ns *NameSpaceEx, prefix string, vmap map[string]interface{}) error {
+	var k string
+	var v interface{}
+	var newprefix string
+	var newkey string
+	var err error
+	var newvmap map[string]interface{}
+	for k, v = range vmap {
+		if reflect.ValueOf(v).Type().String() == "map[string]interface {}" {
+			newprefix = ""
+			if len(prefix) > 0 {
+				newprefix += fmt.Sprintf("%s_", prefix)
+			}
+			newprefix += k
+			newvmap = v.(map[string]interface{})
+			err = self.loadJsonValue(ns, newprefix, newvmap)
+		} else {
+			newkey = ""
+			if len(prefix) > 0 {
+				newkey += fmt.Sprintf("%s_", prefix)
+			}
+			newkey += k
+			err = self.setJsonValueNotDefined(ns, self.mainCmd, newkey, v)
+		}
+		if err != nil {
+			return err
+		}
+	}
 	return nil
+}
+
+func (self *ExtArgsParse) loadJsonFile(ns *NameSpaceEx, cmdname string, jsonfile string) error {
+	var prefix string
+	var data []byte
+	var err error
+	var vmap map[string]interface{}
+	if len(cmdname) > 0 {
+		prefix = cmdname
+	}
+	prefix = strings.Replace(prefix, ".", "_", -1)
+	self.Trace("load json file [%s]", jsonfile)
+	data, err = ioutil.ReadFile(jsonfile)
+	if err != nil {
+		return fmt.Errorf("%s", format_error("can not read [%s] err[%s]", jsonfile, err.Error()))
+	}
+
+	err = json.Unmarshal(data, &vmap)
+	if err != nil {
+		return fmt.Errorf("%s", format_error("parse [%s] error [%s]", string(data), err.Error()))
+	}
+
+	return self.loadJsonValue(ns, prefix, vmap)
 }
 
 func (self *ExtArgsParse) parseSubCommandJsonSet(ns *NameSpaceEx) error {
 	var s string
 	var cmds []*parserCompat
-	var parsers []*parserCompat
 	var idx int
 	var subname string
 	var prefix string
@@ -541,8 +591,7 @@ func (self *ExtArgsParse) parseSubCommandJsonSet(ns *NameSpaceEx) error {
 	var err error
 	s = ns.GetString("subcommand")
 	if len(s) > 0 && !self.noJsonOption {
-		parsers = make([]*parserCompat, 0)
-		cmds = self.findCommandsInPath(s, parsers)
+		cmds = self.argState.GetCmdPaths()
 		idx = len(cmds)
 		for idx = len(cmds); idx >= 2; idx-- {
 			subname = self.formatCmdFromCmdArray(cmds[:idx])
@@ -564,6 +613,7 @@ func (self *ExtArgsParse) parseCommandJsonSet(ns *NameSpaceEx) error {
 	var jsonfile string
 	if !self.noJsonOption && len(self.jsonLong) > 0 {
 		jsonfile = ns.GetString(self.jsonLong)
+		self.Trace("jsonfile [%s]", jsonfile)
 		if len(jsonfile) > 0 {
 			return self.loadJsonFile(ns, "", jsonfile)
 		}

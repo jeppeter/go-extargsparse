@@ -1384,7 +1384,6 @@ func Test_parser_A021(t *testing.T) {
 	check_equal(t, args.GetInt("maxval"), 0xffcc)
 	return
 }
-*/
 
 func Test_parser_A022(t *testing.T) {
 	var loads = `        {
@@ -1479,5 +1478,55 @@ func Test_parser_A023(t *testing.T) {
 	curopt = assertGetOpt(opts, "dep_new")
 	check_not_equal(t, curopt, (*ExtKeyParse)(nil))
 	check_equal(t, curopt.TypeName(), "bool")
+	return
+}
+*/
+
+func Test_parser_A024(t *testing.T) {
+	var loads = `        {
+            "rdep" : {
+                "ip" : {
+                    "modules" : [],
+                    "called" : true,
+                    "setname" : null,
+                    "$" : 2
+                }
+            },
+            "dep" : {
+                "port" : 5000,
+                "cc|C" : true
+            },
+            "verbose|v" : "+"
+        }`
+	var err error
+	var parser *ExtArgsParse
+	var params []string
+	var args *NameSpaceEx
+	beforeParser(t)
+
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	check_equal(t, err, nil)
+	params = []string{"rdep", "ip", "--verbose", "--rdep-ip-modules", "cc", "--rdep-ip-setname", "bb", "xx", "bb"}
+	args, err = parser.ParseCommandLine(params, nil)
+	check_equal(t, err, nil)
+	check_equal(t, args.GetString("subcommand"), "rdep.ip")
+	check_equal(t, args.GetInt("verbose"), 1)
+	check_equal(t, args.GetArray("rdep_ip_modules"), []string{"cc"})
+	check_equal(t, args.GetString("rdep_ip_setname"), "bb")
+	check_equal(t, args.GetArray("subnargs"), []string{"xx", "bb"})
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	check_equal(t, err, nil)
+	params = []string{"dep", "--verbose", "--verbose", "-vvC"}
+	args, err = parser.ParseCommandLine(params, nil)
+	check_equal(t, err, nil)
+	check_equal(t, args.GetString("subcommand"), "dep")
+	check_equal(t, args.GetInt("verbose"), 4)
+	check_equal(t, args.GetInt("dep_port"), 5000)
+	check_equal(t, args.GetBool("dep_cc"), false)
+	check_equal(t, args.GetArray("subnargs"), []string{})
 	return
 }

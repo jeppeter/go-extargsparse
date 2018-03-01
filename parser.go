@@ -824,6 +824,11 @@ func (self *ExtArgsParse) jsonValueBase(ns *NameSpaceEx, opt *ExtKeyParse, value
 			self.Trace("set [%s]=%v", opt.Optdest(), sarr)
 			ns.SetValue(opt.Optdest(), sarr)
 			err = nil
+		case bool:
+			if opt.TypeName() != "bool" {
+				return fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), value))
+			}
+			ns.SetValue(opt.Optdest(), value)
 		default:
 			err = fmt.Errorf("%s", format_error("[%s] not for [%v] [%v] set", opt.TypeName(), value, reflect.ValueOf(value).Type()))
 		}

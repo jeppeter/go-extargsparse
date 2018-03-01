@@ -859,7 +859,6 @@ func Test_parser_A011(t *testing.T) {
 	ok = true
 	return
 }
-*/
 
 func Test_parser_A012(t *testing.T) {
 	var loads = `        {
@@ -867,7 +866,7 @@ func Test_parser_A012(t *testing.T) {
             "$port|p" : {
                 "value" : 3000,
                 "type" : "int",
-                "nargs" : 1 , 
+                "nargs" : 1 ,
                 "helpinfo" : "port to connect"
             },
             "dep" : {
@@ -915,7 +914,7 @@ func Test_parser_A013(t *testing.T) {
             "$port|p" : {
                 "value" : 3000,
                 "type" : "int",
-                "nargs" : 1 , 
+                "nargs" : 1 ,
                 "helpinfo" : "port to connect"
             },
             "dep" : {
@@ -952,6 +951,72 @@ func Test_parser_A013(t *testing.T) {
 	check_equal(t, args.GetInt("port"), 9000)
 	check_equal(t, args.GetString("subcommand"), "dep")
 	check_equal(t, args.GetArray("dep_list"), []string{"jsonval1", "jsonval2"})
+	check_equal(t, args.GetString("dep_string"), "ee")
+	check_equal(t, args.GetArray("subnargs"), []string{"ww"})
+	ok = true
+	return
+}
+*/
+
+func Test_parser_A014(t *testing.T) {
+	var loads = `        {
+            "verbose|v" : "+",
+            "$port|p" : {
+                "value" : 3000,
+                "type" : "int",
+                "nargs" : 1 , 
+                "helpinfo" : "port to connect"
+            },
+            "dep" : {
+                "list|l" : [],
+                "string|s" : "s_var",
+                "$" : "+"
+            }
+        }`
+	var err error
+	var parser *ExtArgsParse
+	var params []string
+	var args *NameSpaceEx
+	var jsonfile string = ""
+	var depjsonfile string = ""
+	var ok bool = false
+	beforeParser(t)
+
+	jsonfile = makeWriteTempFile(`{"dep":{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"},"port":6000,"verbose":3}`)
+	defer func() {
+		if len(jsonfile) > 0 {
+			if ok {
+				os.Remove(jsonfile)
+			} else {
+				keyDebug("jsonfile [%s]", jsonfile)
+			}
+			jsonfile = ""
+		}
+	}()
+	depjsonfile = makeWriteTempFile(`{"list":["depjson1","depjson2"]}`)
+	defer func() {
+		if len(depjsonfile) > 0 {
+			if ok {
+				os.Remove(depjsonfile)
+			} else {
+				keyDebug("depjsonfile [%s]", depjsonfile)
+			}
+			depjsonfile = ""
+		}
+	}()
+	os.Setenv("EXTARGSPARSE_JSON", jsonfile)
+	os.Setenv("DEP_JSON", depjsonfile)
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	check_equal(t, err, nil)
+	params = []string{"-p", "9000", "dep", "--dep-string", "ee", "ww"}
+	args, err = parser.ParseCommandLine(params, nil)
+	check_equal(t, err, nil)
+	check_equal(t, args.GetInt("verbose"), 3)
+	check_equal(t, args.GetInt("port"), 9000)
+	check_equal(t, args.GetString("subcommand"), "dep")
+	check_equal(t, args.GetArray("dep_list"), []string{"depjson1", "depjson2"})
 	check_equal(t, args.GetString("dep_string"), "ee")
 	check_equal(t, args.GetArray("subnargs"), []string{"ww"})
 	ok = true

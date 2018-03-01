@@ -633,7 +633,6 @@ func (self *ExtArgsParse) parseEnvironmentSet(ns *NameSpaceEx) error {
 func (self *ExtArgsParse) parseEnvSubCommandJsonSet(ns *NameSpaceEx) error {
 	var s string
 	var cmds []*parserCompat
-	var parsers []*parserCompat
 	var prefix string
 	var subname string
 	var jsondst string
@@ -642,8 +641,10 @@ func (self *ExtArgsParse) parseEnvSubCommandJsonSet(ns *NameSpaceEx) error {
 	var idx int
 	s = ns.GetString("subcommand")
 	if len(s) > 0 && !self.noJsonOption && len(self.jsonLong) > 0 {
-		parsers = make([]*parserCompat, 0)
-		cmds = self.findCommandsInPath(s, parsers)
+		if self.argState == nil {
+			return fmt.Errorf("%s", "not set argState yet")
+		}
+		cmds = self.argState.GetCmdPaths()
 		for idx = len(cmds); idx >= 2; idx-- {
 			subname = self.formatCmdFromCmdArray(cmds[:idx])
 			prefix = strings.Replace(subname, ".", "_", -1)

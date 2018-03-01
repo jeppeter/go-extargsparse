@@ -93,6 +93,16 @@ func assertGetSubCommand(names []string, cmdname string) string {
 	return ""
 }
 
+func safeRemoveFile(fname string, notice string, ok bool) {
+	if len(fname) > 0 {
+		if ok {
+			os.Remove(fname)
+		} else {
+			keyDebug("%s %s", notice, fname)
+		}
+	}
+}
+
 /*
 type parserTest1 struct {
 	Verbose int
@@ -801,13 +811,7 @@ func Test_parser_A010(t *testing.T) {
 	beforeParser(t)
 
 	depjsonfile = makeWriteTempFile(`{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"}`)
-	defer func() {
-		if ok {
-			os.Remove(depjsonfile)
-		} else {
-			keyDebug("depjsonfile [%s]", depjsonfile)
-		}
-	}()
+	defer safeRemoveFile(depjsonfile,"depjsonfile",ok)
 	option, err = NewExtArgsOptions(`{"errorhandler" : "raise"}`)
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(option, nil)
@@ -863,13 +867,7 @@ func Test_parser_A011(t *testing.T) {
 	beforeParser(t)
 
 	depjsonfile = makeWriteTempFile(`{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"}`)
-	defer func() {
-		if ok {
-			os.Remove(depjsonfile)
-		} else {
-			keyDebug("depjsonfile [%s]", depjsonfile)
-		}
-	}()
+	defer safeRemoveFile(depjsonfile,"depjsonfile",ok)
 	parser, err = NewExtArgsParse(nil, nil)
 	check_equal(t, err, nil)
 	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
@@ -911,13 +909,7 @@ func Test_parser_A012(t *testing.T) {
 	beforeParser(t)
 
 	jsonfile = makeWriteTempFile(`{"dep":{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"},"port":6000,"verbose":3}`)
-	defer func() {
-		if ok {
-			os.Remove(jsonfile)
-		} else {
-			keyDebug("jsonfile [%s]", jsonfile)
-		}
-	}()
+	defer safeRemoveFile(jsonfile,"jsonfile",ok)
 	parser, err = NewExtArgsParse(nil, nil)
 	check_equal(t, err, nil)
 	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
@@ -959,13 +951,7 @@ func Test_parser_A013(t *testing.T) {
 	beforeParser(t)
 
 	jsonfile = makeWriteTempFile(`{"dep":{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"},"port":6000,"verbose":3}`)
-	defer func() {
-		if ok {
-			os.Remove(jsonfile)
-		} else {
-			keyDebug("jsonfile [%s]", jsonfile)
-		}
-	}()
+	defer safeRemoveFile(jsonfile,"jsonfile",ok)
 	os.Setenv("EXTARGSPARSE_JSON", jsonfile)
 	parser, err = NewExtArgsParse(nil, nil)
 	check_equal(t, err, nil)
@@ -1009,27 +995,9 @@ func Test_parser_A014(t *testing.T) {
 	beforeParser(t)
 
 	jsonfile = makeWriteTempFile(`{"dep":{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"},"port":6000,"verbose":3}`)
-	defer func() {
-		if len(jsonfile) > 0 {
-			if ok {
-				os.Remove(jsonfile)
-			} else {
-				keyDebug("jsonfile [%s]", jsonfile)
-			}
-			jsonfile = ""
-		}
-	}()
+	defer safeRemoveFile(jsonfile,"jsonfile",ok)
 	depjsonfile = makeWriteTempFile(`{"list":["depjson1","depjson2"]}`)
-	defer func() {
-		if len(depjsonfile) > 0 {
-			if ok {
-				os.Remove(depjsonfile)
-			} else {
-				keyDebug("depjsonfile [%s]", depjsonfile)
-			}
-			depjsonfile = ""
-		}
-	}()
+	defer safeRemoveFile(depjsonfile,"depjsonfile",ok)
 	os.Setenv("EXTARGSPARSE_JSON", jsonfile)
 	os.Setenv("DEP_JSON", depjsonfile)
 	parser, err = NewExtArgsParse(nil, nil)
@@ -1074,27 +1042,9 @@ func Test_parser_A015(t *testing.T) {
 	beforeParser(t)
 
 	jsonfile = makeWriteTempFile(`{"dep":{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"},"port":6000,"verbose":3}`)
-	defer func() {
-		if len(jsonfile) > 0 {
-			if ok {
-				os.Remove(jsonfile)
-			} else {
-				keyDebug("jsonfile [%s]", jsonfile)
-			}
-			jsonfile = ""
-		}
-	}()
+	defer safeRemoveFile(jsonfile,"jsonfile",ok)
 	depjsonfile = makeWriteTempFile(`{"list":["depjson1","depjson2"]}`)
-	defer func() {
-		if len(depjsonfile) > 0 {
-			if ok {
-				os.Remove(depjsonfile)
-			} else {
-				keyDebug("depjsonfile [%s]", depjsonfile)
-			}
-			depjsonfile = ""
-		}
-	}()
+	defer safeRemoveFile(depjsonfile,"depjsonfile",ok)
 	os.Setenv("DEP_JSON", depjsonfile)
 	parser, err = NewExtArgsParse(nil, nil)
 	check_equal(t, err, nil)
@@ -1142,27 +1092,9 @@ func Test_parser_A016(t *testing.T) {
 	depstrval = "newval"
 	depliststr = `["depenv1","depenv2"]`
 	jsonfile = makeWriteTempFile(`{"dep":{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"},"port":6000,"verbose":3}`)
-	defer func() {
-		if len(jsonfile) > 0 {
-			if ok {
-				os.Remove(jsonfile)
-			} else {
-				keyDebug("jsonfile [%s]", jsonfile)
-			}
-			jsonfile = ""
-		}
-	}()
+	defer safeRemoveFile(jsonfile,"jsonfile",ok)
 	depjsonfile = makeWriteTempFile(`{"list":["depjson1","depjson2"]}`)
-	defer func() {
-		if len(depjsonfile) > 0 {
-			if ok {
-				os.Remove(depjsonfile)
-			} else {
-				keyDebug("depjsonfile [%s]", depjsonfile)
-			}
-			depjsonfile = ""
-		}
-	}()
+	defer safeRemoveFile(depjsonfile,"depjsonfile",ok)
 	os.Setenv("EXTARGSPARSE_JSON", jsonfile)
 	os.Setenv("DEP_JSON", depjsonfile)
 
@@ -1282,27 +1214,9 @@ func Test_parser_A019(t *testing.T) {
 	depstrval = "newval"
 	depliststr = `["depenv1","depenv2"]`
 	jsonfile = makeWriteTempFile(`{"dep":{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"},"port":6000,"verbose":3}`)
-	defer func() {
-		if len(jsonfile) > 0 {
-			if ok {
-				os.Remove(jsonfile)
-			} else {
-				keyDebug("jsonfile [%s]", jsonfile)
-			}
-			jsonfile = ""
-		}
-	}()
+	defer safeRemoveFile(jsonfile,"jsonfile",ok)
 	depjsonfile = makeWriteTempFile(`{"list":["depjson1","depjson2"]}`)
-	defer func() {
-		if len(depjsonfile) > 0 {
-			if ok {
-				os.Remove(depjsonfile)
-			} else {
-				keyDebug("depjsonfile [%s]", depjsonfile)
-			}
-			depjsonfile = ""
-		}
-	}()
+	defer safeRemoveFile(depjsonfile,"depjsonfile",ok)
 	os.Setenv("EXTARGSPARSE_JSON", jsonfile)
 	os.Setenv("DEP_JSON", depjsonfile)
 
@@ -1480,7 +1394,6 @@ func Test_parser_A023(t *testing.T) {
 	check_equal(t, curopt.TypeName(), "bool")
 	return
 }
-*/
 
 func Test_parser_A024(t *testing.T) {
 	var loads = `        {
@@ -1528,5 +1441,80 @@ func Test_parser_A024(t *testing.T) {
 	check_equal(t, args.GetInt("dep_port"), 5000)
 	check_equal(t, args.GetBool("dep_cc"), false)
 	check_equal(t, args.GetArray("subnargs"), []string{})
+	return
+}
+*/
+
+func Test_parser_A025(t *testing.T) {
+	var loads = `        {
+            "verbose|v" : "+",
+            "+http" : {
+                "url|u" : "http://www.google.com",
+                "visual_mode|V": false
+            },
+            "$port|p" : {
+                "value" : 3000,
+                "type" : "int",
+                "nargs" : 1 , 
+                "helpinfo" : "port to connect"
+            },
+            "dep" : {
+                "list|l" : [],
+                "string|s" : "s_var",
+                "$" : "+",
+                "ip" : {
+                    "verbose" : "+",
+                    "list" : [],
+                    "cc" : []
+                }
+            },
+            "rdep" : {
+                "ip" : {
+                    "verbose" : "+",
+                    "list" : [],
+                    "cc" : []
+                }
+            }
+        }`
+	var err error
+	var parser *ExtArgsParse
+	var params []string
+	var args *NameSpaceEx
+	var jsonfile string = ""
+	var depjsonfile string = ""
+	var rdepjsonfile string = ""
+	var ok bool = false
+	beforeParser(t)
+
+	jsonfile = makeWriteTempFile(`{ "http" : { "url" : "http://www.github.com"} ,"dep":{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"},"port":6000,"verbose":3}`)
+	defer safeRemoveFile(jsonfile, "jsonfile", ok)
+	depjsonfile = makeWriteTempFile(`{"list":["depjson1","depjson2"]}`)
+	defer safeRemoveFile(depjsonfile, "depjsonfile", ok)
+	rdepjsonfile = makeWriteTempFile(`{"ip": {"list":["rdepjson1","rdepjson3"],"verbose": 5}}`)
+	defer safeRemoveFile(rdepjsonfile, "rdepjsonfile", ok)
+
+	os.Setenv("EXTARGSPARSE_JSON", jsonfile)
+	os.Setenv("DEP_JSON", depjsonfile)
+	os.Setenv("RDEP_JSON", rdepjsonfile)
+
+	parser, err = NewExtArgsParse(nil, []int{ENV_COMMAND_JSON_SET, ENVIRONMENT_SET, ENV_SUB_COMMAND_JSON_SET})
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	check_equal(t, err, nil)
+	params = []string{"-p", "9000", "rdep", "ip", "--rdep-ip-verbose", "--rdep-ip-cc", "ee", "ww"}
+	args, err = parser.ParseCommandLine(params, nil)
+	check_equal(t, err, nil)
+	check_equal(t, args.GetInt("verbose"), 3)
+	check_equal(t, args.GetInt("port"), 9000)
+	check_equal(t, args.GetString("dep_string"), "jsonstring")
+	check_equal(t, args.GetArray("dep_list"), []string{"jsonval1", "jsonval2"})
+	check_equal(t, args.GetBool("http_visual_mode"), false)
+	check_equal(t, args.GetString("http_url"), "http://www.github.com")
+	check_equal(t, args.GetArray("subnargs"), []string{"ww"})
+	check_equal(t, args.GetString("subcommand"), "rdep.ip")
+	check_equal(t, args.GetInt("rdep_ip_verbose"), 1)
+	check_equal(t, args.GetArray("rdep_ip_cc"), []string{"ee"})
+	check_equal(t, args.GetArray("rdep_ip_list"), []string{"rdepjson1", "rdepjson3"})
+	ok = true
 	return
 }

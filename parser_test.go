@@ -1759,7 +1759,6 @@ func Test_parser_A028(t *testing.T) {
 	check_not_equal(t, err, nil)
 	return
 }
-*/
 
 func Test_parser_A029(t *testing.T) {
 	var loads = `        {
@@ -1771,7 +1770,7 @@ func Test_parser_A029(t *testing.T) {
             "$port|p" : {
                 "value" : 3000,
                 "type" : "int",
-                "nargs" : 1 , 
+                "nargs" : 1 ,
                 "helpinfo" : "port to connect"
             },
             "dep" : {
@@ -1805,5 +1804,67 @@ func Test_parser_A029(t *testing.T) {
 	check_equal(t, err, nil)
 	sarr = getCmdHelp(parser, "")
 	check_equal(t, sarr, []string{"no help information"})
+	return
+}
+*/
+
+func Test_parser_A030(t *testing.T) {
+	var loads = `        {
+            "verbose|v" : "+",
+            "+http" : {
+                "url|u" : "http://www.google.com",
+                "visual_mode|V": false
+            },
+            "$port|p" : {
+                "value" : 3000,
+                "type" : "int",
+                "nargs" : 1 , 
+                "helpinfo" : "port to connect"
+            },
+            "dep<dep_handler>!opt=cc!" : {
+                "list|l!attr=cc;optfunc=list_opt_func!" : [],
+                "string|s" : "s_var",
+                "$" : "+",
+                "ip" : {
+                    "verbose" : "+",
+                    "list" : [],
+                    "cc" : []
+                }
+            },
+            "rdep<rdep_handler>" : {
+                "ip" : {
+                    "verbose" : "+",
+                    "list" : [],
+                    "cc" : []
+                }
+            }
+        }`
+	var err error
+	var parser *ExtArgsParse
+	//var opts []*ExtKeyParse
+	var flag *ExtKeyParse
+	beforeParser(t)
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	check_equal(t, err, nil)
+	flag, err = parser.GetCmdKey("")
+	check_equal(t, err, nil)
+	check_equal(t, flag.CmdName(), "main")
+	check_equal(t, flag.IsCmd(), true)
+	check_equal(t, flag.Function(), "")
+	flag, err = parser.GetCmdKey("dep")
+	check_equal(t, err, nil)
+	check_equal(t, flag.CmdName(), "dep")
+	check_equal(t, flag.Function(), "dep_handler")
+	check_equal(t, flag.Attr("opt"), "cc")
+	flag, err = parser.GetCmdKey("rdep")
+	check_equal(t, err, nil)
+	check_equal(t, flag.CmdName(), "rdep")
+	check_equal(t, flag.Function(), "rdep_handler")
+	check_equal(t, flag.Attr(""), "")
+	flag, err = parser.GetCmdKey("nosuch")
+	check_equal(t, err, nil)
+	check_equal(t, flag, (*ExtKeyParse)(nil))
 	return
 }

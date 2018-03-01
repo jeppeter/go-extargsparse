@@ -1650,7 +1650,6 @@ func Test_parser_A026(t *testing.T) {
 	check_equal(t, err, nil)
 	return
 }
-*/
 
 func Test_parser_A027(t *testing.T) {
 	var loads = `        {
@@ -1662,7 +1661,7 @@ func Test_parser_A027(t *testing.T) {
             "$port|p" : {
                 "value" : 3000,
                 "type" : "int",
-                "nargs" : 1 , 
+                "nargs" : 1 ,
                 "helpinfo" : "port to connect"
             },
             "dep" : {
@@ -1682,8 +1681,7 @@ func Test_parser_A027(t *testing.T) {
                     "cc" : []
                 }
             }
-        }
-`
+        }`
 	var err error
 	var parser *ExtArgsParse
 	var options *ExtArgsOptions
@@ -1711,5 +1709,54 @@ func Test_parser_A027(t *testing.T) {
 	check_not_equal(t, flag, (*ExtKeyParse)(nil))
 	check_equal(t, flag.Attr("attr"), "cc")
 	check_equal(t, flag.Attr("optfunc"), "list_opt_func")
+	return
+}
+*/
+
+func Test_parser_A028(t *testing.T) {
+	var loads = `        {
+            "verbose<VAR1>|v" : "+",
+            "+http" : {
+                "url|u<VAR1>" : "http://www.google.com",
+                "visual_mode|V": false
+            },
+            "$port|p" : {
+                "value" : 3000,
+                "type" : "int",
+                "nargs" : 1 , 
+                "helpinfo" : "port to connect"
+            },
+            "dep" : {
+                "list|l!attr=cc;optfunc=list_opt_func!" : [],
+                "string|s" : "s_var",
+                "$" : "+",
+                "ip" : {
+                    "verbose" : "+",
+                    "list" : [],
+                    "cc" : []
+                }
+            },
+            "rdep" : {
+                "ip" : {
+                    "verbose" : "+",
+                    "list" : [],
+                    "cc" : []
+                }
+            }
+        }`
+	var err error
+	var parser *ExtArgsParse
+	var options *ExtArgsOptions
+	var params []string
+	beforeParser(t)
+	options, err = NewExtArgsOptions(`{"errorhandler" : "raise"}`)
+	check_equal(t, err, nil)
+	parser, err = NewExtArgsParse(options, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	check_equal(t, err, nil)
+	params = []string{"dep", "cc"}
+	_, err = parser.ParseCommandLine(params, nil)
+	check_not_equal(t, err, nil)
 	return
 }

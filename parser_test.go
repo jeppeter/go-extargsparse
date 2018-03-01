@@ -883,7 +883,7 @@ func Test_parser_A010(t *testing.T) {
 	beforeParser(t)
 
 	depjsonfile = makeWriteTempFile(`{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"}`)
-	defer safeRemoveFile(depjsonfile,"depjsonfile",ok)
+	defer safeRemoveFile(depjsonfile, "depjsonfile", ok)
 	option, err = NewExtArgsOptions(`{"errorhandler" : "raise"}`)
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(option, nil)
@@ -939,7 +939,7 @@ func Test_parser_A011(t *testing.T) {
 	beforeParser(t)
 
 	depjsonfile = makeWriteTempFile(`{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"}`)
-	defer safeRemoveFile(depjsonfile,"depjsonfile",ok)
+	defer safeRemoveFile(depjsonfile, "depjsonfile", ok)
 	parser, err = NewExtArgsParse(nil, nil)
 	check_equal(t, err, nil)
 	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
@@ -981,7 +981,7 @@ func Test_parser_A012(t *testing.T) {
 	beforeParser(t)
 
 	jsonfile = makeWriteTempFile(`{"dep":{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"},"port":6000,"verbose":3}`)
-	defer safeRemoveFile(jsonfile,"jsonfile",ok)
+	defer safeRemoveFile(jsonfile, "jsonfile", ok)
 	parser, err = NewExtArgsParse(nil, nil)
 	check_equal(t, err, nil)
 	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
@@ -1023,7 +1023,7 @@ func Test_parser_A013(t *testing.T) {
 	beforeParser(t)
 
 	jsonfile = makeWriteTempFile(`{"dep":{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"},"port":6000,"verbose":3}`)
-	defer safeRemoveFile(jsonfile,"jsonfile",ok)
+	defer safeRemoveFile(jsonfile, "jsonfile", ok)
 	os.Setenv("EXTARGSPARSE_JSON", jsonfile)
 	parser, err = NewExtArgsParse(nil, nil)
 	check_equal(t, err, nil)
@@ -1067,9 +1067,9 @@ func Test_parser_A014(t *testing.T) {
 	beforeParser(t)
 
 	jsonfile = makeWriteTempFile(`{"dep":{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"},"port":6000,"verbose":3}`)
-	defer safeRemoveFile(jsonfile,"jsonfile",ok)
+	defer safeRemoveFile(jsonfile, "jsonfile", ok)
 	depjsonfile = makeWriteTempFile(`{"list":["depjson1","depjson2"]}`)
-	defer safeRemoveFile(depjsonfile,"depjsonfile",ok)
+	defer safeRemoveFile(depjsonfile, "depjsonfile", ok)
 	os.Setenv("EXTARGSPARSE_JSON", jsonfile)
 	os.Setenv("DEP_JSON", depjsonfile)
 	parser, err = NewExtArgsParse(nil, nil)
@@ -1114,9 +1114,9 @@ func Test_parser_A015(t *testing.T) {
 	beforeParser(t)
 
 	jsonfile = makeWriteTempFile(`{"dep":{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"},"port":6000,"verbose":3}`)
-	defer safeRemoveFile(jsonfile,"jsonfile",ok)
+	defer safeRemoveFile(jsonfile, "jsonfile", ok)
 	depjsonfile = makeWriteTempFile(`{"list":["depjson1","depjson2"]}`)
-	defer safeRemoveFile(depjsonfile,"depjsonfile",ok)
+	defer safeRemoveFile(depjsonfile, "depjsonfile", ok)
 	os.Setenv("DEP_JSON", depjsonfile)
 	parser, err = NewExtArgsParse(nil, nil)
 	check_equal(t, err, nil)
@@ -1164,9 +1164,9 @@ func Test_parser_A016(t *testing.T) {
 	depstrval = "newval"
 	depliststr = `["depenv1","depenv2"]`
 	jsonfile = makeWriteTempFile(`{"dep":{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"},"port":6000,"verbose":3}`)
-	defer safeRemoveFile(jsonfile,"jsonfile",ok)
+	defer safeRemoveFile(jsonfile, "jsonfile", ok)
 	depjsonfile = makeWriteTempFile(`{"list":["depjson1","depjson2"]}`)
-	defer safeRemoveFile(depjsonfile,"depjsonfile",ok)
+	defer safeRemoveFile(depjsonfile, "depjsonfile", ok)
 	os.Setenv("EXTARGSPARSE_JSON", jsonfile)
 	os.Setenv("DEP_JSON", depjsonfile)
 
@@ -1286,9 +1286,9 @@ func Test_parser_A019(t *testing.T) {
 	depstrval = "newval"
 	depliststr = `["depenv1","depenv2"]`
 	jsonfile = makeWriteTempFile(`{"dep":{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"},"port":6000,"verbose":3}`)
-	defer safeRemoveFile(jsonfile,"jsonfile",ok)
+	defer safeRemoveFile(jsonfile, "jsonfile", ok)
 	depjsonfile = makeWriteTempFile(`{"list":["depjson1","depjson2"]}`)
-	defer safeRemoveFile(depjsonfile,"depjsonfile",ok)
+	defer safeRemoveFile(depjsonfile, "depjsonfile", ok)
 	os.Setenv("EXTARGSPARSE_JSON", jsonfile)
 	os.Setenv("DEP_JSON", depjsonfile)
 
@@ -1589,7 +1589,6 @@ func Test_parser_A025(t *testing.T) {
 	ok = true
 	return
 }
-*/
 
 func Test_parser_A026(t *testing.T) {
 	var loads = `        {
@@ -1601,7 +1600,7 @@ func Test_parser_A026(t *testing.T) {
             "$port|p" : {
                 "value" : 3000,
                 "type" : "int",
-                "nargs" : 1 , 
+                "nargs" : 1 ,
                 "helpinfo" : "port to connect"
             },
             "dep" : {
@@ -1649,5 +1648,68 @@ func Test_parser_A026(t *testing.T) {
 	check_equal(t, err, nil)
 	err = checkAllOptsHelp(t, sarr, opts)
 	check_equal(t, err, nil)
+	return
+}
+*/
+
+func Test_parser_A027(t *testing.T) {
+	var loads = `        {
+            "verbose|v" : "+",
+            "+http" : {
+                "url|u" : "http://www.google.com",
+                "visual_mode|V": false
+            },
+            "$port|p" : {
+                "value" : 3000,
+                "type" : "int",
+                "nargs" : 1 , 
+                "helpinfo" : "port to connect"
+            },
+            "dep" : {
+                "list|l!attr=cc;optfunc=list_opt_func!" : [],
+                "string|s" : "s_var",
+                "$" : "+",
+                "ip" : {
+                    "verbose" : "+",
+                    "list" : [],
+                    "cc" : []
+                }
+            },
+            "rdep" : {
+                "ip" : {
+                    "verbose" : "+",
+                    "list" : [],
+                    "cc" : []
+                }
+            }
+        }
+`
+	var err error
+	var parser *ExtArgsParse
+	var options *ExtArgsOptions
+	var opts []*ExtKeyParse
+	var flag *ExtKeyParse
+	beforeParser(t)
+	options, err = NewExtArgsOptions(`{"prog" : "cmd1"}`)
+	check_equal(t, err, nil)
+	parser, err = NewExtArgsParse(options, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	check_equal(t, err, nil)
+	opts, err = parser.GetCmdOpts("dep")
+	check_equal(t, err, nil)
+	flag = nil
+	for _, f := range opts {
+		if f.TypeName() == "args" {
+			continue
+		}
+		if f.FlagName() == "list" {
+			flag = f
+			break
+		}
+	}
+	check_not_equal(t, flag, (*ExtKeyParse)(nil))
+	check_equal(t, flag.Attr("attr"), "cc")
+	check_equal(t, flag.Attr("optfunc"), "list_opt_func")
 	return
 }

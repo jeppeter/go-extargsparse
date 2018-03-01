@@ -66,6 +66,24 @@ func makeWriteTempFile(s string) string {
 	return ""
 }
 
+func assertGetOpt(opts []*ExtKeyParse, optdest string) *ExtKeyParse {
+	for _, curopt := range opts {
+		if !curopt.IsFlag() {
+			continue
+		}
+		if curopt.FlagName() == "$" && optdest == "$" {
+			return curopt
+		}
+		if curopt.FlagName() == "$" {
+			continue
+		}
+		if curopt.Optdest() == optdest {
+			return curopt
+		}
+	}
+	return nil
+}
+
 /*
 type parserTest1 struct {
 	Verbose int
@@ -1225,7 +1243,6 @@ func Test_parser_A018(t *testing.T) {
 	check_equal(t, args.GetArray("args"), []string{})
 	return
 }
-*/
 
 func Test_parser_A019(t *testing.T) {
 	var loads = `        {
@@ -1233,7 +1250,7 @@ func Test_parser_A019(t *testing.T) {
             "$port|p" : {
                 "value" : 3000,
                 "type" : "int",
-                "nargs" : 1 , 
+                "nargs" : 1 ,
                 "helpinfo" : "port to connect"
             },
             "dep" : {
@@ -1306,7 +1323,7 @@ func Test_parser_A020(t *testing.T) {
             "$port|P" : {
                 "value" : 3000,
                 "type" : "int",
-                "nargs" : 1 , 
+                "nargs" : 1 ,
                 "helpinfo" : "port to connect"
             },
             "dep" : {
@@ -1337,6 +1354,7 @@ func Test_parser_A020(t *testing.T) {
 	check_equal(t, args.GetArray("args"), []string{})
 	return
 }
+*/
 
 func Test_parser_A021(t *testing.T) {
 	var loads = `        {
@@ -1356,5 +1374,43 @@ func Test_parser_A021(t *testing.T) {
 	args, err = parser.ParseCommandLine(params, nil)
 	check_equal(t, err, nil)
 	check_equal(t, args.GetInt("maxval"), 0xffcc)
+	return
+}
+
+func Test_parser_A022(t *testing.T) {
+	var loads = `        {
+            "verbose|v" : "+"
+        }`
+	var err error
+	var parser *ExtArgsParse
+	var params []string
+	var opts []*ExtKeyParse
+	var curopt *ExtKeyParse
+	beforeParser(t)
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	check_equal(t, err, nil)
+	params, err = parser.GetSubCommands("")
+	check_equal(t, err, nil)
+	check_equal(t, params, []string{})
+	opts, err = parser.GetCmdOpts("")
+	check_equal(t, err, nil)
+	check_equal(t, len(opts), 4)
+	curopt = assertGetOpt(opts, "verbose")
+	check_not_equal(t, curopt, nil)
+	check_equal(t, curopt.Optdest(), "verbose")
+	check_equal(t, curopt.Longopt(), "--verbose")
+	check_equal(t, curopt.Shortopt(), "-v")
+	curopt = assertGetOpt(opts, "noflag")
+	check_equal(t, curopt, (*ExtKeyParse)(nil))
+	curopt = assertGetOpt(opts, "json")
+	check_not_equal(t, curopt, nil)
+	check_equal(t, curopt.Value(), nil)
+	curopt = assertGetOpt(opts, "help")
+	check_not_equal(t, curopt, nil)
+	check_equal(t, curopt.Longopt(), "--help")
+	check_equal(t, curopt.Shortopt(), "-h")
+	check_equal(t, curopt.TypeName(), "help")
 	return
 }

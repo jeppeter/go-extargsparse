@@ -1298,3 +1298,42 @@ func Test_parser_A019(t *testing.T) {
 	ok = true
 	return
 }
+
+func Test_parser_A020(t *testing.T) {
+	var loads = `        {
+            "verbose|v" : "+",
+            "rollback|R" : true,
+            "$port|P" : {
+                "value" : 3000,
+                "type" : "int",
+                "nargs" : 1 , 
+                "helpinfo" : "port to connect"
+            },
+            "dep" : {
+                "list|l" : [],
+                "string|s" : "s_var",
+                "$" : "+"
+            }
+        }`
+	var err error
+	var parser *ExtArgsParse
+	var params []string
+	var args *NameSpaceEx
+	beforeParser(t)
+
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	check_equal(t, err, nil)
+	params = []string{"-P", "9000", "--no-rollback", "dep", "--dep-string", "ee", "ww"}
+	args, err = parser.ParseCommandLine(params, nil)
+	check_equal(t, err, nil)
+	check_equal(t, args.GetInt("verbose"), 0)
+	check_equal(t, args.GetInt("port"), 9000)
+	check_equal(t, args.GetBool("rollback"), false)
+	check_equal(t, args.GetString("subcommand"), "dep")
+	check_equal(t, args.GetArray("dep_list"), []string{})
+	check_equal(t, args.GetString("dep_string"), "ee")
+	check_equal(t, args.GetArray("args"), []string{})
+	return
+}

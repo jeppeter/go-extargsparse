@@ -428,7 +428,7 @@ func (self *ExtArgsParse) findCommandInner(cmdname string, parsers []*parserComp
 				return self.findCommandInner(strings.Join(sarr[1:], "."), nextparsers)
 			}
 		}
-	} else {
+	} else if len(sarr) == 1 {
 		for _, c := range curroot.SubCommands {
 			if c.CmdName == sarr[0] {
 				return c
@@ -449,21 +449,24 @@ func (self *ExtArgsParse) findCommandsInPath(cmdname string, parsers []*parserCo
 		sarr = strings.Split(cmdname, ".")
 	}
 	if self.mainCmd != nil {
+		self.Trace("append [%s]", self.mainCmd.Format())
 		commands = append(commands, self.mainCmd)
 	}
-	for i = 0; i < len(sarr) && len(cmdname) > 0; i++ {
+
+	for i = 0; i <= len(sarr) && len(cmdname) > 0; i++ {
 		if i > 0 {
 			curcommand = self.findCommandInner(sarr[i-1], commands)
 			if curcommand == nil {
 				break
 			}
+			self.Trace("append [%s]", curcommand.Format())
 			commands = append(commands, curcommand)
 		}
 	}
 	return commands
 }
 
-func (self *ExtArgsParse) PrintHelp(out *os.File, cmdname string) error {
+func (self *ExtArgsParse) PrintHelp(out IoWriter, cmdname string) error {
 	var err error
 	var parsers []*parserCompat
 	var s string
@@ -492,10 +495,13 @@ func (self *ExtArgsParse) PrintHelp(out *os.File, cmdname string) error {
 }
 
 func (self *ExtArgsParse) helpAction(ns *NameSpaceEx, validx int, keycls *ExtKeyParse, params []string) (step int, err error) {
-	err = self.PrintHelp(os.Stdout, params[0])
+	var f *FileIoWriter
+	f = NewFileWriter(os.Stdout)
+	err = self.PrintHelp(f, params[0])
 	if err != nil {
 		return 0, err
 	}
+
 	os.Exit(5)
 	return 0, nil
 }

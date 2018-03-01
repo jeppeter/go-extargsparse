@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -104,10 +105,74 @@ func safeRemoveFile(fname string, notice string, ok bool) {
 	}
 }
 
+type stringIO struct {
+	IoWriter
+	obuf *bytes.Buffer
+}
+
+func newStringIO() *stringIO {
+	p := &stringIO{}
+	p.obuf = bytes.NewBufferString("")
+	return p
+}
+
+func (self *stringIO) Write(data []byte) (int, error) {
+	return self.obuf.Write(data)
+}
+
+func (self *stringIO) WriteString(s string) (int, error) {
+	return self.obuf.WriteString(s)
+}
+
+func (self *stringIO) String() string {
+	return self.obuf.String()
+}
+
 func getCmdHelp(parser *ExtArgsParse, cmdname string) []string {
-	obuf := bytes.NewBufferString("")
+	obuf := newStringIO()
 	parser.PrintHelp(obuf, cmdname)
 	return strings.Split(obuf.String(), "\n")
+}
+
+func getOptOk(t *testing.T, sarr []string, opt *ExtKeyParse) error {
+	var exprstr string
+	var ex *regexp.Regexp
+	var err error
+	if opt.FlagName() == "$" {
+		return nil
+	}
+	exprstr = fmt.Sprintf("^\\s+%s", opt.Longopt())
+	if len(opt.Shortopt()) > 0 {
+		exprstr += fmt.Sprintf("\\|%s", opt.Shortopt())
+	}
+	if opt.Nargs().(int) != 0 {
+		exprstr += fmt.Sprintf("\\s+%s\\s+.*$", opt.Optdest())
+	} else {
+		exprstr += fmt.Sprintf("\\s+.*$")
+	}
+
+	ex, err = regexp.Compile(exprstr)
+	if err != nil {
+		return fmt.Errorf("%s", format_error("compile [%s] for [%s] err[%s]", exprstr, opt.Format(), err.Error()))
+	}
+	for _, s := range sarr {
+		if ex.MatchString(s) {
+			return nil
+		}
+	}
+
+	return fmt.Errorf("%s", format_error("can not find [%s] for \n%s", exprstr, sarr))
+}
+
+func checkAllOptsHelp(t *testing.T, sarr []string, opts []*ExtKeyParse) error {
+	var err error
+	for _, opt := range opts {
+		err = getOptOk(t, sarr, opt)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 /*
@@ -1561,6 +1626,7 @@ func Test_parser_A026(t *testing.T) {
 	var parser *ExtArgsParse
 	var options *ExtArgsOptions
 	var sarr []string
+	var opts []*ExtKeyParse
 	beforeParser(t)
 	options, err = NewExtArgsOptions(`{"prog" : "cmd1"}`)
 	check_equal(t, err, nil)
@@ -1569,6 +1635,19 @@ func Test_parser_A026(t *testing.T) {
 	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
 	check_equal(t, err, nil)
 	sarr = getCmdHelp(parser, "")
-	sarr = sarr
+	opts, err = parser.GetCmdOpts("")
+	check_equal(t, err, nil)
+	err = checkAllOptsHelp(t, sarr, opts)
+	check_equal(t, err, nil)
+	sarr = getCmdHelp(parser, "rdep")
+	opts, err = parser.GetCmdOpts("rdep")
+	check_equal(t, err, nil)
+	err = checkAllOptsHelp(t, sarr, opts)
+	check_equal(t, err, nil)
+	sarr = getCmdHelp(parser, "rdep.ip")
+	opts, err = parser.GetCmdOpts("rdep.ip")
+	check_equal(t, err, nil)
+	err = checkAllOptsHelp(t, sarr, opts)
+	check_equal(t, err, nil)
 	return
 }

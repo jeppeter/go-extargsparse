@@ -1806,7 +1806,6 @@ func Test_parser_A029(t *testing.T) {
 	check_equal(t, sarr, []string{"no help information"})
 	return
 }
-*/
 
 func Test_parser_A030(t *testing.T) {
 	var loads = `        {
@@ -1818,7 +1817,7 @@ func Test_parser_A030(t *testing.T) {
             "$port|p" : {
                 "value" : 3000,
                 "type" : "int",
-                "nargs" : 1 , 
+                "nargs" : 1 ,
                 "helpinfo" : "port to connect"
             },
             "dep<dep_handler>!opt=cc!" : {
@@ -1866,5 +1865,33 @@ func Test_parser_A030(t *testing.T) {
 	flag, err = parser.GetCmdKey("nosuch")
 	check_equal(t, err, nil)
 	check_equal(t, flag, (*ExtKeyParse)(nil))
+	return
+}
+*/
+
+func Test_parser_A031(t *testing.T) {
+	var loads = `        {
+            "verbose|v" : "+",
+            "catch|C## to not catch the exception ##" : true,
+            "input|i## to specify input default(stdin)##" : null,
+            "$caption## set caption ##" : "runcommand",
+            "test|t##to test mode##" : false,
+            "release|R##to release test mode##" : false,
+            "$" : "*"
+        }`
+	var err error
+	var parser *ExtArgsParse
+	var params []string
+	var args *NameSpaceEx
+	beforeParser(t)
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	check_equal(t, err, nil)
+	params = []string{"--test"}
+	args, err = parser.ParseCommandLine(params, nil)
+	check_equal(t, err, nil)
+	check_equal(t, args.GetBool("test"), true)
+	check_equal(t, args.GetArray("args"), []string{})
 	return
 }

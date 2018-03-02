@@ -60,7 +60,9 @@ func findFuncWithName(name string) (uintptr, error) {
 		for i, ftab := range moduleData.ftab {
 			if i < (len(moduleData.ftab) - 1) {
 				f := (*runtime.Func)(unsafe.Pointer(&moduleData.pclntable[ftab.funcoff]))
+				keyDebug("[%s] [%s]",f.Name(),name)
 				if f.Name() == name {
+					keyDebug("[%s] [%s]",f.Name(),name)
 					return f.Entry(), nil
 				}
 			}

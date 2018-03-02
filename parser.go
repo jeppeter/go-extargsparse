@@ -1204,8 +1204,10 @@ func (self *ExtArgsParse) callOptMethodFunc(ns *NameSpaceEx, validx int, keycls 
 
 func (self *ExtArgsParse) callKeyOptMethodFunc(ns *NameSpaceEx, validx int, keycls *ExtKeyParse, params []string) (step int, err error) {
 	var callfunc func(ns *NameSpaceEx, valid int, keycls *ExtKeyParse, params []string) (step int, err error)
+	self.Trace("get [%s]", keycls.Attr("optparse"))
 	err = self.GetFuncPtr(keycls.Attr("optparse"), &callfunc)
 	if err != nil {
+		err = fmt.Errorf("%s",format_error("find [%s] error [%s]", keycls.Attr("optparse"), err.Error()))
 		return 0, err
 	}
 	return callfunc(ns, validx, keycls, params)

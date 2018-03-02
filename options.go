@@ -30,8 +30,8 @@ var opt_default_VALUE = map[string]interface{}{
 	"parseall":       true,
 	"screenwidth":    80,
 	"flagnochange":   false,
-	"varuppercase":   true,
-	"funcuppercase":  true,
+	VAR_UPPER_CASE:   true,
+	FUNC_UPPER_CASE:  true,
 }
 
 func (p *ExtArgsOptions) SetValue(k string, v interface{}) error {

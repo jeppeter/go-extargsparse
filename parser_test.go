@@ -1,9 +1,7 @@
 package extargsparse
 
 import (
-	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
@@ -41,33 +39,6 @@ func beforeParser(t *testing.T) {
 	return
 }
 
-func makeWriteTempFileInner(s string) (fname string, err error) {
-	var f *os.File
-	f, err = ioutil.TempFile("", "tmpfile")
-	if err != nil {
-
-		return "", err
-	}
-	defer f.Close()
-	_, err = f.WriteString(s)
-	if err != nil {
-		return "", err
-	}
-	return f.Name(), nil
-}
-
-func makeWriteTempFile(s string) string {
-	var err error
-	var fname string
-	for {
-		fname, err = makeWriteTempFileInner(s)
-		if err == nil {
-			return fname
-		}
-	}
-	return ""
-}
-
 func assertGetOpt(opts []*ExtKeyParse, optdest string) *ExtKeyParse {
 	for _, curopt := range opts {
 		if !curopt.IsFlag() {
@@ -103,29 +74,6 @@ func safeRemoveFile(fname string, notice string, ok bool) {
 			keyDebug("%s %s", notice, fname)
 		}
 	}
-}
-
-type stringIO struct {
-	IoWriter
-	obuf *bytes.Buffer
-}
-
-func newStringIO() *stringIO {
-	p := &stringIO{}
-	p.obuf = bytes.NewBufferString("")
-	return p
-}
-
-func (self *stringIO) Write(data []byte) (int, error) {
-	return self.obuf.Write(data)
-}
-
-func (self *stringIO) WriteString(s string) (int, error) {
-	return self.obuf.WriteString(s)
-}
-
-func (self *stringIO) String() string {
-	return self.obuf.String()
 }
 
 func getCmdHelp(parser *ExtArgsParse, cmdname string) []string {
@@ -659,7 +607,7 @@ func Test_parser_A007_2(t *testing.T) {
 	var options *ExtArgsOptions
 	var p *parserTest7
 	beforeParser(t)
-	options, err = NewExtArgsOptions(`{"varuppercase" : false}`)
+	options, err = NewExtArgsOptions(fmt.Sprintf(`{"%s" : false}`,VAR_UPPER_CASE))
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(options, nil)
 	check_equal(t, err, nil)
@@ -740,7 +688,7 @@ func Test_parser_A008_2(t *testing.T) {
 	var p *parserTest8
 	var options *ExtArgsOptions
 	beforeParser(t)
-	options, err = NewExtArgsOptions(`{"varuppercase" : false}`)
+	options, err = NewExtArgsOptions(fmt.Sprintf(`{"%s" : false}`, VAR_UPPER_CASE))
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(options, nil)
 	beforeParser(t)
@@ -827,7 +775,7 @@ func Test_parser_A009_2(t *testing.T) {
 	var p *parserTest9
 	var options *ExtArgsOptions
 	beforeParser(t)
-	options, err = NewExtArgsOptions(`{"varuppercase" : false}`)
+	options, err = NewExtArgsOptions(fmt.Sprintf(`{"%s" : false}`,VAR_UPPER_CASE))
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(options, nil)
 	check_equal(t, err, nil)

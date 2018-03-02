@@ -1395,7 +1395,7 @@ func (self *ExtArgsParse) setDefaultValue(ns *NameSpaceEx) error {
 }
 
 func (self *ExtArgsParse) varUcFirst(name string) string {
-	if self.options.GetBool("varuppercase") {
+	if self.options.GetBool(VAR_UPPER_CASE) {
 		return ucFirst(name)
 	}
 	return name
@@ -1595,7 +1595,7 @@ func (self *ExtArgsParse) setStructPart(ns *NameSpaceEx, ostruct interface{}) er
 }
 
 func (self *ExtArgsParse) funcUcFirst(name string) string {
-	if self.options.GetBool("funcuppercase") {
+	if self.options.GetBool(FUNC_UPPER_CASE) {
 		return ucFirst(name)
 	}
 	return name

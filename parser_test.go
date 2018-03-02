@@ -3,6 +3,7 @@ package extargsparse
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
@@ -121,6 +122,17 @@ func checkAllOptsHelp(t *testing.T, sarr []string, opts []*ExtKeyParse) error {
 		}
 	}
 	return nil
+}
+func joinFile(a ...string) string {
+	var retf string
+	var err error
+	retf = filepath.Join(a...)
+	retf, err = filepath.Abs(retf)
+	if err != nil {
+		keyDebug("get [%s] err[%s]", retf, err.Error())
+		return ""
+	}
+	return retf
 }
 
 /*
@@ -2173,7 +2185,6 @@ func Test_parser_A039(t *testing.T) {
 	check_equal(t, args.GetInt("setupsectsoffset"), 0x612)
 	return
 }
-*/
 
 type parserTest40 struct {
 	Tce_mirror       string
@@ -2247,5 +2258,63 @@ func Test_parser_A040(t *testing.T) {
 	check_equal(t, p.Tce_listsfile, "")
 	check_equal(t, p.Tce_maxtries, 5)
 	check_equal(t, p.Tce_timeout, 10)
+	return
+}
+*/
+
+func Test_parser_A041(t *testing.T) {
+	var err error
+	var parser *ExtArgsParse
+	var loads string
+	var loads_fmt = `        {
+            "countryname|N" : "CN",
+            "statename|S" : "ZJ",
+            "localityname" : "HZ",
+            "organizationname|O" : ["BT"],
+            "organizationunitname" : "BT R&D",
+            "commonname|C" : "bingte.com",
+            "+ssl" : {
+                "chain" : true,
+                "dir" : "%s",
+                "bits" : 4096,
+                "md" : "sha256",
+                "utf8" : true,
+                "name" : "ipxe",
+                "days" : 3650,
+                "crl-days": 365,
+                "emailaddress" : "bt@bingte.com",
+                "aia_url" : "http://bingte.com/sec/aia",
+                "crl_url" : "http://bingte.com/sec/crl",
+                "ocsp_url" : "http://bingte.com/sec/ocsp",
+                "dns_url" : ["bingte.com"],
+                "excluded_ip" : ["0.0.0.0/0.0.0.0","0:0:0:0:0:0:0:0/0:0:0:0:0:0:0:0"],
+                "password|P" : null,
+                "copy_extensions" : "none",
+                "subca" : false,
+                "comment": ""
+            }
+        }`
+	var args *NameSpaceEx
+	var fdir string
+	var ok bool = false
+	var jsonfile string
+	beforeParser(t)
+	fdir = getCallerFilename(1)
+	check_not_equal(t, fdir, "")
+	fdir = joinFile(filepath.Dir(fdir), "certs")
+	check_not_equal(t, fdir, "")
+	fdir = strings.Replace(fdir, "\\", "\\\\", -1)
+	loads = fmt.Sprintf(loads_fmt, fdir)
+
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	check_equal(t, err, nil)
+	jsonfile = makeWriteTempFile(`{"emailaddress" : "unit@bingte.com","organizationname" : "BT RD","ssl" :{ "dir" : "./certs/bingte","name" : "bingte","subca" : true,"copy_extensions" : "copy","days" : 375,"crl_days" : 30,"bits" : 4096}}`)
+	defer func() { safeRemoveFile(jsonfile, "jsonfile", ok) }()
+	args, err = parser.ParseCommandLine([]string{"--json", jsonfile}, parser)
+	check_not_equal(t, err, nil)
+	args = args
+	ok = true
 	return
 }

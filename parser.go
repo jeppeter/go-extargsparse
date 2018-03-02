@@ -814,7 +814,7 @@ func (self *ExtArgsParse) jsonValueBase(ns *NameSpaceEx, opt *ExtKeyParse, value
 			err = self.setFloatValue(ns, opt, float64(value.(float64)))
 		case string:
 			if opt.TypeName() != "string" && opt.TypeName() != "jsonfile" {
-				return fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), value))
+				return fmt.Errorf("%s", format_error("[%s] [%s] not for [%v] set", opt.TypeName(), opt.Optdest(), value))
 			}
 			self.Trace("set [%s] [%v]", opt.Optdest(), value)
 			ns.SetValue(opt.Optdest(), value)

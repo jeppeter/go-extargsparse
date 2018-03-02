@@ -2125,7 +2125,6 @@ func Test_parser_A037(t *testing.T) {
 	check_equal(t, opts[4].TypeName(), "help")
 	return
 }
-*/
 
 func Test_parser_A038(t *testing.T) {
 	var err error
@@ -2146,5 +2145,107 @@ func Test_parser_A038(t *testing.T) {
 	check_equal(t, err, nil)
 	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
 	check_not_equal(t, err, nil)
+	return
+}
+
+func Test_parser_A039(t *testing.T) {
+	var err error
+	var parser *ExtArgsParse
+	var loads = `        {
+            "verbose|v" : "+",
+            "kernel|K" : "/boot/",
+            "initrd|I" : "/boot/",
+            "encryptfile|e" : null,
+            "encryptkey|E" : null,
+            "setupsectsoffset" : 451
+        }`
+	var args *NameSpaceEx
+	beforeParser(t)
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	check_equal(t, err, nil)
+	os.Setenv("EXTARGS_VERBOSE", "4")
+	os.Setenv("EXTARGS_SETUPSECTSOFFSET", "0x612")
+	args, err = parser.ParseCommandLine([]string{}, nil)
+	check_equal(t, err, nil)
+	check_equal(t, args.GetInt("verbose"), 4)
+	check_equal(t, args.GetInt("setupsectsoffset"), 0x612)
+	return
+}
+*/
+
+type parserTest40 struct {
+	Tce_mirror       string
+	Tce_root         string
+	Tce_tceversion   string
+	Tce_wget         string
+	Tce_cat          string
+	Tce_rm           string
+	Tce_sudoprefix   string
+	Tce_optional_dir string
+	Tce_trymode      bool
+	Tce_platform     string
+	Tce_mount        string
+	Tce_umount       string
+	Tce_chroot       string
+	Tce_chown        string
+	Tce_mkdir        string
+	Tce_rollback     bool
+	Tce_cp           string
+	Tce_jsonfile     string
+	Tce_perspace     int
+	Tce_depmapfile   string
+	Tce_timeout      int
+	Tce_listsfile    string
+	Tce_maxtries     int
+	Args             []string
+}
+
+func Test_parser_A040(t *testing.T) {
+	var err error
+	var parser *ExtArgsParse
+	var loads = `        {
+            "+tce": {
+                "mirror": "http://repo.tinycorelinux.net",
+                "root": "/",
+                "tceversion": "7.x",
+                "wget": "wget",
+                "cat": "cat",
+                "rm": "rm",
+                "sudoprefix": "sudo",
+                "optional_dir": "/cde",
+                "trymode": false,
+                "platform": "x86_64",
+                "mount": "mount",
+                "umount": "umount",
+                "chroot": "chroot",
+                "chown": "chown",
+                "chmod": "chmod",
+                "mkdir": "mkdir",
+                "rollback": true,
+                "cp": "cp",
+                "jsonfile": null,
+                "perspace": 3,
+                "depmapfile": null,
+                "timeout": 10,
+                "listsfile": null,
+                "maxtries": 5
+            }
+        }`
+	var p *parserTest40
+	beforeParser(t)
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	check_equal(t, err, nil)
+	p = &parserTest40{}
+	_, err = parser.ParseCommandLineEx([]string{"--tce-root", "/home/"}, nil, p, nil)
+	check_equal(t, err, nil)
+	check_equal(t, p.Tce_mirror, "http://repo.tinycorelinux.net")
+	check_equal(t, p.Tce_root, "/home/")
+	check_equal(t, p.Tce_listsfile, "")
+	check_equal(t, p.Tce_maxtries, 5)
+	check_equal(t, p.Tce_timeout, 10)
 	return
 }

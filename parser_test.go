@@ -2406,19 +2406,19 @@ func Test_parser_A044(t *testing.T) {
 }
 */
 
-func debug_set_2_args(ns *NameSpaceEx,validx int,keycls *ExtKeyParse,params []string) (step int, err error) {
+func Debug_set_2_args(ns *NameSpaceEx, validx int, keycls *ExtKeyParse, params []string) (step int, err error) {
 	var sarr []string
 	if ns == nil {
-		return 0,nil
+		return 0, nil
 	}
 	if (validx + 2) > len(params) {
-		return 0,fmt.Errorf("%s",format_error("[%d+2] > len(%d) %v",validx,len(params),params))
+		return 0, fmt.Errorf("%s", format_error("[%d+2] > len(%d) %v", validx, len(params), params))
 	}
 	sarr = ns.GetArray(keycls.Optdest())
-	sarr = append(sarr,params[validx])
-	sarr = append(sarr,params[(validx + 1)])
-	ns.SetValue(keycls.Optdest(),sarr)
-	return 2,nil
+	sarr = append(sarr, params[validx])
+	sarr = append(sarr, params[(validx+1)])
+	ns.SetValue(keycls.Optdest(), sarr)
+	return 2, nil
 }
 
 func Test_parser_A045(t *testing.T) {
@@ -2428,7 +2428,7 @@ func Test_parser_A045(t *testing.T) {
             "verbose|v" : "+",
             "kernel|K" : "/boot/",
             "initrd|I" : "/boot/",
-            "pair|P!optparse=%s.debug_set_2_args!" : [],
+            "pair|P!optparse=%s.Debug_set_2_args!" : [],
             "encryptfile|e" : null,
             "encryptkey|E" : null,
             "setupsectsoffset" : 663,
@@ -2436,14 +2436,14 @@ func Test_parser_A045(t *testing.T) {
                 "$" : "+"
             }
         }`
-    var loads string
+	var loads string
 	var args *NameSpaceEx
 	var options *ExtArgsOptions
 	var pkgname string
 	beforeParser(t)
-	debug_set_2_args(nil,0,nil,[]string{})
-	pkgname = getCallerPackage(1)
-	check_not_equal(t,pkgname,"")
+	Debug_set_2_args(nil, 0, nil, []string{})
+	pkgname = getCallerPackage(0)
+	check_not_equal(t, pkgname, "")
 	loads = fmt.Sprintf(loads_fmt, pkgname)
 	options, err = NewExtArgsOptions(`{"parseall": true,"longprefix" : "++", "shortprefix" : "+"}`)
 	check_equal(t, err, nil)
@@ -2451,10 +2451,10 @@ func Test_parser_A045(t *testing.T) {
 	check_equal(t, err, nil)
 	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
 	check_equal(t, err, nil)
-	args, err = parser.ParseCommandLine([]string{"+K","kernel","++pair","initrd","cc","dd","+E","encryptkey","+e","encryptfile","ipxe"}, nil)
+	args, err = parser.ParseCommandLine([]string{"+K", "kernel", "++pair", "initrd", "cc", "dd", "+E", "encryptkey", "+e", "encryptfile", "ipxe"}, nil)
 	check_equal(t, err, nil)
-	check_equal(t, args.GetString("subcommand"),"ipxe")
-	check_equal(t, args.GetArray("subnargs"),[]string{"cc","dd"})
-	check_equal(t, args.GetArray("pair"),[]string{"initrd","cc"})
+	check_equal(t, args.GetString("subcommand"), "ipxe")
+	check_equal(t, args.GetArray("pair"), []string{"initrd", "cc"})
+	check_equal(t, args.GetArray("subnargs"), []string{"dd"})
 	return
 }

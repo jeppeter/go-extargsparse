@@ -64,7 +64,7 @@ func parseAttr(attr string) (kattr map[string]string, err error) {
 	}
 
 	kattr = make(map[string]string)
-	splitstrings = splitexpr.Split(lattr, -1)
+	splitstrings = splitexpr.Split(attr, -1)
 	for _, curs = range splitstrings {
 		if strings.HasPrefix(curs, ATTR_SPLIT_EQUAL) || curs == "" {
 			continue

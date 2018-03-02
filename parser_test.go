@@ -1977,7 +1977,6 @@ func Test_parser_A033(t *testing.T) {
 	}
 	return
 }
-*/
 
 func Test_parser_A034(t *testing.T) {
 	var err error
@@ -2004,6 +2003,69 @@ func Test_parser_A034(t *testing.T) {
 	check_equal(t, args.GetString("dep_string"), "")
 	check_equal(t, args.GetString("subcommand"), "dep")
 	check_equal(t, args.GetArray("subnargs"), []string{})
+	ok = true
+	return
+}
+*/
+
+func Test_parser_A035(t *testing.T) {
+	var err error
+	var parser *ExtArgsParse
+	var loads = `        {
+            "float1|f" : 3.633 ,
+            "float2" : 6422.22,
+            "float3" : 44463.23,
+            "verbose|v" : "+",
+            "dep" : {
+                "float3" : 3332.233
+            },
+            "rdep" : {
+                "ip" : {
+                    "float4" : 3377.33,
+                    "float6" : 33.22,
+                    "float7" : 0.333
+                }
+            }
+
+        }`
+	var depjson string = ""
+	var rdepjson string = ""
+	var rdepipjson string = ""
+	var jsonfile string = ""
+	var ok = false
+	var params []string
+	var args *NameSpaceEx
+	beforeParser(t)
+	depjson = makeWriteTempFile(`{"float3":33.221}`)
+	defer func() { safeRemoveFile(depjson, "depjson", ok) }()
+	rdepipjson = makeWriteTempFile(`{"ip" : { "float4" : 40.3}}`)
+	defer func() { safeRemoveFile(rdepjson, "rdepjson", ok) }()
+	jsonfile = makeWriteTempFile(`{"verbose": 30,"float3": 77.1}`)
+	defer func() { safeRemoveFile(jsonfile, "jsonfile", ok) }()
+	rdepipjson = makeWriteTempFile(`{"float7" : 11.22,"float4" : 779.2}`)
+	defer func() { safeRemoveFile(rdepipjson, "rdepipjson", ok) }()
+	os.Setenv("EXTARGSPARSE_JSON", jsonfile)
+	os.Setenv("DEP_JSON", depjson)
+	os.Setenv("RDEP_JSON", rdepjson)
+	os.Setenv("DEP_FLOAT3", fmt.Sprintf("33.52"))
+	os.Setenv("RDEP_IP_FLOAT7", fmt.Sprintf("99.3"))
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	check_equal(t, err, nil)
+	params = []string{"-vvfvv", "33.21", "rdep", "ip", "--json", jsonfile, "--rdep-ip-json", rdepipjson}
+	args, err = parser.ParseCommandLine(params, nil)
+	check_equal(t, err, nil)
+	check_equal(t, args.GetArray("subnargs"), []string{})
+	check_equal(t, args.GetString("subcommand"), "rdep.ip")
+	check_equal(t, args.GetInt("verbose"), 4)
+	check_equal(t, args.GetFloat("float1"), 33.21)
+	check_equal(t, args.GetFloat("dep_float3"), 33.52)
+	check_equal(t, args.GetFloat("float2"), 6422.22)
+	check_equal(t, args.GetFloat("float3"), 77.1)
+	check_equal(t, args.GetFloat("rdep_ip_float4"), 779.2)
+	check_equal(t, args.GetFloat("rdep_ip_float6"), 33.22)
+	check_equal(t, args.GetFloat("rdep_ip_float7"), 11.22)
 	ok = true
 	return
 }

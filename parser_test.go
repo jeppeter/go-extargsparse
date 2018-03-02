@@ -2068,7 +2068,6 @@ func Test_parser_A035(t *testing.T) {
 	ok = true
 	return
 }
-*/
 
 func Test_parser_A037(t *testing.T) {
 	var err error
@@ -2079,7 +2078,7 @@ func Test_parser_A037(t *testing.T) {
             "output|o##output c file##" : null,
             "verbose|v##verbose mode default(0)##" : "+",
             "cmdpattern|c" : "%EXTARGS_CMDSTRUCT%",
-            "optpattern|O" : "%EXTARGS_STRUCT%", 
+            "optpattern|O" : "%EXTARGS_STRUCT%",
             "structname|s" : "args_options_t",
             "funcname|F" : "debug_extargs_output",
             "releasename|R" : "release_extargs_output",
@@ -2124,5 +2123,28 @@ func Test_parser_A037(t *testing.T) {
 	check_equal(t, opts[2].Optdest(), "funcname")
 	check_equal(t, opts[3].VarName(), "funcpattern")
 	check_equal(t, opts[4].TypeName(), "help")
+	return
+}
+*/
+
+func Test_parser_A038(t *testing.T) {
+	var err error
+	var parser *ExtArgsParse
+	var loads = `        {
+            "verbose|v" : "+",
+            "kernel|K" : "/boot/",
+            "initrd|I" : "/boot/",
+            "encryptfile|e" : null,
+            "encryptkey|E" : null,
+            "setupsectsoffset" : 0x1f1,
+            "ipxe<ipxe_handler>" : {
+                "$" : "+"
+            }
+        }`
+	beforeParser(t)
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	check_not_equal(t, err, nil)
 	return
 }

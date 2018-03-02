@@ -501,8 +501,7 @@ func (self *ExtArgsParse) helpAction(ns *NameSpaceEx, validx int, keycls *ExtKey
 	if err != nil {
 		return 0, err
 	}
-
-	os.Exit(5)
+	os.Exit(0)
 	return 0, nil
 }
 

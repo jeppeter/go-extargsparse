@@ -195,6 +195,17 @@ func getCallerPackage(skip int) string {
 	return retname
 }
 
+func getCallerFilename(skip int) string {
+	/*to add skip this will give the caller package*/
+	var retname string
+	var ok bool
+	_, retname, _, ok = runtime.Caller(skip + 1)
+	if !ok {
+		return ""
+	}
+	return retname
+}
+
 func isFloatToInt(fv float64) (iv int, bret bool) {
 	var mzeros *regexp.Regexp
 	var cv *regexp.Regexp
@@ -247,4 +258,11 @@ func isFloatToInt(fv float64) (iv int, bret bool) {
 		}
 	}
 	return
+}
+
+func getExecutableName(name string) string {
+	if strings.ToLower(runtime.GOOS) == "windows" {
+		return fmt.Sprintf("%s.exe", name)
+	}
+	return name
 }

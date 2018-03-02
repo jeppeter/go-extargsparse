@@ -103,7 +103,7 @@ func (self *parserCompat) get_help_info(keycls *ExtKeyParse) string {
 		s += "to display this help information"
 	} else {
 		if keycls.IsFlag() {
-			s += fmt.Sprintf("%s set default(%s)", keycls.Optdest(), keycls.Value())
+			s += fmt.Sprintf("%s set default(%v)", keycls.Optdest(), keycls.Value())
 		} else {
 			s += fmt.Sprintf("%s command exec", keycls.CmdName())
 		}

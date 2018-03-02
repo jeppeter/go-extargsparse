@@ -3,12 +3,109 @@ package extargsparse
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
 )
+
+func copyFile(src, dst string) (err error) {
+	in, err := os.Open(src)
+	if err != nil {
+		return
+	}
+	defer in.Close()
+
+	out, err := os.Create(dst)
+	if err != nil {
+		return
+	}
+	defer func() {
+		if e := out.Close(); e != nil {
+			err = e
+		}
+	}()
+
+	_, err = io.Copy(out, in)
+	if err != nil {
+		return
+	}
+
+	err = out.Sync()
+	if err != nil {
+		return
+	}
+
+	si, err := os.Stat(src)
+	if err != nil {
+		return
+	}
+	err = os.Chmod(dst, si.Mode())
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func copyDir(src string, dst string) (err error) {
+	src = filepath.Clean(src)
+	dst = filepath.Clean(dst)
+
+	si, err := os.Stat(src)
+	if err != nil {
+		return err
+	}
+	if !si.IsDir() {
+		return fmt.Errorf("source is not a directory")
+	}
+
+	_, err = os.Stat(dst)
+	if err != nil && !os.IsNotExist(err) {
+		return
+	}
+
+	err = os.MkdirAll(dst, si.Mode())
+	if err != nil {
+		return
+	}
+
+	entries, err := ioutil.ReadDir(src)
+	if err != nil {
+		return
+	}
+
+	for _, entry := range entries {
+		if entry.Name() == "." || entry.Name() == ".." {
+			continue
+		}
+		srcPath := filepath.Join(src, entry.Name())
+		dstPath := filepath.Join(dst, entry.Name())
+
+		if entry.IsDir() {
+			err = copyDir(srcPath, dstPath)
+			if err != nil {
+				return
+			}
+		} else {
+			// Skip symlinks.
+			if entry.Mode()&os.ModeSymlink != 0 {
+				continue
+			}
+
+			err = copyFile(srcPath, dstPath)
+			if err != nil {
+				return
+			}
+		}
+	}
+
+	return
+}
 
 func check_equal(t *testing.T, orig, check interface{}) {
 	if !reflect.DeepEqual(orig, check) {
@@ -86,18 +183,66 @@ func formLine(tabs int, fmtstr string, a ...interface{}) string {
 
 type compileExec struct {
 	logObject
-	fname string
-	dname string
+	fname     string
+	dname     string
+	origfname string
+	exename   string
+	addedvars map[string]string
+	modvars   map[string]string
+	outsarr   []string
+	errsarr   []string
 }
 
 func newComileExec() *compileExec {
 	self := &compileExec{logObject: *newLogObject("extargsparse")}
 	self.fname = ""
 	self.dname = ""
+	self.origfname = ""
+	self.exename = ""
+	self.addedvars = make(map[string]string)
+	self.modvars = make(map[string]string)
+	self.outsarr = make([]string, 0)
+	self.errsarr = make([]string, 0)
 	return self
 }
 
+func (self *compileExec) resetVars() {
+	var k, v string
+	for k, _ = range self.addedvars {
+		os.Unsetenv(k)
+	}
+	self.addedvars = make(map[string]string)
+
+	for k, v = range self.modvars {
+		os.Setenv(k, v)
+	}
+	self.modvars = make(map[string]string)
+	return
+}
+
 func (self *compileExec) Release(ok bool) {
+	self.resetVars()
+	self.outsarr = make([]string, 0)
+	self.errsarr = make([]string, 0)
+
+	if len(self.exename) > 0 {
+		if ok {
+			os.Remove(self.exename)
+		} else {
+			self.Error("exe [%s]", self.exename)
+		}
+		self.exename = ""
+	}
+
+	if len(self.origfname) > 0 {
+		if ok {
+			os.Remove(self.origfname)
+		} else {
+			self.Error("origname [%s]", self.origfname)
+		}
+		self.origfname = ""
+	}
+
 	if len(self.fname) > 0 {
 		if ok {
 			os.Remove(self.fname)
@@ -231,11 +376,11 @@ func (self *compileExec) formPriority(priority interface{}) (string, error) {
 }
 
 func (self *compileExec) formNsName(tabs int, key string, nsname string, actname string) string {
-	return formLine(tabs, `fmt.Fprintf(os.Stdout,"%s=%%v", %s.%s("%s"))`, key, actname, key)
+	return formLine(tabs, `fmt.Fprintf(os.Stdout,"%s=%%v\n", %s.%s("%s"))`, key, nsname, actname, key)
 }
 
 func (self *compileExec) formSName(tabs int, key string, sname string) string {
-	return formLine(tabs, `fmt.Fprintf(os.Stdout,"%s=%%v", %s.%s)`, key, sname, key)
+	return formLine(tabs, `fmt.Fprintf(os.Stdout,"%s.%s=%%v\n", %s.%s)`, sname, key, sname, key)
 }
 
 func (self *compileExec) getStructMemberName(options *ExtArgsOptions, cmdname string, flagname string) string {
@@ -352,7 +497,7 @@ func (self *compileExec) formPrintout(tabs int, parser *ExtArgsParse, options *E
 		return "", err
 	}
 	s += curs
-	s += formLine(tabs, "if len(%s.GetString(\"subcommand\") > 0 {", nsname)
+	s += formLine(tabs, "if len(%s.GetString(\"subcommand\")) > 0 {", nsname)
 	s += self.formNsName(tabs+1, "subnargs", nsname, "GetArray")
 	s += formLine(tabs, "} else {")
 	s += self.formNsName(tabs+1, "args", nsname, "GetArray")
@@ -360,7 +505,7 @@ func (self *compileExec) formPrintout(tabs int, parser *ExtArgsParse, options *E
 	return s, nil
 }
 
-func (self *compileExec) writeScript(options string, commandline string, priority interface{}, printout bool) (string, error) {
+func (self *compileExec) writeScript(options string, commandline string, priority interface{}, printout bool, nsname, sname string) (string, error) {
 	var s string
 	var parser *ExtArgsParse
 	var err error
@@ -388,6 +533,11 @@ func (self *compileExec) writeScript(options string, commandline string, priorit
 		if err != nil {
 			return "", err
 		}
+
+		err = parser.LoadCommandLineString(commandline)
+		if err != nil {
+			return "", err
+		}
 		s += formLine(0, "")
 		s += formLine(0, "type CommandArgs struct {")
 		curs, err = self.getParserStruct(1, parser, conf, "")
@@ -401,13 +551,14 @@ func (self *compileExec) writeScript(options string, commandline string, priorit
 	s += formLine(0, "")
 	s += formLine(0, "func main() {")
 
-	s += formLine(1, "var parser *ExtArgsParse")
-	s += formLine(1, "var options *ExtArgsOptions")
+	s += formLine(1, "var parser *extargsparse.ExtArgsParse")
+	s += formLine(1, "var options *extargsparse.ExtArgsOptions")
 	s += formLine(1, "var err error")
 	s += formLine(1, "var commandline = `%s`", commandline)
 	if printout {
-		s += formLine(1, "var p *CommandArgs")
-		s += formLine(1, "p = &CommandArgs{}")
+		s += formLine(1, "var %s *extargsparse.NameSpaceEx", nsname)
+		s += formLine(1, "var %s *CommandArgs", sname)
+		s += formLine(1, "%s = &CommandArgs{}", sname)
 	}
 	s += formLine(0, "")
 	prstr, err = self.formPriority(priority)
@@ -415,7 +566,7 @@ func (self *compileExec) writeScript(options string, commandline string, priorit
 		return "", err
 	}
 	if len(options) > 0 {
-		s += formLine(1, "options, err = NewExtArgsOptions(`%s`)", options)
+		s += formLine(1, "options, err = extargsparse.NewExtArgsOptions(`%s`)", options)
 		s += formLine(1, "if err != nil {")
 		s += formLine(2, `fmt.Fprintf(os.Stderr,"can not parse [%s] error[%%s]\n", err.Error())`, options)
 		s += formLine(2, "os.Exit(3)")
@@ -423,7 +574,7 @@ func (self *compileExec) writeScript(options string, commandline string, priorit
 	} else {
 		s += formLine(1, "options = nil")
 	}
-	s += formLine(1, "parser ,err = NewExtArgsParse(options,%s)", prstr)
+	s += formLine(1, "parser ,err = extargsparse.NewExtArgsParse(options,%s)", prstr)
 	s += formLine(1, "if err != nil {")
 	s += formLine(2, `fmt.Fprintf(os.Stderr,"new args error [%%s]\n", err.Error())`)
 	s += formLine(2, "os.Exit(3)")
@@ -435,13 +586,13 @@ func (self *compileExec) writeScript(options string, commandline string, priorit
 	s += formLine(2, "os.Exit(3)")
 	s += formLine(1, "}")
 	if printout {
-		s += formLine(1, "args, err = parser.ParseCommandLineEx(nil,nil,p,parser)")
+		s += formLine(1, "%s, err = parser.ParseCommandLineEx(nil,parser,%s,nil)", nsname, sname)
 		s += formLine(1, "if err != nil {")
 		s += formLine(2, `fmt.Fprintf(os.Stderr,"parse command error [%%s]\n", err.Error())`)
 		s += formLine(2, "os.Exit(3)")
 		s += formLine(1, "}")
 
-		curs, err = self.formPrintout(1, parser, conf, "args", "p")
+		curs, err = self.formPrintout(1, parser, conf, nsname, sname)
 		if err != nil {
 			return "", err
 		}
@@ -459,14 +610,179 @@ func (self *compileExec) writeScript(options string, commandline string, priorit
 	return s, nil
 }
 
-func (self *compileExec) WriteScript(options string, commandline string, priority interface{}, printout bool) error {
-	var s string
+func (self *compileExec) makeSrcDir(copyfrom string) error {
+	var dname string
 	var err error
-	s, err = self.writeScript(options, commandline, priority, printout)
+	var f *os.File
+	if len(self.dname) > 0 || len(self.fname) > 0 || len(self.origfname) > 0 {
+		return fmt.Errorf("%s", format_error("[%s] dir not delete", self.dname))
+	}
+	dname, err = ioutil.TempDir("", "gobuild")
 	if err != nil {
 		return err
 	}
-	s = s
-
+	self.dname = dname
+	err = os.MkdirAll(filepath.Join(self.dname, "src"), os.ModeDir|0644)
+	if err != nil {
+		return fmt.Errorf("%s", format_error("can not mkdir [%s] err[%s]", filepath.Join(self.dname, "src"), err.Error()))
+	}
+	err = copyDir(copyfrom, filepath.Join(self.dname, "src", "go-extargsparse"))
+	f, err = ioutil.TempFile("", "main")
+	if err != nil {
+		return fmt.Errorf("%s", format_error("can not make temp err[%s]", err.Error()))
+	}
+	defer f.Close()
+	self.origfname = f.Name()
+	self.fname = self.origfname
+	self.fname += ".go"
 	return nil
+}
+
+func (self *compileExec) WriteScript(options string, commandline string, priority interface{}, printout bool, nsname string, sname string) error {
+	var s string
+	var err error
+	var fdir string
+	self.Release(true)
+
+	s, err = self.writeScript(options, commandline, priority, printout, nsname, sname)
+	if err != nil {
+		return err
+	}
+
+	fdir = getCallerFilename(1)
+	if len(fdir) == 0 {
+		return fmt.Errorf("%s", format_error("can not get caller"))
+	}
+
+	if len(fdir) > 0 {
+		fdir, err = filepath.Abs(filepath.Dir(fdir))
+	} else {
+		fdir, err = filepath.Abs(".")
+	}
+	if err != nil {
+		return fmt.Errorf("%s", format_error("get abs error[%s]", err.Error()))
+	}
+
+	err = self.makeSrcDir(fdir)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(self.fname, []byte(s), 0644)
+	if err != nil {
+		return fmt.Errorf("%s", format_error("write [%s] error[%s]", self.fname, err.Error()))
+	}
+
+	self.Info("write [%s]", self.fname)
+	self.Info("dname [%s]", self.dname)
+	return nil
+}
+
+func (self *compileExec) setVars(setvars map[string]string) error {
+	var k, v string
+	var oldv string
+	for k, v = range setvars {
+		oldv = os.Getenv(k)
+		if len(oldv) > 0 {
+			self.modvars[k] = oldv
+		} else {
+			self.addedvars[k] = ""
+		}
+		os.Setenv(k, v)
+	}
+	return nil
+}
+
+func (self *compileExec) removeVars(keys []string) error {
+	var c, oldv string
+	for _, c = range keys {
+		oldv = os.Getenv(c)
+		if len(oldv) > 0 {
+			self.modvars[c] = oldv
+			os.Unsetenv(c)
+		}
+	}
+	return nil
+}
+
+func (self *compileExec) RunCmd(setvars map[string]string, params ...string) error {
+	var cmdrun *exec.Cmd
+	var gobin string
+	var obuf, ebuf *bytes.Buffer
+	var err error
+	var c string
+
+	if len(self.exename) > 0 {
+		err = fmt.Errorf("%s", "already run [%s]", self.exename)
+		return err
+	}
+
+	gobin = getExecutableName("go")
+	self.exename = getExecutableName(self.origfname)
+	if len(self.fname) == 0 {
+		return fmt.Errorf("%s", format_error("not set fname yet"))
+	}
+
+	/*now to add*/
+	setvars["GOPATH"] = fmt.Sprintf("%s%c%s", self.dname, os.PathListSeparator, os.Getenv("GOPATH"))
+
+	err = self.setVars(setvars)
+	if err != nil {
+		return err
+	}
+	defer self.resetVars()
+
+	err = self.removeVars([]string{"EXTARGSPARSE_LOGLEVEL"})
+	if err != nil {
+		return err
+	}
+
+	// now we should give the export name
+
+	// now we should set the go build
+	cmdrun = exec.Command(gobin, "build", "-o", self.exename, self.fname)
+	obuf = bytes.NewBufferString("")
+	ebuf = bytes.NewBufferString("")
+	cmdrun.Stdout = obuf
+	cmdrun.Stderr = ebuf
+	err = cmdrun.Run()
+	if err != nil {
+		err = fmt.Errorf("%s", format_error("compile [%s] error [%s] output [%s]", self.fname, err.Error(), ebuf.String()))
+		return err
+	}
+
+	cmdrun = nil
+	obuf = nil
+	ebuf = nil
+	cmdrun = exec.Command(self.exename)
+	cmdrun.Args = make([]string, 0)
+	cmdrun.Args = append(cmdrun.Args, self.exename)
+	for _, c = range params {
+		cmdrun.Args = append(cmdrun.Args, c)
+	}
+	obuf = bytes.NewBufferString("")
+	ebuf = bytes.NewBufferString("")
+	cmdrun.Stdout = obuf
+	cmdrun.Stderr = ebuf
+	err = cmdrun.Run()
+	if err != nil {
+		err = fmt.Errorf("%s", format_error("run [%s] %v error [%s] output [%s]", self.exename, params, err.Error(), ebuf.String()))
+		return err
+	}
+	self.Trace("obuf [%s]", obuf.String())
+	self.outsarr = strings.Split(obuf.String(), "\n")
+	self.errsarr = strings.Split(ebuf.String(), "\n")
+	err = nil
+	obuf = nil
+	ebuf = nil
+	cmdrun = nil
+	return nil
+}
+
+func (self *compileExec) GetOut() []string {
+	return self.outsarr
+}
+
+func (self *compileExec) GetErr() []string {
+	return self.errsarr
 }

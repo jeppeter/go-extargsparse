@@ -123,7 +123,6 @@ func checkAllOptsHelp(t *testing.T, sarr []string, opts []*ExtKeyParse) error {
 	return nil
 }
 
-/*
 type parserTest1 struct {
 	Verbose int
 	Flag    bool
@@ -607,7 +606,7 @@ func Test_parser_A007_2(t *testing.T) {
 	var options *ExtArgsOptions
 	var p *parserTest7
 	beforeParser(t)
-	options, err = NewExtArgsOptions(fmt.Sprintf(`{"%s" : false}`,VAR_UPPER_CASE))
+	options, err = NewExtArgsOptions(fmt.Sprintf(`{"%s" : false}`, VAR_UPPER_CASE))
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(options, nil)
 	check_equal(t, err, nil)
@@ -775,7 +774,7 @@ func Test_parser_A009_2(t *testing.T) {
 	var p *parserTest9
 	var options *ExtArgsOptions
 	beforeParser(t)
-	options, err = NewExtArgsOptions(fmt.Sprintf(`{"%s" : false}`,VAR_UPPER_CASE))
+	options, err = NewExtArgsOptions(fmt.Sprintf(`{"%s" : false}`, VAR_UPPER_CASE))
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(options, nil)
 	check_equal(t, err, nil)
@@ -831,7 +830,7 @@ func Test_parser_A010(t *testing.T) {
 	beforeParser(t)
 
 	depjsonfile = makeWriteTempFile(`{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"}`)
-	defer safeRemoveFile(depjsonfile, "depjsonfile", ok)
+	defer func() { safeRemoveFile(depjsonfile, "depjsonfile", ok) }()
 	option, err = NewExtArgsOptions(`{"errorhandler" : "raise"}`)
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(option, nil)
@@ -887,7 +886,7 @@ func Test_parser_A011(t *testing.T) {
 	beforeParser(t)
 
 	depjsonfile = makeWriteTempFile(`{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"}`)
-	defer safeRemoveFile(depjsonfile, "depjsonfile", ok)
+	defer func() { safeRemoveFile(depjsonfile, "depjsonfile", ok) }()
 	parser, err = NewExtArgsParse(nil, nil)
 	check_equal(t, err, nil)
 	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
@@ -929,7 +928,7 @@ func Test_parser_A012(t *testing.T) {
 	beforeParser(t)
 
 	jsonfile = makeWriteTempFile(`{"dep":{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"},"port":6000,"verbose":3}`)
-	defer safeRemoveFile(jsonfile, "jsonfile", ok)
+	defer func() { safeRemoveFile(jsonfile, "jsonfile", ok) }()
 	parser, err = NewExtArgsParse(nil, nil)
 	check_equal(t, err, nil)
 	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
@@ -971,7 +970,7 @@ func Test_parser_A013(t *testing.T) {
 	beforeParser(t)
 
 	jsonfile = makeWriteTempFile(`{"dep":{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"},"port":6000,"verbose":3}`)
-	defer safeRemoveFile(jsonfile, "jsonfile", ok)
+	defer func() { safeRemoveFile(jsonfile, "jsonfile", ok) }()
 	os.Setenv("EXTARGSPARSE_JSON", jsonfile)
 	parser, err = NewExtArgsParse(nil, nil)
 	check_equal(t, err, nil)
@@ -1015,9 +1014,9 @@ func Test_parser_A014(t *testing.T) {
 	beforeParser(t)
 
 	jsonfile = makeWriteTempFile(`{"dep":{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"},"port":6000,"verbose":3}`)
-	defer safeRemoveFile(jsonfile, "jsonfile", ok)
+	defer func() { safeRemoveFile(jsonfile, "jsonfile", ok) }()
 	depjsonfile = makeWriteTempFile(`{"list":["depjson1","depjson2"]}`)
-	defer safeRemoveFile(depjsonfile, "depjsonfile", ok)
+	defer func() { safeRemoveFile(depjsonfile, "depjsonfile", ok) }()
 	os.Setenv("EXTARGSPARSE_JSON", jsonfile)
 	os.Setenv("DEP_JSON", depjsonfile)
 	parser, err = NewExtArgsParse(nil, nil)
@@ -1062,9 +1061,9 @@ func Test_parser_A015(t *testing.T) {
 	beforeParser(t)
 
 	jsonfile = makeWriteTempFile(`{"dep":{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"},"port":6000,"verbose":3}`)
-	defer safeRemoveFile(jsonfile, "jsonfile", ok)
+	defer func() { safeRemoveFile(jsonfile, "jsonfile", ok) }()
 	depjsonfile = makeWriteTempFile(`{"list":["depjson1","depjson2"]}`)
-	defer safeRemoveFile(depjsonfile, "depjsonfile", ok)
+	defer func() { safeRemoveFile(depjsonfile, "depjsonfile", ok) }()
 	os.Setenv("DEP_JSON", depjsonfile)
 	parser, err = NewExtArgsParse(nil, nil)
 	check_equal(t, err, nil)
@@ -1112,9 +1111,9 @@ func Test_parser_A016(t *testing.T) {
 	depstrval = "newval"
 	depliststr = `["depenv1","depenv2"]`
 	jsonfile = makeWriteTempFile(`{"dep":{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"},"port":6000,"verbose":3}`)
-	defer safeRemoveFile(jsonfile, "jsonfile", ok)
+	defer func() { safeRemoveFile(jsonfile, "jsonfile", ok) }()
 	depjsonfile = makeWriteTempFile(`{"list":["depjson1","depjson2"]}`)
-	defer safeRemoveFile(depjsonfile, "depjsonfile", ok)
+	defer func() { safeRemoveFile(depjsonfile, "depjsonfile", ok) }()
 	os.Setenv("EXTARGSPARSE_JSON", jsonfile)
 	os.Setenv("DEP_JSON", depjsonfile)
 
@@ -1234,9 +1233,9 @@ func Test_parser_A019(t *testing.T) {
 	depstrval = "newval"
 	depliststr = `["depenv1","depenv2"]`
 	jsonfile = makeWriteTempFile(`{"dep":{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"},"port":6000,"verbose":3}`)
-	defer safeRemoveFile(jsonfile, "jsonfile", ok)
+	defer func() { safeRemoveFile(jsonfile, "jsonfile", ok) }()
 	depjsonfile = makeWriteTempFile(`{"list":["depjson1","depjson2"]}`)
-	defer safeRemoveFile(depjsonfile, "depjsonfile", ok)
+	defer func() { safeRemoveFile(depjsonfile, "depjsonfile", ok) }()
 	os.Setenv("EXTARGSPARSE_JSON", jsonfile)
 	os.Setenv("DEP_JSON", depjsonfile)
 
@@ -1506,11 +1505,11 @@ func Test_parser_A025(t *testing.T) {
 	beforeParser(t)
 
 	jsonfile = makeWriteTempFile(`{ "http" : { "url" : "http://www.github.com"} ,"dep":{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"},"port":6000,"verbose":3}`)
-	defer safeRemoveFile(jsonfile, "jsonfile", ok)
+	defer func() { safeRemoveFile(jsonfile, "jsonfile", ok) }()
 	depjsonfile = makeWriteTempFile(`{"list":["depjson1","depjson2"]}`)
-	defer safeRemoveFile(depjsonfile, "depjsonfile", ok)
+	defer func() { safeRemoveFile(depjsonfile, "depjsonfile", ok) }()
 	rdepjsonfile = makeWriteTempFile(`{"ip": {"list":["rdepjson1","rdepjson3"],"verbose": 5}}`)
-	defer safeRemoveFile(rdepjsonfile, "rdepjsonfile", ok)
+	defer func() { safeRemoveFile(rdepjsonfile, "rdepjsonfile", ok) }()
 
 	os.Setenv("EXTARGSPARSE_JSON", jsonfile)
 	os.Setenv("DEP_JSON", depjsonfile)
@@ -1815,7 +1814,6 @@ func Test_parser_A030(t *testing.T) {
 	check_equal(t, flag, (*ExtKeyParse)(nil))
 	return
 }
-*/
 
 func Test_parser_A031(t *testing.T) {
 	var loads = `        {
@@ -1841,5 +1839,106 @@ func Test_parser_A031(t *testing.T) {
 	check_equal(t, err, nil)
 	check_equal(t, args.GetBool("test"), true)
 	check_equal(t, args.GetArray("args"), []string{})
+	return
+}
+
+func Test_parser_A032(t *testing.T) {
+	var loads = `        {
+            "verbose|v" : "+",
+            "+http" : {
+                "url|u" : "http://www.google.com",
+                "visual_mode|V": false
+            },
+            "$port|p" : {
+                "value" : 3000,
+                "type" : "int",
+                "nargs" : 1 , 
+                "helpinfo" : "port to connect"
+            },
+            "dep<dep_handler>!opt=cc!" : {
+                "list|l!attr=cc;optfunc=list_opt_func!" : [],
+                "string|s" : "s_var",
+                "$" : "+",
+                "ip" : {
+                    "verbose" : "+",
+                    "list" : [],
+                    "cc" : []
+                }
+            },
+            "rdep<rdep_handler>" : {
+                "ip" : {
+                    "verbose" : "+",
+                    "list" : [],
+                    "cc" : []
+                }
+            }
+        }`
+	var err error
+	var ok bool = false
+	var cl *compileExec
+	var setvars map[string]string
+	var parser *ExtArgsParse
+	var opts []*ExtKeyParse
+	beforeParser(t)
+	cl = newComileExec()
+	check_not_equal(t, cl, (*compileExec)(nil))
+	defer func() {
+		if cl != nil {
+			cl.Release(ok)
+		}
+		cl = nil
+	}()
+	err = cl.WriteScript("{}", loads, nil, false, "ns", "pp")
+	check_equal(t, err, nil)
+	setvars = make(map[string]string)
+	err = cl.RunCmd(setvars, "-h")
+	check_equal(t, err, nil)
+
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(loads)
+	check_equal(t, err, nil)
+
+	opts, err = parser.GetCmdOpts("")
+	check_equal(t, err, nil)
+
+	err = checkAllOptsHelp(t, cl.GetOut(), opts)
+	check_equal(t, err, nil)
+	cl.Release(true)
+	cl = nil
+
+	cl = newComileExec()
+	check_not_equal(t, cl, (*compileExec)(nil))
+	err = cl.WriteScript("{}", loads, nil, false, "ns", "pp")
+	check_equal(t, err, nil)
+	setvars = make(map[string]string)
+	err = cl.RunCmd(setvars, "dep", "-h")
+	check_equal(t, err, nil)
+
+	opts, err = parser.GetCmdOpts("dep")
+	check_equal(t, err, nil)
+
+	err = checkAllOptsHelp(t, cl.GetOut(), opts)
+	check_equal(t, err, nil)
+	cl.Release(true)
+	cl = nil
+
+	cl = newComileExec()
+	check_not_equal(t, cl, (*compileExec)(nil))
+	err = cl.WriteScript("{}", loads, nil, false, "ns", "pp")
+	check_equal(t, err, nil)
+	setvars = make(map[string]string)
+	err = cl.RunCmd(setvars, "rdep", "-h")
+	check_equal(t, err, nil)
+
+	opts, err = parser.GetCmdOpts("rdep")
+	check_equal(t, err, nil)
+
+	err = checkAllOptsHelp(t, cl.GetOut(), opts)
+	check_equal(t, err, nil)
+	cl.Release(true)
+	cl = nil
+
+	ok = true
 	return
 }

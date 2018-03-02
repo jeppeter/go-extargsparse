@@ -135,7 +135,6 @@ func joinFile(a ...string) string {
 	return retf
 }
 
-/*
 type parserTest1 struct {
 	Verbose int
 	Flag    bool
@@ -145,6 +144,7 @@ type parserTest1 struct {
 	Args    []string
 }
 
+/*
 func Test_parser_A001(t *testing.T) {
 	var loads = `        {
             "verbose|v##increment verbose mode##" : "+",

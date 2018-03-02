@@ -1,7 +1,6 @@
 package extargsparse
 
 /*
-
 import (
 	"encoding/json"
 	"fmt"

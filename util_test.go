@@ -109,13 +109,13 @@ func copyDir(src string, dst string) (err error) {
 
 func check_equal(t *testing.T, orig, check interface{}) {
 	if !reflect.DeepEqual(orig, check) {
-		t.Fatalf("%s[%s] orig [%v] != check[%v]", format_out_stack(2), t.Name(), orig, check)
+		t.Fatalf("%s orig [%v] != check[%v]", format_out_stack(2),  orig, check)
 	}
 }
 
 func check_not_equal(t *testing.T, orig, check interface{}) {
 	if reflect.DeepEqual(orig, check) {
-		t.Fatalf("%s[%s] orig [%v] == check[%v]", format_out_stack(2), t.Name(), orig, check)
+		t.Fatalf("%s orig [%v] == check[%v]", format_out_stack(2),  orig, check)
 	}
 }
 

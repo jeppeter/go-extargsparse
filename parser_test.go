@@ -135,6 +135,29 @@ func joinFile(a ...string) string {
 	return retf
 }
 
+func debug_set_2_args(ns *NameSpaceEx, validx int, keycls *ExtKeyParse, params []string) (step int, err error) {
+	var sarr []string
+	if ns == nil {
+		return 0, nil
+	}
+	if (validx + 2) > len(params) {
+		return 0, fmt.Errorf("%s", format_error("[%d+2] > len(%d) %v", validx, len(params), params))
+	}
+	sarr = ns.GetArray(keycls.Optdest())
+	sarr = append(sarr, params[validx])
+	sarr = append(sarr, params[(validx+1)])
+	ns.SetValue(keycls.Optdest(), sarr)
+	return 2, nil
+}
+
+func debug_opthelp_set(keycls *ExtKeyParse) string {
+	if keycls == nil {
+		return ""
+	}
+	return fmt.Sprintf("opthelp function set [%s] default value (%s)", keycls.Optdest(), keycls.Value())
+}
+
+/*
 type parserTest1 struct {
 	Verbose int
 	Flag    bool
@@ -144,7 +167,6 @@ type parserTest1 struct {
 	Args    []string
 }
 
-/*
 func Test_parser_A001(t *testing.T) {
 	var loads = `        {
             "verbose|v##increment verbose mode##" : "+",
@@ -2404,22 +2426,7 @@ func Test_parser_A044(t *testing.T) {
 	check_equal(t, args.GetArray("subnargs"),[]string{"cc","dd"})
 	return
 }
-*/
 
-func Debug_set_2_args(ns *NameSpaceEx, validx int, keycls *ExtKeyParse, params []string) (step int, err error) {
-	var sarr []string
-	if ns == nil {
-		return 0, nil
-	}
-	if (validx + 2) > len(params) {
-		return 0, fmt.Errorf("%s", format_error("[%d+2] > len(%d) %v", validx, len(params), params))
-	}
-	sarr = ns.GetArray(keycls.Optdest())
-	sarr = append(sarr, params[validx])
-	sarr = append(sarr, params[(validx+1)])
-	ns.SetValue(keycls.Optdest(), sarr)
-	return 2, nil
-}
 
 func Test_parser_A045(t *testing.T) {
 	var err error
@@ -2428,7 +2435,7 @@ func Test_parser_A045(t *testing.T) {
             "verbose|v" : "+",
             "kernel|K" : "/boot/",
             "initrd|I" : "/boot/",
-            "pair|P!optparse=%s.Debug_set_2_args!" : [],
+            "pair|P!optparse=%s.debug_set_2_args!" : [],
             "encryptfile|e" : null,
             "encryptkey|E" : null,
             "setupsectsoffset" : 663,
@@ -2441,7 +2448,7 @@ func Test_parser_A045(t *testing.T) {
 	var options *ExtArgsOptions
 	var pkgname string
 	beforeParser(t)
-	Debug_set_2_args(nil, 0, nil, []string{})
+	debug_set_2_args(nil, 0, nil, []string{})
 	pkgname = getCallerPackage(0)
 	check_not_equal(t, pkgname, "")
 	loads = fmt.Sprintf(loads_fmt, pkgname)
@@ -2456,5 +2463,52 @@ func Test_parser_A045(t *testing.T) {
 	check_equal(t, args.GetString("subcommand"), "ipxe")
 	check_equal(t, args.GetArray("pair"), []string{"initrd", "cc"})
 	check_equal(t, args.GetArray("subnargs"), []string{"dd"})
+	return
+}
+*/
+
+func Test_parser_A046(t *testing.T) {
+	var err error
+	var parser *ExtArgsParse
+	var loads_fmt = `        {
+            "verbose|v" : "+",
+            "kernel|K" : "/boot/",
+            "initrd|I" : "/boot/",
+            "pair|P!optparse=%s.debug_set_2_args;opthelp=%s.debug_opthelp_set!" : [],
+            "encryptfile|e" : null,
+            "encryptkey|E" : null,
+            "setupsectsoffset" : 663,
+            "ipxe" : {
+                "$" : "+"
+            }
+        }`
+	var loads string
+	var options *ExtArgsOptions
+	var pkgname string
+	var sarr []string
+	var expr *regexp.Regexp
+	var ok bool = false
+	var c string
+	beforeParser(t)
+	debug_set_2_args(nil, 0, nil, []string{})
+	debug_opthelp_set(nil)
+	pkgname = getCallerPackage(0)
+	check_not_equal(t, pkgname, "")
+	loads = fmt.Sprintf(loads_fmt, pkgname, pkgname)
+	options, err = NewExtArgsOptions(`{"parseall": true,"longprefix" : "++", "shortprefix" : "+"}`)
+	check_equal(t, err, nil)
+	parser, err = NewExtArgsParse(options, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	check_equal(t, err, nil)
+	sarr = getCmdHelp(parser, "")
+	expr = regexp.MustCompile(`.*opthelp function set \[pair\].*`)
+	for _, c = range sarr {
+		if expr.MatchString(c) {
+			ok = true
+			break
+		}
+	}
+	check_equal(t, ok, true)
 	return
 }

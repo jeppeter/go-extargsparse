@@ -2006,7 +2006,6 @@ func Test_parser_A034(t *testing.T) {
 	ok = true
 	return
 }
-*/
 
 func Test_parser_A035(t *testing.T) {
 	var err error
@@ -2067,5 +2066,63 @@ func Test_parser_A035(t *testing.T) {
 	check_equal(t, args.GetFloat("rdep_ip_float6"), 33.22)
 	check_equal(t, args.GetFloat("rdep_ip_float7"), 11.22)
 	ok = true
+	return
+}
+*/
+
+func Test_parser_A037(t *testing.T) {
+	var err error
+	var parser *ExtArgsParse
+	var loads = `        {
+            "jsoninput|j##input json default stdin##" : null,
+            "input|i##input file to get default nothing - for stdin##" : null,
+            "output|o##output c file##" : null,
+            "verbose|v##verbose mode default(0)##" : "+",
+            "cmdpattern|c" : "%EXTARGS_CMDSTRUCT%",
+            "optpattern|O" : "%EXTARGS_STRUCT%", 
+            "structname|s" : "args_options_t",
+            "funcname|F" : "debug_extargs_output",
+            "releasename|R" : "release_extargs_output",
+            "funcpattern" : "%EXTARGS_DEBUGFUNC%",
+            "prefix|p" : "",
+            "test" : {
+                "$" : 0
+            },
+            "optstruct" : {
+                "$" : 0
+            },
+            "cmdstruct" : {
+                "$" : 0
+            },
+            "debugfunc" : {
+                "$" : 0
+            },
+            "all" : {
+                "$" : 0
+            }
+        }`
+	var subcmds []string
+	var opts []*ExtKeyParse
+	beforeParser(t)
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	check_equal(t, err, nil)
+	subcmds, err = parser.GetSubCommands("")
+	check_equal(t, err, nil)
+	check_equal(t, len(subcmds), 5)
+	check_equal(t, subcmds[0], "all")
+	check_equal(t, subcmds[1], "cmdstruct")
+	check_equal(t, subcmds[2], "debugfunc")
+	check_equal(t, subcmds[3], "optstruct")
+	check_equal(t, subcmds[4], "test")
+	opts, err = parser.GetCmdOpts("")
+	check_equal(t, err, nil)
+	check_equal(t, len(opts), 14)
+	check_equal(t, opts[0].FlagName(), "$")
+	check_equal(t, opts[1].Longopt(), "--cmdpattern")
+	check_equal(t, opts[2].Optdest(), "funcname")
+	check_equal(t, opts[3].VarName(), "funcpattern")
+	check_equal(t, opts[4].TypeName(), "help")
 	return
 }

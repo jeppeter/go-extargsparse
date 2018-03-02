@@ -1790,7 +1790,13 @@ func (self *ExtArgsParse) GetCmdKey(cmdname string) (*ExtKeyParse, error) {
 
 func (self *ExtArgsParse) sortCmdOpts(opts []*ExtKeyParse) []*ExtKeyParse {
 	sort.Slice(opts, func(i, j int) bool {
-		return opts[i].CmdName() < opts[j].CmdName()
+		if opts[i].TypeName() == "args" {
+			return true
+		}
+		if opts[j].TypeName() == "args" {
+			return false
+		}
+		return opts[i].Optdest() < opts[j].Optdest()
 	})
 	return opts
 }

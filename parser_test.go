@@ -123,6 +123,7 @@ func checkAllOptsHelp(t *testing.T, sarr []string, opts []*ExtKeyParse) error {
 	return nil
 }
 
+/*
 type parserTest1 struct {
 	Verbose int
 	Flag    bool
@@ -1852,7 +1853,7 @@ func Test_parser_A032(t *testing.T) {
             "$port|p" : {
                 "value" : 3000,
                 "type" : "int",
-                "nargs" : 1 , 
+                "nargs" : 1 ,
                 "helpinfo" : "port to connect"
             },
             "dep<dep_handler>!opt=cc!" : {
@@ -1940,5 +1941,40 @@ func Test_parser_A032(t *testing.T) {
 	cl = nil
 
 	ok = true
+	return
+}
+*/
+
+func Test_parser_A033(t *testing.T) {
+	var cmd1_fmt = `        {
+            "%s" : true
+        }`
+	var cmd2_fmt = `        {
+            "+%s" : {
+                "reserve": true
+            }
+        }`
+	var cmd3_fmt = `        {
+            "%s" : {
+                "function" : 30
+            }
+        }`
+	var test_reserve_args = []string{"subcommand", "subnargs", "nargs", "extargs", "args"}
+	var cmd_fmts = []string{cmd1_fmt, cmd2_fmt, cmd3_fmt}
+	var fmtstr string
+	var k string
+	var err error
+	var parser *ExtArgsParse
+	var loads string
+	beforeParser(t)
+	for _, fmtstr = range cmd_fmts {
+		for _, k = range test_reserve_args {
+			loads = fmt.Sprintf(fmtstr, k)
+			parser, err = NewExtArgsParse(nil, nil)
+			check_equal(t, err, nil)
+			err = parser.LoadCommandLineString(loads)
+			check_not_equal(t, err, nil)
+		}
+	}
 	return
 }

@@ -163,6 +163,9 @@ func (self *ExtArgsParse) loadCommandSubparser(prefix string, keycls *ExtKeyPars
 	if keycls.TypeName() != "command" {
 		return fmt.Errorf("%s", format_error("%s not valid command", keycls.Format()))
 	}
+	if keycls.CmdName() != "" && check_in_array(parser_reserver_args, keycls.CmdName()) {
+		return fmt.Errorf("%s", format_error("%s in reserved %v", keycls.CmdName(), parser_reserver_args))
+	}
 	self.Info("load [%s]", keycls.Format())
 	vmap = keycls.Value().(map[string]interface{})
 	if keycls.IsCmd() && check_in_array(parser_reserver_args, keycls.CmdName()) {
@@ -194,7 +197,7 @@ func (self *ExtArgsParse) loadCommandSubparser(prefix string, keycls *ExtKeyPars
 
 func (self *ExtArgsParse) loadCommandPrefix(prefix string, keycls *ExtKeyParse, parsers []*parserCompat) error {
 	var vmap map[string]interface{}
-	if len(prefix) > 0 && check_in_array(parser_reserver_args, prefix) {
+	if len(keycls.Prefix()) > 0 && check_in_array(parser_reserver_args, keycls.Prefix()) {
 		return fmt.Errorf("%s", format_error("prefix [%s] in [%v]", prefix, parser_reserver_args))
 	}
 	vmap = keycls.Value().(map[string]interface{})

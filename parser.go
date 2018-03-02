@@ -209,6 +209,7 @@ func (self *ExtArgsParse) stringAction(ns *NameSpaceEx, validx int, keycls *ExtK
 		err = fmt.Errorf("%s", format_error("need args [%d] [%s] [%v]", validx, keycls.Format(), params))
 		return 1, err
 	}
+	self.Trace("set [%s] [%v]", keycls.Optdest(), params[validx])
 	ns.SetValue(keycls.Optdest(), params[validx])
 	return 1, nil
 }
@@ -543,7 +544,14 @@ func (self *ExtArgsParse) loadJsonValue(ns *NameSpaceEx, prefix string, vmap map
 	var err error
 	var newvmap map[string]interface{}
 	for k, v = range vmap {
-		if reflect.ValueOf(v).Type().String() == "map[string]interface {}" {
+		if v == nil {
+			newkey = ""
+			if len(prefix) > 0 {
+				newkey += fmt.Sprintf("%s_", prefix)
+			}
+			newkey += k
+			err = self.setJsonValueNotDefined(ns, self.mainCmd, newkey, v)
+		} else if reflect.ValueOf(v).Type().String() == "map[string]interface {}" {
 			newprefix = ""
 			if len(prefix) > 0 {
 				newprefix += fmt.Sprintf("%s_", prefix)
@@ -808,6 +816,7 @@ func (self *ExtArgsParse) jsonValueBase(ns *NameSpaceEx, opt *ExtKeyParse, value
 			if opt.TypeName() != "string" && opt.TypeName() != "jsonfile" {
 				return fmt.Errorf("%s", format_error("[%s] not for [%v] set", opt.TypeName(), value))
 			}
+			self.Trace("set [%s] [%v]", opt.Optdest(), value)
 			ns.SetValue(opt.Optdest(), value)
 			err = nil
 		case []string:
@@ -848,7 +857,7 @@ func (self *ExtArgsParse) jsonValueBase(ns *NameSpaceEx, opt *ExtKeyParse, value
 		if opt.TypeName() != "string" && opt.TypeName() != "jsonfile" {
 			return fmt.Errorf("%s", format_error("[%s] not for nil set [%s]", opt.TypeName(), opt.Optdest()))
 		}
-		ns.SetValue(opt.Optdest(), value)
+		ns.SetValue(opt.Optdest(), "")
 	}
 	return nil
 }

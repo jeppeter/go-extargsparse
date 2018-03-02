@@ -1943,7 +1943,6 @@ func Test_parser_A032(t *testing.T) {
 	ok = true
 	return
 }
-*/
 
 func Test_parser_A033(t *testing.T) {
 	var cmd1_fmt = `        {
@@ -1976,5 +1975,35 @@ func Test_parser_A033(t *testing.T) {
 			check_not_equal(t, err, nil)
 		}
 	}
+	return
+}
+*/
+
+func Test_parser_A034(t *testing.T) {
+	var err error
+	var parser *ExtArgsParse
+	var loads = `        {
+            "dep" : {
+                "string|S" : "stringval"
+            }
+        }`
+	var depjson string = ""
+	var ok = false
+	var params []string
+	var args *NameSpaceEx
+	beforeParser(t)
+	depjson = makeWriteTempFile(`{"dep_string":null}`)
+	defer func() { safeRemoveFile(depjson, "depjson", ok) }()
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	check_equal(t, err, nil)
+	params = []string{"--json", depjson, "dep"}
+	args, err = parser.ParseCommandLine(params, nil)
+	check_equal(t, err, nil)
+	check_equal(t, args.GetString("dep_string"), "")
+	check_equal(t, args.GetString("subcommand"), "dep")
+	check_equal(t, args.GetArray("subnargs"), []string{})
+	ok = true
 	return
 }

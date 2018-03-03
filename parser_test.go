@@ -1938,10 +1938,12 @@ func Test_parser_A032(t *testing.T) {
 		}
 		cl = nil
 	}()
-	err = cl.WriteScript("{}", loads, nil, false, "ns", "pp")
+	err = cl.WriteScript("{}", loads, []string{}, "", nil, false, "ns", "pp")
 	check_equal(t, err, nil)
 	setvars = make(map[string]string)
-	err = cl.RunCmd(setvars, "-h")
+	err = cl.Compile()
+	check_equal(t, err, nil)
+	err = cl.RunCmd(setvars, []string{}, "-h")
 	check_equal(t, err, nil)
 
 	parser, err = NewExtArgsParse(nil, nil)
@@ -1954,15 +1956,8 @@ func Test_parser_A032(t *testing.T) {
 
 	err = checkAllOptsHelp(t, cl.GetOut(), opts)
 	check_equal(t, err, nil)
-	cl.Release(true)
-	cl = nil
 
-	cl = newComileExec()
-	check_not_equal(t, cl, (*compileExec)(nil))
-	err = cl.WriteScript("{}", loads, nil, false, "ns", "pp")
-	check_equal(t, err, nil)
-	setvars = make(map[string]string)
-	err = cl.RunCmd(setvars, "dep", "-h")
+	err = cl.RunCmd(setvars, []string{}, "dep", "-h")
 	check_equal(t, err, nil)
 
 	opts, err = parser.GetCmdOpts("dep")
@@ -1970,15 +1965,8 @@ func Test_parser_A032(t *testing.T) {
 
 	err = checkAllOptsHelp(t, cl.GetOut(), opts)
 	check_equal(t, err, nil)
-	cl.Release(true)
-	cl = nil
 
-	cl = newComileExec()
-	check_not_equal(t, cl, (*compileExec)(nil))
-	err = cl.WriteScript("{}", loads, nil, false, "ns", "pp")
-	check_equal(t, err, nil)
-	setvars = make(map[string]string)
-	err = cl.RunCmd(setvars, "rdep", "-h")
+	err = cl.RunCmd(setvars, []string{}, "rdep", "-h")
 	check_equal(t, err, nil)
 
 	opts, err = parser.GetCmdOpts("rdep")
@@ -1986,8 +1974,6 @@ func Test_parser_A032(t *testing.T) {
 
 	err = checkAllOptsHelp(t, cl.GetOut(), opts)
 	check_equal(t, err, nil)
-	cl.Release(true)
-	cl = nil
 
 	ok = true
 	return
@@ -2527,6 +2513,7 @@ func Test_parser_A046(t *testing.T) {
 }
 */
 
+// we call the function as will exit ,so we do this ok
 func Test_parser_A047(t *testing.T) {
 	var err error
 	var parser *ExtArgsParse

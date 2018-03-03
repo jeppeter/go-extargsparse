@@ -109,13 +109,13 @@ func copyDir(src string, dst string) (err error) {
 
 func check_equal(t *testing.T, orig, check interface{}) {
 	if !reflect.DeepEqual(orig, check) {
-		t.Fatalf("%s orig [%v] != check[%v]", format_out_stack(2),  orig, check)
+		t.Fatalf("%s orig [%v] != check[%v]", format_out_stack(2), orig, check)
 	}
 }
 
 func check_not_equal(t *testing.T, orig, check interface{}) {
 	if reflect.DeepEqual(orig, check) {
-		t.Fatalf("%s orig [%v] == check[%v]", format_out_stack(2),  orig, check)
+		t.Fatalf("%s orig [%v] == check[%v]", format_out_stack(2), orig, check)
 	}
 }
 
@@ -169,6 +169,63 @@ func (self *stringIO) String() string {
 	return self.obuf.String()
 }
 
+func runCommand(setvars map[string]string, delvars []string, binname string, params ...string) (outs, errs string, err error) {
+	var cmdrun *exec.Cmd
+	var envs []string
+	var newenvs []string
+	var s string
+	var willdel bool
+	var k, v string
+	var obuf, ebuf *bytes.Buffer
+
+	cmdrun = exec.Command(binname, params...)
+	envs = os.Environ()
+	newenvs = make([]string, 0)
+	for _, s = range envs {
+		willdel = false
+		for _, k = range delvars {
+			if strings.HasPrefix(s, fmt.Sprintf("%s=", k)) {
+				willdel = true
+				break
+			}
+		}
+
+		if !willdel {
+			for k, _ = range setvars {
+				if strings.HasPrefix(s, fmt.Sprintf("%s=", k)) {
+					willdel = true
+					break
+				}
+			}
+		}
+
+		if !willdel {
+			newenvs = append(newenvs, s)
+		}
+	}
+
+	for k, v = range setvars {
+		newenvs = append(newenvs, fmt.Sprintf("%s=%s", k, v))
+	}
+
+	cmdrun.Env = newenvs
+	obuf = bytes.NewBufferString("")
+	ebuf = bytes.NewBufferString("")
+	cmdrun.Stdout = obuf
+	cmdrun.Stderr = ebuf
+
+	err = cmdrun.Run()
+	if err != nil {
+		err = fmt.Errorf("%s", format_error("can not run %s error out[%s]", cmdrun.Args, ebuf.String()))
+		return
+	}
+
+	outs = obuf.String()
+	errs = ebuf.String()
+	err = nil
+	return
+}
+
 func formLine(tabs int, fmtstr string, a ...interface{}) string {
 	var s string
 	var i int
@@ -187,8 +244,8 @@ type compileExec struct {
 	dname     string
 	origfname string
 	exename   string
-	addedvars map[string]string
 	modvars   map[string]string
+	delvars   []string
 	outsarr   []string
 	errsarr   []string
 }
@@ -199,23 +256,15 @@ func newComileExec() *compileExec {
 	self.dname = ""
 	self.origfname = ""
 	self.exename = ""
-	self.addedvars = make(map[string]string)
 	self.modvars = make(map[string]string)
+	self.delvars = make([]string, 0)
 	self.outsarr = make([]string, 0)
 	self.errsarr = make([]string, 0)
 	return self
 }
 
 func (self *compileExec) resetVars() {
-	var k, v string
-	for k, _ = range self.addedvars {
-		os.Unsetenv(k)
-	}
-	self.addedvars = make(map[string]string)
-
-	for k, v = range self.modvars {
-		os.Setenv(k, v)
-	}
+	self.delvars = make([]string, 0)
 	self.modvars = make(map[string]string)
 	return
 }
@@ -505,13 +554,14 @@ func (self *compileExec) formPrintout(tabs int, parser *ExtArgsParse, options *E
 	return s, nil
 }
 
-func (self *compileExec) writeScript(options string, commandline string, priority interface{}, printout bool, nsname, sname string) (string, error) {
+func (self *compileExec) writeScript(options string, commandline string, addmods []string, funcstr string, priority interface{}, printout bool, nsname, sname string) (string, error) {
 	var s string
 	var parser *ExtArgsParse
 	var err error
 	var conf *ExtArgsOptions
 	var curs string
 	var prstr string
+	var c string
 	s = ""
 	s += formLine(0, "package main")
 	s += formLine(0, "")
@@ -519,6 +569,9 @@ func (self *compileExec) writeScript(options string, commandline string, priorit
 	s += formLine(1, `"fmt"`)
 	s += formLine(1, `"go-extargsparse"`)
 	s += formLine(1, `"os"`)
+	for _, c = range addmods {
+		s += formLine(1, fmt.Sprintf(`"%s"`, c))
+	}
 	s += formLine(0, ")")
 
 	if printout {
@@ -546,6 +599,11 @@ func (self *compileExec) writeScript(options string, commandline string, priorit
 		}
 		s += curs
 		s += formLine(0, "}")
+	}
+
+	if len(funcstr) > 0 {
+		s += formLine(0, "")
+		s += funcstr
 	}
 
 	s += formLine(0, "")
@@ -638,13 +696,13 @@ func (self *compileExec) makeSrcDir(copyfrom string) error {
 	return nil
 }
 
-func (self *compileExec) WriteScript(options string, commandline string, priority interface{}, printout bool, nsname string, sname string) error {
+func (self *compileExec) WriteScript(options string, commandline string, addmods []string, funcstr string, priority interface{}, printout bool, nsname string, sname string) error {
 	var s string
 	var err error
 	var fdir string
 	self.Release(true)
 
-	s, err = self.writeScript(options, commandline, priority, printout, nsname, sname)
+	s, err = self.writeScript(options, commandline, addmods, funcstr, priority, printout, nsname, sname)
 	if err != nil {
 		return err
 	}
@@ -680,52 +738,52 @@ func (self *compileExec) WriteScript(options string, commandline string, priorit
 
 func (self *compileExec) setVars(setvars map[string]string) error {
 	var k, v string
-	var oldv string
 	for k, v = range setvars {
-		oldv = os.Getenv(k)
-		if len(oldv) > 0 {
-			self.modvars[k] = oldv
-		} else {
-			self.addedvars[k] = ""
-		}
-		os.Setenv(k, v)
+		self.modvars[k] = v
 	}
 	return nil
 }
 
 func (self *compileExec) removeVars(keys []string) error {
-	var c, oldv string
+	var c string
 	for _, c = range keys {
-		oldv = os.Getenv(c)
-		if len(oldv) > 0 {
-			self.modvars[c] = oldv
-			os.Unsetenv(c)
-		}
+		self.delvars = append(self.delvars, c)
 	}
 	return nil
 }
 
-func (self *compileExec) RunCmd(setvars map[string]string, params ...string) error {
-	var cmdrun *exec.Cmd
-	var gobin string
-	var obuf, ebuf *bytes.Buffer
+func (self *compileExec) runCommandCtx(binname string, params ...string) error {
+	var outs, errs string
 	var err error
-	var c string
-
-	if len(self.exename) > 0 {
-		err = fmt.Errorf("%s", "already run [%s]", self.exename)
+	outs, errs, err = runCommand(self.modvars, self.delvars, binname, params...)
+	if err != nil {
 		return err
 	}
+	self.Trace("run %v\n[%s]\n", params, outs)
+	self.outsarr = strings.Split(outs, "\n")
+	self.errsarr = strings.Split(errs, "\n")
+	return nil
+}
+
+func (self *compileExec) Compile() error {
+	var gobin string
+	var err error
+	var setvars map[string]string
+
+	setvars = make(map[string]string)
 
 	gobin = getExecutableName("go")
 	self.exename = getExecutableName(self.origfname)
 	if len(self.fname) == 0 {
 		return fmt.Errorf("%s", format_error("not set fname yet"))
 	}
-
+	defer func() {
+		if err != nil {
+			self.exename = ""
+		}
+	}()
 	/*now to add*/
 	setvars["GOPATH"] = fmt.Sprintf("%s%c%s", self.dname, os.PathListSeparator, os.Getenv("GOPATH"))
-
 	err = self.setVars(setvars)
 	if err != nil {
 		return err
@@ -737,46 +795,34 @@ func (self *compileExec) RunCmd(setvars map[string]string, params ...string) err
 		return err
 	}
 
-	// now we should give the export name
-
-	// now we should set the go build
-	cmdrun = exec.Command(gobin, "build", "-o", self.exename, self.fname)
-	obuf = bytes.NewBufferString("")
-	ebuf = bytes.NewBufferString("")
-	cmdrun.Stdout = obuf
-	cmdrun.Stderr = ebuf
-	err = cmdrun.Run()
+	err = self.runCommandCtx(gobin, "build", "-o", self.exename, self.fname)
 	if err != nil {
-		err = fmt.Errorf("%s", format_error("compile [%s] error [%s] output [%s]", self.fname, err.Error(), ebuf.String()))
 		return err
 	}
 
-	cmdrun = nil
-	obuf = nil
-	ebuf = nil
-	cmdrun = exec.Command(self.exename)
-	cmdrun.Args = make([]string, 0)
-	cmdrun.Args = append(cmdrun.Args, self.exename)
-	for _, c = range params {
-		cmdrun.Args = append(cmdrun.Args, c)
-	}
-	obuf = bytes.NewBufferString("")
-	ebuf = bytes.NewBufferString("")
-	cmdrun.Stdout = obuf
-	cmdrun.Stderr = ebuf
-	err = cmdrun.Run()
-	if err != nil {
-		err = fmt.Errorf("%s", format_error("run [%s] %v error [%s] output [%s]", self.exename, params, err.Error(), ebuf.String()))
-		return err
-	}
-	self.Trace("obuf [%s]", obuf.String())
-	self.outsarr = strings.Split(obuf.String(), "\n")
-	self.errsarr = strings.Split(ebuf.String(), "\n")
-	err = nil
-	obuf = nil
-	ebuf = nil
-	cmdrun = nil
 	return nil
+}
+
+func (self *compileExec) RunCmd(setvars map[string]string, delvars []string, params ...string) error {
+	var err error
+
+	if len(self.exename) == 0 {
+		err = fmt.Errorf("%s", format_error("not compiled"))
+		return err
+	}
+
+	err = self.setVars(setvars)
+	if err != nil {
+		return err
+	}
+	defer self.resetVars()
+
+	err = self.removeVars(delvars)
+	if err != nil {
+		return err
+	}
+
+	return self.runCommandCtx(self.exename, params...)
 }
 
 func (self *compileExec) GetOut() []string {

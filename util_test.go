@@ -13,6 +13,16 @@ import (
 	"testing"
 )
 
+func safeRemoveFile(fname string, notice string, ok bool) {
+	if len(fname) > 0 {
+		if ok && len(os.Getenv("NOT_REMOVE_FILE")) == 0 {
+			os.RemoveAll(fname)
+		} else {
+			keyDebug("%s %s", notice, fname)
+		}
+	}
+}
+
 func copyFile(src, dst string) (err error) {
 	in, err := os.Open(src)
 	if err != nil {
@@ -274,39 +284,17 @@ func (self *compileExec) Release(ok bool) {
 	self.outsarr = make([]string, 0)
 	self.errsarr = make([]string, 0)
 
-	if len(self.exename) > 0 {
-		if ok {
-			os.Remove(self.exename)
-		} else {
-			self.Error("exe [%s]", self.exename)
-		}
-		self.exename = ""
-	}
+	safeRemoveFile(self.exename, "exename", ok)
+	self.exename = ""
 
-	if len(self.origfname) > 0 {
-		if ok {
-			os.Remove(self.origfname)
-		} else {
-			self.Error("origname [%s]", self.origfname)
-		}
-		self.origfname = ""
-	}
+	safeRemoveFile(self.origfname, "origfname", ok)
+	self.origfname = ""
 
-	if len(self.fname) > 0 {
-		if ok {
-			os.Remove(self.fname)
-		} else {
-			self.Error("fname [%s]", self.fname)
-		}
-		self.fname = ""
-	}
-	if len(self.dname) > 0 {
-		if ok {
-			os.RemoveAll(self.dname)
-		} else {
-			self.Error("dname [%s]", self.dname)
-		}
-	}
+	safeRemoveFile(self.fname, "fname", ok)
+	self.fname = ""
+
+	safeRemoveFile(self.dname, "dname", ok)
+	self.dname = ""
 	return
 }
 

@@ -67,16 +67,6 @@ func assertGetSubCommand(names []string, cmdname string) string {
 	return ""
 }
 
-func safeRemoveFile(fname string, notice string, ok bool) {
-	if len(fname) > 0 {
-		if ok {
-			os.Remove(fname)
-		} else {
-			keyDebug("%s %s", notice, fname)
-		}
-	}
-}
-
 func getCmdHelp(parser *ExtArgsParse, cmdname string) []string {
 	obuf := newStringIO()
 	parser.PrintHelp(obuf, cmdname)
@@ -193,6 +183,7 @@ func init() {
 	Debug_args_function(nil, nil, nil)
 }
 
+/*
 type parserTest1 struct {
 	Verbose int
 	Flag    bool
@@ -2513,8 +2504,8 @@ func Test_parser_A046(t *testing.T) {
 	check_equal(t, ok, true)
 	return
 }
+*/
 
-/*
 func Test_parser_A047(t *testing.T) {
 	var err error
 	var parser *ExtArgsParse
@@ -2537,6 +2528,31 @@ func Test_parser_A047(t *testing.T) {
 	var expr *regexp.Regexp
 	var ok bool = false
 	var c string
+	var codestr = `func format_error(fmtstr string, a ...interface{}) string {
+	return fmt.Sprintf(fmtstr, a...)
+}
+
+func debug_set_2_args(ns *extargsparse.NameSpaceEx, validx int, keycls *extargsparse.ExtKeyParse, params []string) (step int, err error) {
+	var sarr []string
+	if ns == nil {
+		return 0, nil
+	}
+	if (validx + 2) > len(params) {
+		return 0, fmt.Errorf("%s", format_error("[%d+2] > len(%d) %v", validx, len(params), params))
+	}
+	sarr = ns.GetArray(keycls.Optdest())
+	sarr = append(sarr, params[validx])
+	sarr = append(sarr, params[(validx+1)])
+	ns.SetValue(keycls.Optdest(), sarr)
+	return 2, nil
+}
+
+func debug_opthelp_set(keycls *extargsparse.ExtKeyParse) string {
+	if keycls == nil {
+		return ""
+	}
+	return fmt.Sprintf("opthelp function set [%s] default value (%s)", keycls.Optdest(), keycls.Value())
+}`
 	beforeParser(t)
 	pkgname = getCallerPackage(0)
 	check_not_equal(t, pkgname, "")
@@ -2558,4 +2574,3 @@ func Test_parser_A047(t *testing.T) {
 	check_equal(t, ok, true)
 	return
 }
-*/

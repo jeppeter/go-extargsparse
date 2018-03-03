@@ -2859,7 +2859,6 @@ func Test_parser_A052(t *testing.T) {
 	ok = true
 	return
 }
-*/
 
 func Test_parser_A053(t *testing.T) {
 	var err error
@@ -2868,7 +2867,7 @@ func Test_parser_A053(t *testing.T) {
             "$port|p" : {
                 "value" : 3000,
                 "type" : "int",
-                "nargs" : 1 , 
+                "nargs" : 1 ,
                 "helpinfo" : "port to connect"
             },
             "dep" : {
@@ -2977,6 +2976,63 @@ func Test_parser_A053(t *testing.T) {
 	check_equal(t, args.GetString("subcommand"), "dep")
 	check_equal(t, args.GetArray("list"), []string{"jsonval1", "jsonval2"})
 	check_equal(t, args.GetString("string"), "ee")
+	check_equal(t, args.GetArray("subnargs"), []string{"ww"})
+	ok = true
+	return
+}
+*/
+
+func Test_parser_A054(t *testing.T) {
+	var err error
+	var loads = `        {
+            "verbose|v" : "+",
+            "$port|p" : {
+                "value" : 3000,
+                "type" : "int",
+                "nargs" : 1 , 
+                "helpinfo" : "port to connect"
+            },
+            "dep" : {
+                "list|l" : [],
+                "string|s" : "s_var",
+                "$" : "+"
+            }
+        }`
+	var confstr = fmt.Sprintf(`        {
+            "jsonlong" : "jsonfile"
+        }`)
+	var options *ExtArgsOptions
+	var parser *ExtArgsParse
+	var args *NameSpaceEx
+	var ok bool
+	var jsonfile string
+	var depjsonfile string
+	var depstrval string = `newval`
+	var depliststr string = `["depenv1","depenv2"]`
+
+	beforeParser(t)
+	ok = false
+	jsonfile = makeWriteTempFile(`{"dep":{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"},"port":6000,"verbose":3}`)
+	defer func() { safeRemoveFile(jsonfile, "jsonfile", ok) }()
+	depjsonfile = makeWriteTempFile(`{"list":["depjson1","depjson2"]}`)
+	defer func() { safeRemoveFile(depjsonfile, "depjsonfile", ok) }()
+	os.Setenv("EXTARGSPARSE_JSONFILE", jsonfile)
+	os.Setenv("DEP_JSONFILE", depjsonfile)
+
+	options, err = NewExtArgsOptions(confstr)
+	check_equal(t, err, nil)
+	parser, err = NewExtArgsParse(options, []int{ENV_COMMAND_JSON_SET, ENVIRONMENT_SET, ENV_SUB_COMMAND_JSON_SET})
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(loads)
+	check_equal(t, err, nil)
+	os.Setenv("DEP_STRING", depstrval)
+	os.Setenv("DEP_LIST", depliststr)
+	args, err = parser.ParseCommandLine([]string{"--jsonfile", jsonfile, "dep", "ww"}, nil)
+	check_equal(t, args.GetInt("verbose"), 3)
+	check_equal(t, args.GetInt("port"), 6000)
+	check_equal(t, args.GetString("subcommand"), "dep")
+	check_equal(t, args.GetArray("dep_list"), []string{"jsonval1", "jsonval2"})
+	check_equal(t, args.GetString("dep_string"), "jsonstring")
 	check_equal(t, args.GetArray("subnargs"), []string{"ww"})
 	ok = true
 	return

@@ -2581,7 +2581,6 @@ func init(){
 	check_equal(t, ok, true)
 	return
 }
-*/
 
 func Test_parser_A048(t *testing.T) {
 	var err error
@@ -2590,7 +2589,7 @@ func Test_parser_A048(t *testing.T) {
             "$port|p" : {
                 "value" : 3000,
                 "type" : "int",
-                "nargs" : 1 , 
+                "nargs" : 1 ,
                 "helpinfo" : "port to connect"
             },
             "dep" : {
@@ -2634,5 +2633,71 @@ func Test_parser_A048(t *testing.T) {
 	check_equal(t, args.GetString("dep_string"), "ee")
 	check_equal(t, args.GetArray("subnargs"), []string{"ww"})
 	ok = true
+	return
+}
+*/
+
+func Test_parser_A049(t *testing.T) {
+	var err error
+	var loads = `        {
+            "verbose|v##very long very long very long very long very long very long very long very long very long very long very long very long very long very long very long very long very long very long##" : "+",
+            "$port|p" : {
+                "value" : 3000,
+                "type" : "int",
+                "nargs" : 1 , 
+                "helpinfo" : "port to connect"
+            },
+            "dep" : {
+                "list|l" : [],
+                "string|s" : "s_var",
+                "$" : "+"
+            }
+        }`
+	var confstr = fmt.Sprintf(`{"screenwidth": 60}`)
+	var options *ExtArgsOptions
+	var parser *ExtArgsParse
+	var sio *stringIO
+	var sarr []string
+	var overlength bool
+	var idx int
+	var c string
+
+	beforeParser(t)
+
+	options, err = NewExtArgsOptions(confstr)
+	check_equal(t, err, nil)
+	parser, err = NewExtArgsParse(options, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(loads)
+	check_equal(t, err, nil)
+	sio = newStringIO()
+	check_not_equal(t, sio, (*stringIO)(nil))
+	sarr = getCmdHelp(parser, "")
+	overlength = false
+	for idx, c = range sarr {
+		if len(c) > 64 && idx > 0 {
+			overlength = true
+			break
+		}
+	}
+	check_equal(t, overlength, false)
+	confstr = fmt.Sprintf(`{"screenwidth" : 80}`)
+	options, err = NewExtArgsOptions(confstr)
+	check_equal(t, err, nil)
+	parser, err = NewExtArgsParse(options, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(loads)
+	check_equal(t, err, nil)
+	sio = newStringIO()
+	check_not_equal(t, sio, (*stringIO)(nil))
+	sarr = getCmdHelp(parser, "")
+	overlength = false
+	for idx, c = range sarr {
+		if len(c) > 64 && idx > 0 {
+			overlength = true
+			break
+		}
+	}
+	check_equal(t, overlength, true)
 	return
 }

@@ -35,7 +35,24 @@ var opt_default_VALUE = map[string]interface{}{
 }
 
 func (p *ExtArgsOptions) SetValue(k string, v interface{}) error {
-	p.values[k] = v
+	var retv interface{}
+	var iv int
+	var bret bool
+	retv = v
+	switch v.(type) {
+	case float64:
+		iv, bret = isFloatToInt(v.(float64))
+		if bret {
+			retv = iv
+		}
+	case float32:
+		iv, bret = isFloatToInt(float64(v.(float32)))
+		if bret {
+			retv = iv
+		}
+	}
+
+	p.values[k] = retv
 	return nil
 }
 

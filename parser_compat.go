@@ -83,7 +83,7 @@ func (self *parserCompat) get_help_info(keycls *ExtKeyParse) string {
 	assert_test(keycls != nil, "must no be null")
 	if keycls.Attr("opthelp") != "" {
 		/*now it is the help function ,so we call this*/
-
+		self.Trace("call [%s] upper[%v]", keycls.Attr("opthelp"), self.FunctionUpper)
 		err = self.GetFuncPtr(self.FunctionUpper, keycls.Attr("opthelp"), &helpfunc)
 		if err == nil {
 			return helpfunc(keycls)

@@ -162,6 +162,10 @@ func debug_opthelp_set(keycls *ExtKeyParse) string {
 	return fmt.Sprintf("opthelp function set [%s] default value (%s)", keycls.Optdest(), keycls.Value())
 }
 
+type parserTest5Ctx struct {
+	has_called_args string
+}
+
 func Debug_args_function(ns *NameSpaceEx, ostruct interface{}, Context interface{}) error {
 	var p *parserTest5Ctx
 	if Context == nil || ns == nil {
@@ -511,9 +515,6 @@ func Test_parser_A004_2(t *testing.T) {
 	return
 }
 
-type parserTest5Ctx struct {
-	has_called_args string
-}
 
 func Test_parser_A005(t *testing.T) {
 	var loads_fmt = `        {
@@ -2508,12 +2509,11 @@ func Test_parser_A046(t *testing.T) {
 
 func Test_parser_A047(t *testing.T) {
 	var err error
-	var parser *ExtArgsParse
-	var loads_fmt = `        {
+	var loads = `        {
             "verbose|v" : "+",
             "kernel|K" : "/boot/",
             "initrd|I" : "/boot/",
-            "pair|P!optparse=%s.debug_set_2_args;%s.opthelp=debug_opthelp_set!" : [],
+            "pair|P!optparse=debug_set_2_args;opthelp=debug_opthelp_set!" : [],
             "encryptfile|e" : null,
             "encryptkey|E" : null,
             "setupsectsoffset" : 663,
@@ -2521,13 +2521,13 @@ func Test_parser_A047(t *testing.T) {
                 "$" : "+"
             }
         }`
-	var loads string
-	var options *ExtArgsOptions
-	var pkgname string
 	var sarr []string
 	var expr *regexp.Regexp
 	var ok bool = false
+	var cl *compileExec
 	var c string
+	var setvars map[string]string
+	var confstr = fmt.Sprintf(`{"parseall": true,"longprefix" : "++", "shortprefix" : "+" , "helpshort" : "?" , "helplong": "usage" , "jsonlong" : "jsonfile", "%s": false}`, FUNC_UPPER_CASE)
 	var codestr = `func format_error(fmtstr string, a ...interface{}) string {
 	return fmt.Sprintf(fmtstr, a...)
 }
@@ -2552,18 +2552,25 @@ func debug_opthelp_set(keycls *extargsparse.ExtKeyParse) string {
 		return ""
 	}
 	return fmt.Sprintf("opthelp function set [%s] default value (%s)", keycls.Optdest(), keycls.Value())
+}
+
+func init(){
+	debug_set_2_args(nil,1,nil,[]string{})
+	debug_opthelp_set(nil)
 }`
 	beforeParser(t)
-	pkgname = getCallerPackage(0)
-	check_not_equal(t, pkgname, "")
-	loads = fmt.Sprintf(loads_fmt, pkgname, pkgname)
-	options, err = NewExtArgsOptions(fmt.Sprintf(`{"parseall": true,"longprefix" : "++", "shortprefix" : "+", "%s": false}`, FUNC_UPPER_CASE))
+	cl = newComileExec()
+	check_not_equal(t, cl, (*compileExec)(nil))
+	defer func() { cl.Release(ok) }()
+	err = cl.WriteScript(confstr, loads, []string{}, codestr, nil, false, "args", "ppc")
 	check_equal(t, err, nil)
-	parser, err = NewExtArgsParse(options, nil)
+	err = cl.Compile()
 	check_equal(t, err, nil)
-	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	setvars = make(map[string]string)
+	err = cl.RunCmd(setvars, []string{}, "++usage")
 	check_equal(t, err, nil)
-	sarr = getCmdHelp(parser, "")
+
+	sarr = cl.GetOut()
 	expr = regexp.MustCompile(`.*opthelp function set \[pair\].*`)
 	for _, c = range sarr {
 		if expr.MatchString(c) {

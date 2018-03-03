@@ -599,6 +599,7 @@ func (self *compileExec) writeScript(options string, commandline string, addmods
 
 	s += formLine(1, "var parser *extargsparse.ExtArgsParse")
 	s += formLine(1, "var options *extargsparse.ExtArgsOptions")
+	s += formLine(1, "var confstr =`%s`", options)
 	s += formLine(1, "var err error")
 	s += formLine(1, "var commandline = `%s`", commandline)
 	if printout {
@@ -612,9 +613,9 @@ func (self *compileExec) writeScript(options string, commandline string, addmods
 		return "", err
 	}
 	if len(options) > 0 {
-		s += formLine(1, "options, err = extargsparse.NewExtArgsOptions(`%s`)", options)
+		s += formLine(1, "options, err = extargsparse.NewExtArgsOptions(confstr)")
 		s += formLine(1, "if err != nil {")
-		s += formLine(2, `fmt.Fprintf(os.Stderr,"can not parse [%s] error[%%s]\n", err.Error())`, options)
+		s += formLine(2, `fmt.Fprintf(os.Stderr,"can not parse [%%s] error[%%s]\n", confstr, err.Error())`)
 		s += formLine(2, "os.Exit(3)")
 		s += formLine(1, "}")
 	} else {

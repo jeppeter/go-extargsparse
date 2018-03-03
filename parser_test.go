@@ -3127,7 +3127,6 @@ func Test_parser_A054(t *testing.T) {
 	ok = true
 	return
 }
-*/
 
 func Test_parser_A055(t *testing.T) {
 	var err error
@@ -3136,7 +3135,7 @@ func Test_parser_A055(t *testing.T) {
             "$port|p" : {
                 "value" : 3000,
                 "type" : "int",
-                "nargs" : 1 , 
+                "nargs" : 1 ,
                 "helpinfo" : "port to connect"
             },
             "dep" : {
@@ -3188,5 +3187,78 @@ func Test_parser_A055(t *testing.T) {
 	check_equal(t, args.GetString("dep_string"), "JSONSTRING")
 	check_equal(t, args.GetArray("subnargs"), []string{"ww"})
 	ok = true
+	return
+}
+*/
+
+func Test_parser_A056(t *testing.T) {
+	var err error
+	var loads = `        {
+            "asn1parse" : {
+                "$" : 0,
+                "$inform!optparse=inform_optparse;completefunc=inform_complete!" : null,
+                "$in" : null,
+                "$out" : null,
+                "$noout" : false,
+                "$offset" : 0,
+                "$length" : -1,
+                "$dump" : false,
+                "$dlimit" : -1,
+                "$oid" : null,
+                "$strparse" : 0,
+                "$genstr" : null,
+                "$genconf" : null
+            }
+        }`
+	var confstr = fmt.Sprintf(`        {
+            "longprefix" : "-",
+            "shortprefix" : "-",
+            "nojsonoption" : true,
+            "cmdprefixadded" : false
+        }
+`)
+	var options *ExtArgsOptions
+	var parser *ExtArgsParse
+	var sarr []string
+	var optnames []string = []string{"inform", "in", "out", "noout", "offset", "length", "dump", "dlimit", "oid", "strparse", "genstr", "genconf", "help"}
+	var c string
+	var ok bool
+	var opts []*ExtKeyParse
+	var opt *ExtKeyParse
+
+	beforeParser(t)
+
+	options, err = NewExtArgsOptions(confstr)
+	check_equal(t, err, nil)
+	parser, err = NewExtArgsParse(options, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(loads)
+	check_equal(t, err, nil)
+	sarr, err = parser.GetSubCommands("")
+	check_equal(t, err, nil)
+	check_equal(t, sarr, []string{"asn1parse"})
+	opts, err = parser.GetCmdOpts("asn1parse")
+	check_equal(t, err, nil)
+	for _, opt = range opts {
+		if !opt.IsFlag() || opt.TypeName() == "args" {
+			continue
+		}
+		ok = false
+		if opt.TypeName() == "help" {
+			if opt.Longopt() == "-help" && opt.Shortopt() == "-h" {
+				ok = true
+			}
+
+		} else {
+			for _, c = range optnames {
+				if c == opt.Optdest() && fmt.Sprintf("-%s", c) == opt.Longopt() {
+					ok = true
+				}
+			}
+
+		}
+		check_equal(t, ok, true)
+	}
+
 	return
 }

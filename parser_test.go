@@ -2807,6 +2807,7 @@ func Test_parser_A052(t *testing.T) {
         }`)
 	var options *ExtArgsOptions
 	var parser *ExtArgsParse
+	var args *NameSpaceEx
 	var sarr []string
 	var ok bool
 	var jsonfile string
@@ -2849,6 +2850,13 @@ func Test_parser_A052(t *testing.T) {
 	}
 	check_equal(t, helpok, false)
 	check_equal(t, jsonok, false)
+	args, err = parser.ParseCommandLine([]string{"-p", "9000", "dep", "--dep-string", "ee", "ww"}, nil)
+	check_equal(t, args.GetInt("verbose"), 0)
+	check_equal(t, args.GetInt("port"), 9000)
+	check_equal(t, args.GetString("subcommand"), "dep")
+	check_equal(t, args.GetArray("dep_list"), []string{"depenv1", "depenv2"})
+	check_equal(t, args.GetString("dep_string"), "ee")
+	check_equal(t, args.GetArray("subnargs"), []string{"ww"})
 	ok = true
 	return
 }

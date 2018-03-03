@@ -279,7 +279,6 @@ func init() {
 	Debug_args_function(nil, nil, nil)
 }
 
-/*
 type parserTest1 struct {
 	Verbose int
 	Flag    bool
@@ -301,8 +300,7 @@ func Test_parser_A001(t *testing.T) {
                 "nargs" : "*",
                 "type" : "string"
             }
-        }s
-	`
+        }`
 	var params = []string{"-vvvv", "-f", "-n", "30", "-l", "bar1", "-l", "bar2", "var1", "var2"}
 	var parser *ExtArgsParse
 	var args *NameSpaceEx
@@ -606,7 +604,6 @@ func Test_parser_A004_2(t *testing.T) {
 	check_equal(t, p.Args, []string{})
 	return
 }
-
 
 func Test_parser_A005(t *testing.T) {
 	var loads_fmt = `        {
@@ -3261,7 +3258,6 @@ func Test_parser_A056(t *testing.T) {
 
 	return
 }
-*/
 
 func Test_parser_A057(t *testing.T) {
 	var err error
@@ -3382,5 +3378,74 @@ func Test_parser_A057(t *testing.T) {
 		check_equal(t, ok, true)
 	}
 
+	return
+}
+
+func Test_parser_A058(t *testing.T) {
+	var err error
+	var loads = `        {
+            "verbose" : "+",
+            "dep" : {
+                "$" : "*"
+            },
+            "rdep" : {
+                "$" : "*"
+            }
+        }`
+	var confstr = fmt.Sprintf(`{}`)
+	var options *ExtArgsOptions
+	var parser *ExtArgsParse
+	var sarr []string
+	var matchexpr *regexp.Regexp
+
+	beforeParser(t)
+
+	options, err = NewExtArgsOptions(confstr)
+	check_equal(t, err, nil)
+	parser, err = NewExtArgsParse(options, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(loads)
+	check_equal(t, err, nil)
+	sarr = getCmdHelp(parser, "")
+	matchexpr = regexp.MustCompile(`.*\[OPTIONS\]\s+\[SUBCOMMANDS\]\s+.*`)
+	check_equal(t, matchexpr.MatchString(sarr[0]), true)
+	return
+}
+
+func Test_parser_A059(t *testing.T) {
+	var err error
+	var loads_fmt = `        {
+            "verbose|v" : "+",
+            "kernel|K" : "/boot/",
+            "initrd|I" : "/boot/",
+            "pair|P!optparse=%s.Debug_set_2_args!" : [],
+            "encryptfile|e" : null,
+            "encryptkey|E" : null,
+            "setupsectsoffset" : 663,
+            "ipxe" : {
+                "$" : "+"
+            }
+        }`
+	var loads string
+	var confstr = fmt.Sprintf(`{"parseall" : true,"longprefix" : "++", "shortprefix" : "+"}`)
+	var options *ExtArgsOptions
+	var parser *ExtArgsParse
+	var args *NameSpaceEx
+	var pkgname string
+
+	beforeParser(t)
+	pkgname = getCallerPackage(1)
+	loads = fmt.Sprintf(loads_fmt, pkgname)
+	options, err = NewExtArgsOptions(confstr)
+	check_equal(t, err, nil)
+	parser, err = NewExtArgsParse(options, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(loads)
+	check_equal(t, err, nil)
+	args, err = parser.ParseCommandLine([]string{"+K", "kernel", "++pair", "initrd", "cc", "dd", "+E", "encryptkey", "+e", "encryptfile", "ipxe"}, nil)
+	check_equal(t, err, nil)
+	check_equal(t, args.GetString("subcommand"), "ipxe")
+	check_equal(t, args.GetArray("subnargs"), []string{"dd"})
+	check_equal(t, args.GetArray("pair"), []string{"INITRD", "CC"})
 	return
 }

@@ -340,9 +340,8 @@ func (self *ExtKeyParse) Optdest() string {
 
 	if !self.noChange {
 		optdest = strings.ToLower(optdest)
-		optdest = strings.Replace(optdest, "-", "_", -1)
 	}
-
+	optdest = strings.Replace(optdest, "-", "_", -1)
 	return optdest
 }
 

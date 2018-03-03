@@ -3189,7 +3189,6 @@ func Test_parser_A055(t *testing.T) {
 	ok = true
 	return
 }
-*/
 
 func Test_parser_A056(t *testing.T) {
 	var err error
@@ -3257,6 +3256,129 @@ func Test_parser_A056(t *testing.T) {
 			}
 
 		}
+		check_equal(t, ok, true)
+	}
+
+	return
+}
+*/
+
+func Test_parser_A057(t *testing.T) {
+	var err error
+	var loads = `        {
+            "asn1parse" : {
+                "$" : 0,
+                "$inform!optparse=inform_optparse;completefunc=inform_complete!" : null,
+                "$in" : null,
+                "$out" : null,
+                "$noout" : false,
+                "$offset" : 0,
+                "$length" : -1,
+                "$dump" : false,
+                "$dlimit" : -1,
+                "$oid" : null,
+                "$strparse" : 0,
+                "$genstr" : null,
+                "$genconf" : null
+            },
+            "ca" : {
+                "$" : 0,
+                "$config" : null,
+                "$name" : null,
+                "$in" : null,
+                "$ss_cert" : null,
+                "$spkac" : null,
+                "$infiles" : null,
+                "$out" : null,
+                "$outdir" : null,
+                "$cert" : null,
+                "$keyfile" : null,
+                "$keyform!optparse=inform_optparse;completefunc=inform_complete!" : null,
+                "$key" : null,
+                "$selfsign" : false,
+                "$passin" : null,
+                "$verbose" : "+",
+                "$notext" : false,
+                "$startdate" : null,
+                "$enddate" : null,
+                "$days" : 30,
+                "$md" : null,
+                "$policy" : null,
+                "$preserveDN" : false,
+                "$msie_hack" : false,
+                "$noemailDN" : false,
+                "$batch" : false,
+                "$extensions" : null,
+                "$extfile" : null,
+                "$engine" : null,
+                "$subj" : null,
+                "$utf8" : false,
+                "$multivalue-rdn" : false,
+                "$gencrl" : false,
+                "$crldays" : 30,
+                "$crlhours" : -1,
+                "$revoke" : null,
+                "$status" : null,
+                "$updatedb" : false,
+                "$crl_reason" : null,
+                "$crl_hold" : null,
+                "$crl_compromise" : null,
+                "$crl_CA_compromise" : null,
+                "$crlexts" : null
+            }
+        }`
+	var confstr = fmt.Sprintf(`        {
+            "longprefix" : "-",
+            "shortprefix" : "-",
+            "nojsonoption" : true,
+            "cmdprefixadded" : false,
+            "flagnochange" : true
+        }`)
+	var options *ExtArgsOptions
+	var parser *ExtArgsParse
+	var sarr []string
+	var optnames []string = []string{"config", "name", "in", "ss_cert", "spkac", "infiles", "out", "outdir", "cert", "keyfile", "keyform", "key", "selfsign", "passin", "verbose", "notext", "startdate", "enddate", "days", "md", "policy", "preserveDN", "msie_hack", "noemailDN", "batch", "extensions", "extfile", "engine", "subj", "utf8", "gencrl", "crldays", "crlhours", "revoke", "status", "updatedb", "crl_reason", "crl_hold", "crl_compromise", "crl_CA_compromise", "crlexts"}
+	var c string
+	var ok bool
+	var opts []*ExtKeyParse
+	var opt *ExtKeyParse
+
+	beforeParser(t)
+
+	options, err = NewExtArgsOptions(confstr)
+	check_equal(t, err, nil)
+	parser, err = NewExtArgsParse(options, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(loads)
+	check_equal(t, err, nil)
+	sarr, err = parser.GetSubCommands("")
+	check_equal(t, err, nil)
+	check_equal(t, sarr, []string{"asn1parse", "ca"})
+	opts, err = parser.GetCmdOpts("ca")
+	check_equal(t, err, nil)
+	for _, opt = range opts {
+		if !opt.IsFlag() || opt.TypeName() == "args" {
+			continue
+		}
+		ok = false
+		if opt.TypeName() == "help" {
+			if opt.Longopt() == "-help" && opt.Shortopt() == "-h" {
+				ok = true
+			}
+
+		} else if opt.Longopt() == "-multivalue-rdn" {
+			keyDebug("optdest [%s]", opt.Optdest())
+			if opt.Optdest() == "multivalue_rdn" {
+				ok = true
+			}
+		} else {
+			for _, c = range optnames {
+				if c == opt.Optdest() && fmt.Sprintf("-%s", c) == opt.Longopt() {
+					ok = true
+				}
+			}
+		}
+		keyDebug("opt [%s]", opt.Format())
 		check_equal(t, ok, true)
 	}
 

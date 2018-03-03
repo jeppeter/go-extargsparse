@@ -2739,7 +2739,6 @@ func Test_parser_A050(t *testing.T) {
 	check_equal(t, ok, true)
 	return
 }
-*/
 
 func Test_parser_A051(t *testing.T) {
 	var err error
@@ -2782,5 +2781,74 @@ func Test_parser_A051(t *testing.T) {
 		}
 	}
 	check_equal(t, ok, true)
+	return
+}
+*/
+
+func Test_parser_A052(t *testing.T) {
+	var err error
+	var loads = `        {
+            "verbose|v" : "+",
+            "$port|p" : {
+                "value" : 3000,
+                "type" : "int",
+                "nargs" : 1 , 
+                "helpinfo" : "port to connect"
+            },
+            "dep" : {
+                "list|l" : [],
+                "string|s" : "s_var",
+                "$" : "+"
+            }
+        }`
+	var confstr = fmt.Sprintf(`        {
+            "nojsonoption" : true,
+            "nohelpoption" : true
+        }`)
+	var options *ExtArgsOptions
+	var parser *ExtArgsParse
+	var sarr []string
+	var ok bool
+	var jsonfile string
+	var depjsonfile string
+	var c string
+	var depstrval string = `newval`
+	var depliststr string = `["depenv1","depenv2"]`
+	var helpexpr, jsonexpr *regexp.Regexp
+	var helpok, jsonok bool
+
+	beforeParser(t)
+	ok = false
+	jsonfile = makeWriteTempFile(`{"dep":{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"},"port":6000,"verbose":3}`)
+	defer func() { safeRemoveFile(jsonfile, "jsonfile", ok) }()
+	depjsonfile = makeWriteTempFile(`{"list":["depjson1","depjson2"]}`)
+	defer func() { safeRemoveFile(depjsonfile, "depjsonfile", ok) }()
+	os.Setenv("EXTARGSPARSE_JSONFILE", jsonfile)
+	os.Setenv("DEP_JSONFILE", depjsonfile)
+
+	options, err = NewExtArgsOptions(confstr)
+	check_equal(t, err, nil)
+	parser, err = NewExtArgsParse(options, []int{ENV_COMMAND_JSON_SET, ENVIRONMENT_SET, ENV_SUB_COMMAND_JSON_SET})
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(loads)
+	check_equal(t, err, nil)
+	os.Setenv("DEP_STRING", depstrval)
+	os.Setenv("DEP_LIST", depliststr)
+	sarr = getCmdHelp(parser, "")
+	helpok = false
+	jsonok = false
+	helpexpr = regexp.MustCompile(`^\s+--help.*`)
+	jsonexpr = regexp.MustCompile(`^\s+--json.*`)
+	for _, c = range sarr {
+		if helpexpr.MatchString(c) {
+			helpok = true
+		}
+		if jsonexpr.MatchString(c) {
+			jsonok = true
+		}
+	}
+	check_equal(t, helpok, false)
+	check_equal(t, jsonok, false)
+	ok = true
 	return
 }

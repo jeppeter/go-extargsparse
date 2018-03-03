@@ -172,7 +172,27 @@ func debug_opthelp_set(keycls *ExtKeyParse) string {
 	return fmt.Sprintf("opthelp function set [%s] default value (%s)", keycls.Optdest(), keycls.Value())
 }
 
-/*
+func Debug_args_function(ns *NameSpaceEx, ostruct interface{}, Context interface{}) error {
+	var p *parserTest5Ctx
+	if Context == nil || ns == nil {
+		return nil
+	}
+	p = Context.(*parserTest5Ctx)
+	if ns.GetString("subcommand") != "" {
+		p.has_called_args = ns.GetString("subcommand")
+	} else {
+		p.has_called_args = ""
+	}
+	return nil
+}
+
+func init() {
+	debug_opthelp_set(nil)
+	Debug_set_2_args(nil, 0, nil, []string{})
+	debug_set_2_args(nil, 0, nil, []string{})
+	Debug_args_function(nil, nil, nil)
+}
+
 type parserTest1 struct {
 	Verbose int
 	Flag    bool
@@ -504,20 +524,6 @@ type parserTest5Ctx struct {
 	has_called_args string
 }
 
-func Debug_args_function(ns *NameSpaceEx, ostruct interface{}, Context interface{}) error {
-	var p *parserTest5Ctx
-	if Context == nil || ns == nil {
-		return nil
-	}
-	p = Context.(*parserTest5Ctx)
-	if ns.GetString("subcommand") != "" {
-		p.has_called_args = ns.GetString("subcommand")
-	} else {
-		p.has_called_args = ""
-	}
-	return nil
-}
-
 func Test_parser_A005(t *testing.T) {
 	var loads_fmt = `        {
             "verbose|v" : "+",
@@ -540,7 +546,6 @@ func Test_parser_A005(t *testing.T) {
 	var params = []string{"-p", "7003", "-vvvvv", "dep", "-l", "foo1", "-s", "new_var", "zz"}
 	var args *NameSpaceEx
 	var pc *parserTest5Ctx
-	Debug_args_function(nil, nil, nil) // we call this function here because this function will compiled when call
 	pc = &parserTest5Ctx{}
 	pkgname = getCallerPackage(1)
 	beforeParser(t)
@@ -2448,7 +2453,6 @@ func Test_parser_A045(t *testing.T) {
 	var options *ExtArgsOptions
 	var pkgname string
 	beforeParser(t)
-	debug_set_2_args(nil, 0, nil, []string{})
 	pkgname = getCallerPackage(0)
 	check_not_equal(t, pkgname, "")
 	loads = fmt.Sprintf(loads_fmt, pkgname)
@@ -2489,8 +2493,6 @@ func Test_parser_A046(t *testing.T) {
 	var ok bool = false
 	var c string
 	beforeParser(t)
-	debug_set_2_args(nil, 0, nil, []string{})
-	debug_opthelp_set(nil)
 	pkgname = getCallerPackage(0)
 	check_not_equal(t, pkgname, "")
 	loads = fmt.Sprintf(loads_fmt, pkgname, pkgname)
@@ -2511,9 +2513,8 @@ func Test_parser_A046(t *testing.T) {
 	check_equal(t, ok, true)
 	return
 }
-*/
 
-// we call the function as will exit ,so we do this ok
+/*
 func Test_parser_A047(t *testing.T) {
 	var err error
 	var parser *ExtArgsParse
@@ -2537,8 +2538,6 @@ func Test_parser_A047(t *testing.T) {
 	var ok bool = false
 	var c string
 	beforeParser(t)
-	debug_set_2_args(nil, 0, nil, []string{})
-	debug_opthelp_set(nil)
 	pkgname = getCallerPackage(0)
 	check_not_equal(t, pkgname, "")
 	loads = fmt.Sprintf(loads_fmt, pkgname, pkgname)
@@ -2559,3 +2558,4 @@ func Test_parser_A047(t *testing.T) {
 	check_equal(t, ok, true)
 	return
 }
+*/

@@ -2635,7 +2635,6 @@ func Test_parser_A048(t *testing.T) {
 	ok = true
 	return
 }
-*/
 
 func Test_parser_A049(t *testing.T) {
 	var err error
@@ -2644,7 +2643,7 @@ func Test_parser_A049(t *testing.T) {
             "$port|p" : {
                 "value" : 3000,
                 "type" : "int",
-                "nargs" : 1 , 
+                "nargs" : 1 ,
                 "helpinfo" : "port to connect"
             },
             "dep" : {
@@ -2699,5 +2698,45 @@ func Test_parser_A049(t *testing.T) {
 		}
 	}
 	check_equal(t, overlength, true)
+	return
+}
+*/
+
+func Test_parser_A050(t *testing.T) {
+	var err error
+	var loads = `        {
+            "verbose|v" : "+",
+            "dep" : {
+                "list|l" : [],
+                "string|s" : "s_var",
+                "$" : "+"
+            }
+        }`
+	var confstr = fmt.Sprintf(`{"helplong": "usage", "helpshort" : "?" , "longprefix" : "++", "shortprefix" : "+"}`)
+	var options *ExtArgsOptions
+	var parser *ExtArgsParse
+	var sarr []string
+	var ok bool
+	var c string
+	var matchexpr *regexp.Regexp
+
+	beforeParser(t)
+
+	options, err = NewExtArgsOptions(confstr)
+	check_equal(t, err, nil)
+	parser, err = NewExtArgsParse(options, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(loads)
+	check_equal(t, err, nil)
+	sarr = getCmdHelp(parser, "")
+	ok = false
+	matchexpr = regexp.MustCompile(`^\s+\+\+usage|\+\?\s+to display.*`)
+	for _, c = range sarr {
+		if matchexpr.MatchString(c) {
+			ok = true
+			break
+		}
+	}
+	check_equal(t, ok, true)
 	return
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"strings"
 	"testing"
@@ -181,7 +182,97 @@ func Debug_args_function(ns *NameSpaceEx, ostruct interface{}, Context interface
 	return nil
 }
 
+func jsonfunc_2(value interface{}) (vs []string, err error) {
+	var vinter []interface{}
+	var v interface{}
+
+	vs = make([]string, 0)
+	switch value.(type) {
+	case []interface{}:
+		vinter = value.([]interface{})
+		for _, v = range vinter {
+			vs = append(vs, fmt.Sprintf("%s", v))
+		}
+	case []string:
+		vs = value.([]string)
+	default:
+		err = fmt.Errorf("%s", format_error("can not use type [%s]", reflect.ValueOf(value).Type().String()))
+		return
+	}
+	err = nil
+	return
+
+}
+
+func Debug_2_jsonfunc(ns *NameSpaceEx, keycls *ExtKeyParse, value interface{}) error {
+	var vs []string
+	var err error
+	var setvs []string
+	var idx int
+	if ns == nil {
+		return nil
+	}
+
+	if keycls == nil {
+		return fmt.Errorf("%s", format_error("nil keycls"))
+	}
+
+	if !keycls.IsFlag() || keycls.TypeName() != "list" {
+		return fmt.Errorf("%s", format_error("keycls [%s] not valid", keycls.Format()))
+	}
+
+	if value == nil {
+		ns.SetValue(keycls.Optdest(), []string{})
+	}
+
+	vs, err = jsonfunc_2(value)
+	if err != nil {
+		return err
+	}
+
+	if (len(vs) % 2) != 0 {
+		return fmt.Errorf("%s", format_error("%s not even size", vs))
+	}
+
+	setvs = make([]string, 0)
+	for idx = 0; idx < len(vs); idx += 2 {
+		setvs = append(setvs, vs[idx])
+	}
+	ns.SetValue(keycls.Optdest(), setvs)
+	return nil
+}
+
+func Debug_upper_jsonfunc(ns *NameSpaceEx, keycls *ExtKeyParse, value interface{}) error {
+	var s string
+	if ns == nil {
+		return nil
+	}
+
+	if keycls == nil {
+		return fmt.Errorf("%s", format_error("keycls nil"))
+	}
+
+	if !keycls.IsFlag() || keycls.TypeName() != "string" {
+		return fmt.Errorf("%s", format_error("[%s] not type string", keycls.Format()))
+	}
+	if value == nil {
+		ns.SetValue(keycls.Optdest(), nil)
+		return nil
+	}
+
+	switch value.(type) {
+	case string:
+		s = value.(string)
+	default:
+		return fmt.Errorf("%s", format_error("[%v] not valid string type", value))
+	}
+	ns.SetValue(keycls.Optdest(), strings.ToUpper(s))
+	return nil
+}
+
 func init() {
+	Debug_2_jsonfunc(nil, nil, nil)
+	Debug_upper_jsonfunc(nil, nil, nil)
 	debug_opthelp_set(nil)
 	Debug_set_2_args(nil, 0, nil, []string{})
 	debug_set_2_args(nil, 0, nil, []string{})
@@ -210,7 +301,7 @@ func Test_parser_A001(t *testing.T) {
                 "nargs" : "*",
                 "type" : "string"
             }
-        }
+        }s
 	`
 	var params = []string{"-vvvv", "-f", "-n", "30", "-l", "bar1", "-l", "bar2", "var1", "var2"}
 	var parser *ExtArgsParse
@@ -3040,7 +3131,7 @@ func Test_parser_A054(t *testing.T) {
 
 func Test_parser_A055(t *testing.T) {
 	var err error
-	var loads = `        {
+	var loads_fmt = `        {
             "verbose|v" : "+",
             "$port|p" : {
                 "value" : 3000,
@@ -3049,11 +3140,12 @@ func Test_parser_A055(t *testing.T) {
                 "helpinfo" : "port to connect"
             },
             "dep" : {
-                "list|l!jsonfunc=debug_2_jsonfunc!" : [],
-                "string|s!jsonfunc=debug_upper_jsonfunc!" : "s_var",
+                "list|l!jsonfunc=%s.debug_2_jsonfunc!" : [],
+                "string|s!jsonfunc=%s.debug_upper_jsonfunc!" : "s_var",
                 "$" : "+"
             }
         }`
+	var loads string
 	var confstr = fmt.Sprintf(`        {
             "jsonlong" : "jsonfile"
         }`)
@@ -3065,9 +3157,13 @@ func Test_parser_A055(t *testing.T) {
 	var depjsonfile string
 	var depstrval string = `newval`
 	var depliststr string = `["depenv1","depenv2"]`
+	var pkgname string
 
 	beforeParser(t)
 	ok = false
+	pkgname = getCallerPackage(1)
+	check_not_equal(t, pkgname, "")
+	loads = fmt.Sprintf(loads_fmt, pkgname, pkgname)
 	jsonfile = makeWriteTempFile(`{"dep":{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"},"port":6000,"verbose":3}`)
 	defer func() { safeRemoveFile(jsonfile, "jsonfile", ok) }()
 	depjsonfile = makeWriteTempFile(`{"list":["depjson1","depjson2"]}`)
@@ -3084,11 +3180,12 @@ func Test_parser_A055(t *testing.T) {
 	os.Setenv("DEP_STRING", depstrval)
 	os.Setenv("DEP_LIST", depliststr)
 	args, err = parser.ParseCommandLine([]string{"--jsonfile", jsonfile, "dep", "ww"}, nil)
+	check_equal(t, err, nil)
 	check_equal(t, args.GetInt("verbose"), 3)
 	check_equal(t, args.GetInt("port"), 6000)
 	check_equal(t, args.GetString("subcommand"), "dep")
-	check_equal(t, args.GetArray("dep_list"), []string{"jsonval1", "jsonval2"})
-	check_equal(t, args.GetString("dep_string"), "jsonstring")
+	check_equal(t, args.GetArray("dep_list"), []string{"jsonval1"})
+	check_equal(t, args.GetString("dep_string"), "JSONSTRING")
 	check_equal(t, args.GetArray("subnargs"), []string{"ww"})
 	ok = true
 	return

@@ -1205,9 +1205,9 @@ func (self *ExtArgsParse) callOptMethodFunc(ns *NameSpaceEx, validx int, keycls 
 func (self *ExtArgsParse) callKeyOptMethodFunc(ns *NameSpaceEx, validx int, keycls *ExtKeyParse, params []string) (step int, err error) {
 	var callfunc func(ns *NameSpaceEx, valid int, keycls *ExtKeyParse, params []string) (step int, err error)
 	self.Trace("get [%s]", keycls.Attr("optparse"))
-	err = self.GetFuncPtr(keycls.Attr("optparse"), &callfunc)
+	err = self.GetFuncPtr(self.options.GetBool(FUNC_UPPER_CASE), keycls.Attr("optparse"), &callfunc)
 	if err != nil {
-		err = fmt.Errorf("%s",format_error("find [%s] error [%s]", keycls.Attr("optparse"), err.Error()))
+		err = fmt.Errorf("%s", format_error("find [%s] error [%s]", keycls.Attr("optparse"), err.Error()))
 		return 0, err
 	}
 	return callfunc(ns, validx, keycls, params)
@@ -1337,20 +1337,10 @@ func (self *ExtArgsParse) callJsonBindMap(ns *NameSpaceEx, opt *ExtKeyParse, val
 }
 
 func (self *ExtArgsParse) callJsonValue(ns *NameSpaceEx, opt *ExtKeyParse, value interface{}) error {
+	var err error
 	if opt.Attr("jsonfunc") != "" {
 		var jsonfunc func(ns *NameSpaceEx, opt *ExtKeyParse, value interface{}) error
-		var realfuncname string
-		var sarr []string
-		var err error
-		realfuncname = opt.Attr("jsonfunc")
-		sarr = strings.Split(realfuncname, ".")
-		if len(sarr) > 1 {
-			realfuncname = strings.Join(sarr[:len(sarr)-1], ".")
-			realfuncname += fmt.Sprintf(".%s", self.funcUcFirst(sarr[len(sarr)-1]))
-		} else {
-			realfuncname = fmt.Sprintf("main.%s", self.funcUcFirst(realfuncname))
-		}
-		err = self.GetFuncPtr(realfuncname, &jsonfunc)
+		err = self.GetFuncPtr(self.options.GetBool(FUNC_UPPER_CASE), opt.Attr("jsonfunc"), &jsonfunc)
 		if err != nil {
 			return err
 		}
@@ -1617,25 +1607,13 @@ func (self *ExtArgsParse) funcUcFirst(name string) string {
 func (self *ExtArgsParse) callbackFunc(funcname string, ns *NameSpaceEx, ostruct interface{}, Context interface{}) error {
 	var callfunc func(ns *NameSpaceEx, ostruct interface{}, Context interface{}) error
 	var err error
-	var realfuncname string
-	var sarr []string
-	sarr = strings.Split(funcname, ".")
-	if len(sarr) > 1 {
-		realfuncname = strings.Join(sarr[:(len(sarr)-1)], ".")
-		if len(realfuncname) > 0 {
-			realfuncname += "."
-		}
-		realfuncname += self.funcUcFirst(sarr[len(sarr)-1])
-	} else {
-		realfuncname = fmt.Sprintf("main.%s", self.funcUcFirst(funcname))
-	}
 
-	err = self.GetFuncPtr(realfuncname, &callfunc)
+	err = self.GetFuncPtr(self.options.GetBool(FUNC_UPPER_CASE), funcname, &callfunc)
 	if err != nil {
-		self.Error("can not find [%s] [%s]", realfuncname, funcname)
+		self.Error("can not find [%s] [%s]", funcname, err.Error())
 		return err
 	}
-	self.Info("call [%s] [%s] [%v]", funcname, realfuncname, callfunc)
+	self.Info("call [%s]  [%v]", funcname, callfunc)
 	return callfunc(ns, ostruct, Context)
 }
 
@@ -1792,16 +1770,16 @@ func (self *ExtArgsParse) GetCmdKey(cmdname string) (*ExtKeyParse, error) {
 
 type cmdoptsSort []*ExtKeyParse
 
-func (self cmdoptsSort)Len() int {
+func (self cmdoptsSort) Len() int {
 	return len(self)
 }
 
-func (self cmdoptsSort)Swap(i, j int) {
-	self[i],self[j] = self[j],self[i]
+func (self cmdoptsSort) Swap(i, j int) {
+	self[i], self[j] = self[j], self[i]
 	return
 }
 
-func (self cmdoptsSort) Less(i,j int) bool {
+func (self cmdoptsSort) Less(i, j int) bool {
 	if self[i].TypeName() == "args" {
 		return true
 	}
@@ -1816,15 +1794,15 @@ func (self cmdoptsSort) Less(i,j int) bool {
 func (self *ExtArgsParse) sortCmdOpts(opts []*ExtKeyParse) []*ExtKeyParse {
 	sort.Sort(cmdoptsSort(opts))
 	/*
-	sort.Slice(opts, func(i, j int) bool {
-		if opts[i].TypeName() == "args" {
-			return true
-		}
-		if opts[j].TypeName() == "args" {
-			return false
-		}
-		return opts[i].Optdest() < opts[j].Optdest()
-	})
+		sort.Slice(opts, func(i, j int) bool {
+			if opts[i].TypeName() == "args" {
+				return true
+			}
+			if opts[j].TypeName() == "args" {
+				return false
+			}
+			return opts[i].Optdest() < opts[j].Optdest()
+		})
 	*/
 	return opts
 }
@@ -1847,7 +1825,7 @@ func (self *ExtArgsParse) getCmdOpts(cmdname string, cmdpaths []*parserCompat) [
 		}
 		return self.sortCmdOpts(retkeys)
 	}
- 
+
 	sarr = strings.Split(cmdname, ".")
 	for _, c = range cmdpaths[len(cmdpaths)-1].SubCommands {
 		if c.CmdName == sarr[0] {

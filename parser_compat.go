@@ -9,18 +9,19 @@ import (
 
 type parserCompat struct {
 	logObject
-	KeyCls       *ExtKeyParse
-	CmdName      string
-	CmdOpts      []*ExtKeyParse
-	SubCommands  []*parserCompat
-	HelpInfo     string
-	CallFunction string
-	ScreenWidth  int
-	Epilog       string
-	Description  string
-	Prog         string
-	Usage        string
-	Version      string
+	KeyCls        *ExtKeyParse
+	CmdName       string
+	CmdOpts       []*ExtKeyParse
+	SubCommands   []*parserCompat
+	HelpInfo      string
+	CallFunction  string
+	ScreenWidth   int
+	Epilog        string
+	Description   string
+	Prog          string
+	Usage         string
+	Version       string
+	FunctionUpper bool
 }
 
 func newParserCompat(keycls *ExtKeyParse, opt *ExtArgsOptions) *parserCompat {
@@ -59,6 +60,11 @@ func newParserCompat(keycls *ExtKeyParse, opt *ExtArgsOptions) *parserCompat {
 		self.ScreenWidth = opt.GetValue("screenwidth").(int)
 	}
 
+	self.FunctionUpper = true
+	if opt != nil {
+		self.FunctionUpper = opt.GetBool(FUNC_UPPER_CASE)
+	}
+
 	if self.ScreenWidth < 40 {
 		self.ScreenWidth = 40
 	}
@@ -78,7 +84,7 @@ func (self *parserCompat) get_help_info(keycls *ExtKeyParse) string {
 	if keycls.Attr("opthelp") != "" {
 		/*now it is the help function ,so we call this*/
 
-		err = self.GetFuncPtr(keycls.Attr("opthelp"), &helpfunc)
+		err = self.GetFuncPtr(self.FunctionUpper, keycls.Attr("opthelp"), &helpfunc)
 		if err == nil {
 			return helpfunc(keycls)
 		}

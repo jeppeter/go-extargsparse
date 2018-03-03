@@ -2360,10 +2360,10 @@ func Test_parser_A042(t *testing.T) {
 	check_equal(t, err, nil)
 	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
 	check_equal(t, err, nil)
-	args, err = parser.ParseCommandLine([]string{"-vvvK","kernel","--initrd","initrd","cc","dd","-E","encryptkey","-e","encryptfile","ipxe"}, nil)
+	args, err = parser.ParseCommandLine([]string{"-vvvK", "kernel", "--initrd", "initrd", "cc", "dd", "-E", "encryptkey", "-e", "encryptfile", "ipxe"}, nil)
 	check_equal(t, err, nil)
-	check_equal(t, args.GetString("subcommand"),"ipxe")
-	check_equal(t, args.GetArray("subnargs"),[]string{"cc","dd"})
+	check_equal(t, args.GetString("subcommand"), "ipxe")
+	check_equal(t, args.GetArray("subnargs"), []string{"cc", "dd"})
 	return
 }
 
@@ -2390,10 +2390,10 @@ func Test_parser_A043(t *testing.T) {
 	check_equal(t, err, nil)
 	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
 	check_equal(t, err, nil)
-	args, err = parser.ParseCommandLine([]string{"-K","kernel","-initrd","initrd","cc","dd","-E","encryptkey","-e","encryptfile","ipxe"}, nil)
+	args, err = parser.ParseCommandLine([]string{"-K", "kernel", "-initrd", "initrd", "cc", "dd", "-E", "encryptkey", "-e", "encryptfile", "ipxe"}, nil)
 	check_equal(t, err, nil)
-	check_equal(t, args.GetString("subcommand"),"ipxe")
-	check_equal(t, args.GetArray("subnargs"),[]string{"cc","dd"})
+	check_equal(t, args.GetString("subcommand"), "ipxe")
+	check_equal(t, args.GetArray("subnargs"), []string{"cc", "dd"})
 	return
 }
 
@@ -2420,13 +2420,12 @@ func Test_parser_A044(t *testing.T) {
 	check_equal(t, err, nil)
 	err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
 	check_equal(t, err, nil)
-	args, err = parser.ParseCommandLine([]string{"+K","kernel","++initrd","initrd","cc","dd","+E","encryptkey","+e","encryptfile","ipxe"}, nil)
+	args, err = parser.ParseCommandLine([]string{"+K", "kernel", "++initrd", "initrd", "cc", "dd", "+E", "encryptkey", "+e", "encryptfile", "ipxe"}, nil)
 	check_equal(t, err, nil)
-	check_equal(t, args.GetString("subcommand"),"ipxe")
-	check_equal(t, args.GetArray("subnargs"),[]string{"cc","dd"})
+	check_equal(t, args.GetString("subcommand"), "ipxe")
+	check_equal(t, args.GetArray("subnargs"), []string{"cc", "dd"})
 	return
 }
-
 
 func Test_parser_A045(t *testing.T) {
 	var err error
@@ -2495,7 +2494,7 @@ func Test_parser_A046(t *testing.T) {
 	pkgname = getCallerPackage(0)
 	check_not_equal(t, pkgname, "")
 	loads = fmt.Sprintf(loads_fmt, pkgname, pkgname)
-	options, err = NewExtArgsOptions(`{"parseall": true,"longprefix" : "++", "shortprefix" : "+"}`)
+	options, err = NewExtArgsOptions(fmt.Sprintf(`{"parseall": true,"longprefix" : "++", "shortprefix" : "+", "%s": false}`, FUNC_UPPER_CASE))
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(options, nil)
 	check_equal(t, err, nil)

@@ -115,8 +115,29 @@ func (l *logObject) Debug_long(callstack int, fmtstr string, a ...interface{}) {
 	return
 }
 
-func (l *logObject) GetFuncPtr(funcname string, outptr interface{}) error {
-	return getFunc(outptr, funcname)
+func (l *logObject) GetFuncPtr(uppercase bool, funcname string, outptr interface{}) error {
+	var realname string
+	var sarr []string
+	if len(funcname) == 0 {
+		return fmt.Errorf("%s", format_error("not valid funcname [%s]", funcname))
+	}
+	sarr = strings.Split(funcname, ".")
+	if len(sarr) > 1 {
+		realname = strings.Join(sarr[:(len(sarr)-1)], ".")
+		realname += "."
+		if uppercase {
+			realname += ucFirst(sarr[len(sarr)-1])
+		} else {
+			realname += sarr[len(sarr)-1]
+		}
+	} else {
+		if uppercase {
+			realname = fmt.Sprintf("main.%s", ucFirst(funcname))
+		} else {
+			realname = fmt.Sprintf("main.%s", funcname)
+		}
+	}
+	return getFunc(outptr, realname)
 }
 
 func (l *logObject) Debug(fmtstr string, a ...interface{}) {

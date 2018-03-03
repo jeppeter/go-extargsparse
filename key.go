@@ -24,7 +24,6 @@ var flagwords = []string{"flagname", "helpinfo", "shortflag", "nargs", "varname"
 var flagspecial = []string{"value", "prefix"}
 
 func parseAttr(attr string) (kattr map[string]string, err error) {
-	var lattr string
 	var splitchar string = ";"
 	var splitstrings []string
 	var splitexpr *regexp.Regexp
@@ -34,9 +33,8 @@ func parseAttr(attr string) (kattr map[string]string, err error) {
 
 	kattr = nil
 	err = nil
-	lattr = strings.ToLower(attr)
-	if strings.HasPrefix(lattr, ATTR_SPLIT_EQUAL) {
-		splitchar = lattr[len(ATTR_SPLIT_EQUAL):(len(ATTR_SPLIT_EQUAL) + 1)]
+	if strings.HasPrefix(attr, ATTR_SPLIT_EQUAL) {
+		splitchar = attr[len(ATTR_SPLIT_EQUAL):(len(ATTR_SPLIT_EQUAL) + 1)]
 		switch splitchar {
 		case "\\":
 			splitchar = "\\\\"

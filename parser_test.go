@@ -3363,7 +3363,6 @@ func Test_parser_A057(t *testing.T) {
 			}
 
 		} else if opt.Longopt() == "-multivalue-rdn" {
-			keyDebug("optdest [%s]", opt.Optdest())
 			if opt.Optdest() == "multivalue_rdn" {
 				ok = true
 			}
@@ -3374,7 +3373,6 @@ func Test_parser_A057(t *testing.T) {
 				}
 			}
 		}
-		keyDebug("opt [%s]", opt.Format())
 		check_equal(t, ok, true)
 	}
 

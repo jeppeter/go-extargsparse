@@ -1742,7 +1742,7 @@ func Test_parser_A026(t *testing.T) {
 	var sarr []string
 	var opts []*ExtKeyParse
 	beforeParser(t)
-	options, err = NewExtArgsOptions(`{"prog" : "cmd1"}`)
+	options, err = NewExtArgsOptions(fmt.Sprintf(`{"prog" : "cmd1"}`))
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(options, nil)
 	check_equal(t, err, nil)
@@ -1803,7 +1803,7 @@ func Test_parser_A027(t *testing.T) {
 	var opts []*ExtKeyParse
 	var flag *ExtKeyParse
 	beforeParser(t)
-	options, err = NewExtArgsOptions(`{"prog" : "cmd1"}`)
+	options, err = NewExtArgsOptions(fmt.Sprintf(`{"prog" : "cmd1"}`))
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(options, nil)
 	check_equal(t, err, nil)

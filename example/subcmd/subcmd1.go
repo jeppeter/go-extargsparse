@@ -43,7 +43,7 @@ func init() {
 
 func main() {
 	var commandline = `{
-		"verbose" : "+",
+		"verbose|v" : "+",
 		"dep<dep_handler>" : {
 			"$" : "*",
 			"list|L" :  [],

@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	ATTR_SPLIT       = "split"
-	ATTR_SPLIT_EQUAL = "split="
+	attr_split       = "split"
+	attr_split_equal = "split="
 )
 
 var helpExpr *regexp.Regexp = regexp.MustCompile(`(?i)##([^\#\!]+)##$`)
@@ -33,8 +33,8 @@ func parseAttr(attr string) (kattr map[string]string, err error) {
 
 	kattr = nil
 	err = nil
-	if strings.HasPrefix(attr, ATTR_SPLIT_EQUAL) {
-		splitchar = attr[len(ATTR_SPLIT_EQUAL):(len(ATTR_SPLIT_EQUAL) + 1)]
+	if strings.HasPrefix(attr, attr_split_equal) {
+		splitchar = attr[len(attr_split_equal):(len(attr_split_equal) + 1)]
 		switch splitchar {
 		case "\\":
 			splitchar = "\\\\"
@@ -64,7 +64,7 @@ func parseAttr(attr string) (kattr map[string]string, err error) {
 	kattr = make(map[string]string)
 	splitstrings = splitexpr.Split(attr, -1)
 	for _, curs = range splitstrings {
-		if strings.HasPrefix(curs, ATTR_SPLIT_EQUAL) || curs == "" {
+		if strings.HasPrefix(curs, attr_split_equal) || curs == "" {
 			continue
 		}
 		vk = equalexpr.Split(curs, 2)
@@ -89,7 +89,7 @@ func setAttr(attr interface{}) (kattr map[string]string, err error) {
 	case map[string]interface{}:
 		vmap = attr.(map[string]interface{})
 		for k, v = range vmap {
-			if strings.ToLower(k) == ATTR_SPLIT || k == "" {
+			if strings.ToLower(k) == attr_split || k == "" {
 				continue
 			}
 			switch v.(type) {

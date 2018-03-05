@@ -68,11 +68,19 @@ func newParserCompat(keycls *ExtKeyParse, opt *ExtArgsOptions) *parserCompat {
 	if self.ScreenWidth < 40 {
 		self.ScreenWidth = 40
 	}
-	self.Epilog = ""
-	self.Description = ""
-	self.Prog = ""
-	self.Usage = ""
-	self.Version = ""
+	if opt != nil {
+		self.Epilog = opt.GetString("epilog")
+		self.Description = opt.GetString("description")
+		self.Prog = opt.GetString("prog")
+		self.Usage = opt.GetString("usage")
+		self.Version = opt.GetString("version")
+	} else {
+		self.Epilog = ""
+		self.Description = ""
+		self.Prog = ""
+		self.Usage = ""
+		self.Version = ""
+	}
 	return self
 }
 

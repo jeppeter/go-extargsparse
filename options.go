@@ -7,7 +7,7 @@ import (
 )
 
 type ExtArgsOptions struct {
-	logObject
+	logger *logObject
 	values map[string]interface{}
 }
 
@@ -34,6 +34,8 @@ var opt_default_VALUE = map[string]interface{}{
 	FUNC_UPPER_CASE:  true,
 }
 
+// to set the value of k and v
+//    it almost the direct but one case with float in the type of no small part ,it will return int set
 func (p *ExtArgsOptions) SetValue(k string, v interface{}) error {
 	var retv interface{}
 	var iv int
@@ -56,18 +58,8 @@ func (p *ExtArgsOptions) SetValue(k string, v interface{}) error {
 	return nil
 }
 
-func (p *ExtArgsOptions) SetString(k string, v string) error {
-	return p.SetValue(k, v)
-}
-
-func (p *ExtArgsOptions) SetInt(k string, v int) error {
-	return p.SetValue(k, v)
-}
-
-func (p *ExtArgsOptions) SetBool(k string, v bool) error {
-	return p.SetValue(k, v)
-}
-
+// get the value of key ,if not set return nil, otherwise return the interface{}
+//    it gives the caller to check the type
 func (p *ExtArgsOptions) GetValue(k string) interface{} {
 	var v interface{}
 	var ok bool
@@ -78,6 +70,7 @@ func (p *ExtArgsOptions) GetValue(k string) interface{} {
 	return v
 }
 
+// get the value of key , if it is not set or not string type it will return ""
 func (p *ExtArgsOptions) GetString(k string) string {
 	var v interface{}
 	v = p.GetValue(k)
@@ -91,6 +84,7 @@ func (p *ExtArgsOptions) GetString(k string) string {
 	return fmt.Sprintf("%v", v)
 }
 
+// get the value of key ,if it is not set or not bool type it will return false
 func (p *ExtArgsOptions) GetBool(k string) bool {
 	var v interface{}
 	v = p.GetValue(k)
@@ -105,6 +99,7 @@ func (p *ExtArgsOptions) GetBool(k string) bool {
 	return false
 }
 
+// get the value of key ,if it is not set or not int type it will return 0
 func (p *ExtArgsOptions) GetInt(k string) int {
 	var v interface{}
 	v = p.GetValue(k)
@@ -127,6 +122,7 @@ func (p *ExtArgsOptions) GetInt(k string) int {
 	return 0
 }
 
+// Format to give the value in the string format split by ; it is by debug used
 func (p *ExtArgsOptions) Format() string {
 	var keys []string
 	var s string = ""
@@ -154,6 +150,29 @@ func (p *ExtArgsOptions) Format() string {
 	return s
 }
 
+// NewExtArgsOptions for create new options for *ExtArgsParse
+//    s is the json file ,
+//    key               default value
+//    "prog":           ""
+//    "usage":          ""
+//    "description":    ""
+//    "epilog":         ""
+//    "version":        "0.0.1"
+//    "errorhandler":   "exit"
+//    "helphandler":    nil
+//    "longprefix":     "--"
+//    "shortprefix":    "-"
+//    "nohelpoption":   false
+//    "nojsonoption":   false
+//    "helplong":       "help"
+//    "helpshort":      "h"
+//    "jsonlong":       "json"
+//    "cmdprefixadded": true
+//    "parseall":       true
+//    "screenwidth":    80
+//    "flagnochange":   false
+//    VAR_UPPER_CASE:   true
+//    FUNC_UPPER_CASE:  true
 func NewExtArgsOptions(s string) (p *ExtArgsOptions, err error) {
 	var vmap map[string]interface{}
 	var k string
@@ -166,7 +185,7 @@ func NewExtArgsOptions(s string) (p *ExtArgsOptions, err error) {
 		return
 	}
 
-	p = &ExtArgsOptions{logObject: *newLogObject("extargsparse"), values: make(map[string]interface{})}
+	p = &ExtArgsOptions{logger: newLogObject("extargsparse"), values: make(map[string]interface{})}
 	for k, v = range opt_default_VALUE {
 		p.SetValue(k, v)
 	}

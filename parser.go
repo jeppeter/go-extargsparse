@@ -1759,6 +1759,7 @@ func (self *ExtArgsParse) getCmdKey(cmdname string, cmdpaths []*parserCompat) *E
 	return nil
 }
 
+// GetCmdKey will get the command keycls for this ,it can be for parse and expand the coding
 func (self *ExtArgsParse) GetCmdKey(cmdname string) (*ExtKeyParse, error) {
 	var err error
 	var cmdpaths []*parserCompat

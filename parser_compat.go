@@ -149,7 +149,7 @@ func (self *parserCompat) get_opt_help_opthelp(opt *ExtKeyParse) string {
 func (self *parserCompat) get_cmd_help_cmdname() string {
 	var s string = ""
 	if len(self.CmdName) > 0 {
-		s = self.CmdName
+		s = fmt.Sprintf("[%s]", self.CmdName)
 	}
 	return s
 }
@@ -169,8 +169,8 @@ func (self *parserCompat) GetHelpSize(hs *helpSize, recursive int) *helpSize {
 		hs = newHelpSize()
 	}
 
-	hs.SetValue("cmdnamesize", len(self.get_cmd_help_cmdname()))
-	hs.SetValue("cmdhelpsize", len(self.get_cmd_help_cmdhelp()))
+	hs.SetValue("cmdnamesize", len(self.get_cmd_help_cmdname())+1)
+	hs.SetValue("cmdhelpsize", len(self.get_cmd_help_cmdhelp())+1)
 
 	for _, curopt = range self.CmdOpts {
 		if curopt.TypeName() == "args" {
@@ -192,8 +192,8 @@ func (self *parserCompat) GetHelpSize(hs *helpSize, recursive int) *helpSize {
 	}
 
 	for _, chldparser = range self.SubCommands {
-		hs.SetValue("cmdnamesize", len(chldparser.CmdName)+2)
-		hs.SetValue("cmdhelpsize", len(chldparser.HelpInfo))
+		hs.SetValue("cmdnamesize", len(chldparser.get_cmd_help_cmdname())+1)
+		hs.SetValue("cmdhelpsize", len(chldparser.get_cmd_help_cmdhelp())+1)
 	}
 
 	return hs
@@ -235,6 +235,8 @@ func (self *parserCompat) GetHelpInfo(hs *helpSize, parentcmds []*parserCompat) 
 	var rootcmds *parserCompat = nil
 	var curcmd *parserCompat
 	var curopt *ExtKeyParse
+	var cmdname string
+	var cmdhelp string
 	var curs string
 	var curint int
 	var optname string
@@ -309,6 +311,8 @@ func (self *parserCompat) GetHelpInfo(hs *helpSize, parentcmds []*parserCompat) 
 		rets += fmt.Sprintf("%s\n", self.Description)
 	}
 
+	rets += "\n"
+
 	if len(self.CmdOpts) > 0 {
 		rets += "[OPTIONS]\n"
 
@@ -338,10 +342,38 @@ func (self *parserCompat) GetHelpInfo(hs *helpSize, parentcmds []*parserCompat) 
 		}
 	}
 
+	if len(self.SubCommands) > 0 {
+		rets += "\n"
+		rets += "[SUBCOMMANDS]\n"
+		for _, curcmd = range self.SubCommands {
+			cmdname = curcmd.get_cmd_help_cmdname()
+			cmdhelp = curcmd.get_cmd_help_cmdhelp()
+			curs = ""
+			curs += "    "
+			curs += fmt.Sprintf("%-*s %-*s", hs.GetValue("cmdnamesize"), cmdname, hs.GetValue("cmdhelpsize"), cmdhelp)
+			if len(curs) < self.ScreenWidth {
+				rets += curs
+				rets += "\n"
+			} else {
+				curs = ""
+				curs += "    "
+				curs += fmt.Sprintf("%-*s", hs.GetValue("cmdnamesize"), cmdname)
+				rets += fmt.Sprintf("%s\n", curs)
+				if self.ScreenWidth > 60 {
+					rets += self.get_indent_string(cmdhelp, 20, self.ScreenWidth)
+				} else {
+					rets += self.get_indent_string(cmdhelp, 15, self.ScreenWidth)
+				}
+			}
+		}
+	}
+
 	if len(self.Epilog) > 0 {
+		rets += "\n"
 		rets += fmt.Sprintf("\n%s\n", self.Epilog)
 	}
 
+	self.Trace("%s", rets)
 	return rets
 }
 

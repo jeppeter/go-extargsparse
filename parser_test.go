@@ -105,6 +105,38 @@ func getOptOk(t *testing.T, sarr []string, opt *ExtKeyParse) error {
 	return fmt.Errorf("%s", format_error("can not find [%s] for \n%s", exprstr, sarr))
 }
 
+func assertGetCmd(sarr []string, cmdname string) bool {
+	var matchexpr *regexp.Regexp
+	var restr string = fmt.Sprintf(`^\s+\[%s\]\s+.*`, cmdname)
+	var ok bool = false
+	var s string
+	matchexpr = regexp.MustCompile(restr)
+	for _, s = range sarr {
+		if matchexpr.MatchString(s) {
+			ok = true
+			break
+		}
+	}
+
+	return ok
+}
+
+func assertOkCmds(t *testing.T, sarr []string, parser *ExtArgsParse, cmdname string) error {
+	var cmds []string
+	var ok bool
+	var c string
+	var err error
+	cmds, err = parser.GetSubCommands(cmdname)
+	check_equal(t, err, nil)
+	for _, c = range cmds {
+		ok = assertGetCmd(sarr, c)
+		if !ok {
+			return fmt.Errorf("%s", format_error("cannot found [%s] in {%v}", c, sarr))
+		}
+	}
+	return nil
+}
+
 func checkAllOptsHelp(t *testing.T, sarr []string, opts []*ExtKeyParse) error {
 	var err error
 	for _, opt := range opts {
@@ -3445,5 +3477,39 @@ func Test_parser_A059(t *testing.T) {
 	check_equal(t, args.GetString("subcommand"), "ipxe")
 	check_equal(t, args.GetArray("subnargs"), []string{"dd"})
 	check_equal(t, args.GetArray("pair"), []string{"INITRD", "CC"})
+	return
+}
+
+func Test_parser_A060(t *testing.T) {
+	var loads = `{
+    "dep": {
+        "$": "*",
+        "ip": {
+            "$": "*"
+        }
+    },
+    "rdep" : {
+        "$" : "*",
+        "ip" : {
+            "$" : "*"
+        }
+    }
+}`
+	var parser *ExtArgsParse
+	var sarr []string
+	var err error
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(loads)
+	check_equal(t, err, nil)
+	sarr = getCmdHelp(parser, "")
+	err = assertOkCmds(t, sarr, parser, "")
+	check_equal(t, err, nil)
+	sarr = getCmdHelp(parser, "dep")
+	err = assertOkCmds(t, sarr, parser, "dep")
+	check_equal(t, err, nil)
+	sarr = getCmdHelp(parser, "rdep")
+	err = assertOkCmds(t, sarr, parser, "rdep")
+	check_equal(t, err, nil)
 	return
 }

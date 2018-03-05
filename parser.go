@@ -16,7 +16,7 @@ var parser_reserver_args = []string{"subcommand", "subnargs", "nargs", "extargs"
 var parser_priority_args = []int{SUB_COMMAND_JSON_SET, COMMAND_JSON_SET, ENVIRONMENT_SET, ENV_SUB_COMMAND_JSON_SET, ENV_COMMAND_JSON_SET}
 
 type ExtArgsParse struct {
-	logObject
+	logger              *logObject
 	options             *ExtArgsOptions
 	mainCmd             *parserCompat
 	argState            *parseState
@@ -144,7 +144,7 @@ func (self *ExtArgsParse) getSubparserInner(keycls *ExtKeyParse, parsers []*pars
 		return cmdparser
 	}
 	cmdparser = newParserCompat(keycls, self.options)
-	self.Info("%s", cmdparser.Format())
+	self.logger.Info("%s", cmdparser.Format())
 	if len(parsers) > 0 {
 		curparser = parsers[len(parsers)-1]
 	} else {
@@ -166,7 +166,7 @@ func (self *ExtArgsParse) loadCommandSubparser(prefix string, keycls *ExtKeyPars
 	if keycls.CmdName() != "" && check_in_array(parser_reserver_args, keycls.CmdName()) {
 		return fmt.Errorf("%s", format_error("%s in reserved %v", keycls.CmdName(), parser_reserver_args))
 	}
-	self.Info("load [%s]", keycls.Format())
+	self.logger.Info("load [%s]", keycls.Format())
 	vmap = keycls.Value().(map[string]interface{})
 	if keycls.IsCmd() && check_in_array(parser_reserver_args, keycls.CmdName()) {
 		return fmt.Errorf("%s", format_error("cmdname [%s] in [%v] reserved", keycls.CmdName(), parser_reserver_args))
@@ -209,7 +209,7 @@ func (self *ExtArgsParse) stringAction(ns *NameSpaceEx, validx int, keycls *ExtK
 		err = fmt.Errorf("%s", format_error("need args [%d] [%s] [%v]", validx, keycls.Format(), params))
 		return 1, err
 	}
-	self.Trace("set [%s] [%v]", keycls.Optdest(), params[validx])
+	self.logger.Trace("set [%s] [%v]", keycls.Optdest(), params[validx])
 	ns.SetValue(keycls.Optdest(), params[validx])
 	return 1, nil
 }
@@ -453,7 +453,7 @@ func (self *ExtArgsParse) findCommandsInPath(cmdname string, parsers []*parserCo
 		sarr = strings.Split(cmdname, ".")
 	}
 	if self.mainCmd != nil {
-		self.Trace("append [%s]", self.mainCmd.Format())
+		self.logger.Trace("append [%s]", self.mainCmd.Format())
 		commands = append(commands, self.mainCmd)
 	}
 
@@ -463,7 +463,7 @@ func (self *ExtArgsParse) findCommandsInPath(cmdname string, parsers []*parserCo
 			if curcommand == nil {
 				break
 			}
-			self.Trace("append [%s]", curcommand.Format())
+			self.logger.Trace("append [%s]", curcommand.Format())
 			commands = append(commands, curcommand)
 		}
 	}
@@ -583,7 +583,7 @@ func (self *ExtArgsParse) loadJsonFile(ns *NameSpaceEx, cmdname string, jsonfile
 		prefix = cmdname
 	}
 	prefix = strings.Replace(prefix, ".", "_", -1)
-	self.Trace("load json file [%s]", jsonfile)
+	self.logger.Trace("load json file [%s]", jsonfile)
 	data, err = ioutil.ReadFile(jsonfile)
 	if err != nil {
 		return fmt.Errorf("%s", format_error("can not read [%s] err[%s]", jsonfile, err.Error()))
@@ -630,7 +630,7 @@ func (self *ExtArgsParse) parseCommandJsonSet(ns *NameSpaceEx) error {
 	var jsonfile string
 	if !self.noJsonOption && len(self.jsonLong) > 0 {
 		jsonfile = ns.GetString(self.jsonLong)
-		self.Trace("jsonfile [%s]", jsonfile)
+		self.logger.Trace("jsonfile [%s]", jsonfile)
 		if len(jsonfile) > 0 {
 			return self.loadJsonFile(ns, "", jsonfile)
 		}
@@ -680,7 +680,7 @@ func (self *ExtArgsParse) setEnvironValueInner(ns *NameSpaceEx, prefix string, p
 		if len(valstr) == 0 {
 			continue
 		}
-		self.Trace("[%s]=%s", optdest, valstr)
+		self.logger.Trace("[%s]=%s", optdest, valstr)
 
 		if opt.TypeName() == "string" || opt.TypeName() == "jsonfile" {
 			value = valstr
@@ -698,7 +698,7 @@ func (self *ExtArgsParse) setEnvironValueInner(ns *NameSpaceEx, prefix string, p
 			if err != nil {
 				return fmt.Errorf("%s", format_error("can not parse [%s] error [%s]", valstr, err.Error()))
 			}
-			self.Trace("[%s]=%v", opt.Format(), vmap["code"])
+			self.logger.Trace("[%s]=%v", opt.Format(), vmap["code"])
 			err = self.callJsonValue(ns, opt, vmap["code"])
 		} else if opt.TypeName() == "int" || opt.TypeName() == "count" || opt.TypeName() == "long" {
 			base = 10
@@ -816,7 +816,7 @@ func (self *ExtArgsParse) jsonValueBase(ns *NameSpaceEx, opt *ExtKeyParse, value
 			if opt.TypeName() != "string" && opt.TypeName() != "jsonfile" {
 				return fmt.Errorf("%s", format_error("[%s] [%s] not for [%v] set", opt.TypeName(), opt.Optdest(), value))
 			}
-			self.Trace("set [%s] [%v]", opt.Optdest(), value)
+			self.logger.Trace("set [%s] [%v]", opt.Optdest(), value)
 			ns.SetValue(opt.Optdest(), value)
 			err = nil
 		case []string:
@@ -827,7 +827,7 @@ func (self *ExtArgsParse) jsonValueBase(ns *NameSpaceEx, opt *ExtKeyParse, value
 			for _, v = range value.([]interface{}) {
 				sarr = append(sarr, fmt.Sprintf("%v", v))
 			}
-			self.Trace("set [%s]=%v", opt.Optdest(), sarr)
+			self.logger.Trace("set [%s]=%v", opt.Optdest(), sarr)
 			ns.SetValue(opt.Optdest(), sarr)
 			err = nil
 		case []interface{}:
@@ -838,7 +838,7 @@ func (self *ExtArgsParse) jsonValueBase(ns *NameSpaceEx, opt *ExtKeyParse, value
 			for _, v = range value.([]interface{}) {
 				sarr = append(sarr, fmt.Sprintf("%v", v))
 			}
-			self.Trace("set [%s]=%v", opt.Optdest(), sarr)
+			self.logger.Trace("set [%s]=%v", opt.Optdest(), sarr)
 			ns.SetValue(opt.Optdest(), sarr)
 			err = nil
 		case bool:
@@ -866,6 +866,9 @@ func (self *ExtArgsParse) jsonValueError(ns *NameSpaceEx, keycls *ExtKeyParse, v
 	return fmt.Errorf("%s", format_error("set [%s] error", keycls.Format()))
 }
 
+// NewExtArgsParse create the parser to parse command line
+//    options is the options created by NewExtArgsOptions
+//    priority is can be either nil or []int{}   value only can be [COMMAND_SET,SUB_COMMAND_JSON_SET,COMMAND_JSON_SET,ENVIRONMENT_SET,ENV_SUB_COMMAND_JSON_SET,ENV_COMMAND_JSON_SET,DEFAULT_SET]
 func NewExtArgsParse(options *ExtArgsOptions, priority interface{}) (self *ExtArgsParse, err error) {
 	var pr []int
 	var iv int
@@ -895,7 +898,7 @@ func NewExtArgsParse(options *ExtArgsOptions, priority interface{}) (self *ExtAr
 		}
 	}
 
-	self = &ExtArgsParse{logObject: *newLogObject("extargsparse")}
+	self = &ExtArgsParse{logger: newLogObject("extargsparse")}
 
 	self.options = options
 	self.mainCmd = newParserCompat(nil, options)
@@ -1091,7 +1094,7 @@ func (self *ExtArgsParse) loadCommandLineInner(prefix string, vmap map[string]in
 	}
 
 	for k, v = range vmap {
-		self.Info("%s , %s , %v , False", prefix, k, v)
+		self.logger.Info("%s , %s , %v , False", prefix, k, v)
 		keycls, err = newExtKeyParse_long(prefix, k, v, false, false, false, self.longPrefix, self.shortPrefix, self.options.GetBool("flagnochange"))
 		if err != nil {
 			return err
@@ -1204,8 +1207,8 @@ func (self *ExtArgsParse) callOptMethodFunc(ns *NameSpaceEx, validx int, keycls 
 
 func (self *ExtArgsParse) callKeyOptMethodFunc(ns *NameSpaceEx, validx int, keycls *ExtKeyParse, params []string) (step int, err error) {
 	var callfunc func(ns *NameSpaceEx, valid int, keycls *ExtKeyParse, params []string) (step int, err error)
-	self.Trace("get [%s]", keycls.Attr("optparse"))
-	err = self.GetFuncPtr(self.options.GetBool(FUNC_UPPER_CASE), keycls.Attr("optparse"), &callfunc)
+	self.logger.Trace("get [%s]", keycls.Attr("optparse"))
+	err = self.logger.GetFuncPtr(self.options.GetBool(FUNC_UPPER_CASE), keycls.Attr("optparse"), &callfunc)
 	if err != nil {
 		err = fmt.Errorf("%s", format_error("find [%s] error [%s]", keycls.Attr("optparse"), err.Error()))
 		return 0, err
@@ -1249,7 +1252,7 @@ func (self *ExtArgsParse) parseArgs(params []string) (ns *NameSpaceEx, err error
 			helpparams = []string{helpcmdname}
 			step, err = self.callOptMethod(ns, validx, keycls, helpparams)
 		} else {
-			self.Info("ns [%s] validx [%d] keycls [%s] params %v", ns.Format(), validx, keycls.Format(), params)
+			self.logger.Info("ns [%s] validx [%d] keycls [%s] params %v", ns.Format(), validx, keycls.Format(), params)
 			step, err = self.callOptMethod(ns, validx, keycls, params)
 		}
 		if err != nil {
@@ -1340,7 +1343,7 @@ func (self *ExtArgsParse) callJsonValue(ns *NameSpaceEx, opt *ExtKeyParse, value
 	var err error
 	if opt.Attr("jsonfunc") != "" {
 		var jsonfunc func(ns *NameSpaceEx, opt *ExtKeyParse, value interface{}) error
-		err = self.GetFuncPtr(self.options.GetBool(FUNC_UPPER_CASE), opt.Attr("jsonfunc"), &jsonfunc)
+		err = self.logger.GetFuncPtr(self.options.GetBool(FUNC_UPPER_CASE), opt.Attr("jsonfunc"), &jsonfunc)
 		if err != nil {
 			return err
 		}
@@ -1438,7 +1441,7 @@ func (self *ExtArgsParse) setStructPartForSingle(ns *NameSpaceEx, ostruct interf
 	}
 	name = strings.Join(sarr, ".")
 	for _, opt = range parser.CmdOpts {
-		self.Trace("opt [%s]", opt.Format())
+		self.logger.Trace("opt [%s]", opt.Format())
 		if opt.IsFlag() && opt.TypeName() != "help" && opt.TypeName() != "jsonfile" {
 			switch opt.TypeName() {
 			case "list":
@@ -1497,13 +1500,13 @@ func (self *ExtArgsParse) setStructPartForSingle(ns *NameSpaceEx, ostruct interf
 						curname = strings.Replace(curname, ".", "_", -1)
 						err = setMemberValue(ostruct, curname, value)
 						if err == nil {
-							self.Trace("set [%s]=[%v]", curname, value)
+							self.logger.Trace("set [%s]=[%v]", curname, value)
 						}
 					} else {
-						self.Trace("set [%s]=[%v]", curname, value)
+						self.logger.Trace("set [%s]=[%v]", curname, value)
 					}
 				} else {
-					self.Trace("set [%s]=[%v]", curname, value)
+					self.logger.Trace("set [%s]=[%v]", curname, value)
 				}
 			}
 
@@ -1522,12 +1525,12 @@ func (self *ExtArgsParse) setStructPartForSingle(ns *NameSpaceEx, ostruct interf
 					}
 					err = setMemberValue(ostruct, curname, value)
 					if err != nil {
-						self.Warn("can not set [%s] [%s] [%v] [%s]", curname, opt.Format(), value, err.Error())
+						self.logger.Warn("can not set [%s] [%s] [%v] [%s]", curname, opt.Format(), value, err.Error())
 					} else {
-						self.Trace("set [%s]=[%v]", curname, value)
+						self.logger.Trace("set [%s]=[%v]", curname, value)
 					}
 				} else {
-					self.Trace("set [%s]=[%v]", curname, value)
+					self.logger.Trace("set [%s]=[%v]", curname, value)
 				}
 			}
 		}
@@ -1608,12 +1611,12 @@ func (self *ExtArgsParse) callbackFunc(funcname string, ns *NameSpaceEx, ostruct
 	var callfunc func(ns *NameSpaceEx, ostruct interface{}, Context interface{}) error
 	var err error
 
-	err = self.GetFuncPtr(self.options.GetBool(FUNC_UPPER_CASE), funcname, &callfunc)
+	err = self.logger.GetFuncPtr(self.options.GetBool(FUNC_UPPER_CASE), funcname, &callfunc)
 	if err != nil {
-		self.Error("can not find [%s] [%s]", funcname, err.Error())
+		self.logger.Error("can not find [%s] [%s]", funcname, err.Error())
 		return err
 	}
-	self.Info("call [%s]  [%v]", funcname, callfunc)
+	self.logger.Info("call [%s]  [%v]", funcname, callfunc)
 	return callfunc(ns, ostruct, Context)
 }
 
@@ -1678,7 +1681,7 @@ func (self *ExtArgsParse) ParseCommandLineEx(params interface{}, Context interfa
 		cmds = self.argState.GetCmdPaths()
 		if len(cmds) > 0 {
 			funcname = cmds[len(cmds)-1].KeyCls.Function()
-			self.Info("[%s]funcname [%s]", cmds[len(cmds)-1].KeyCls.Format(), funcname)
+			self.logger.Info("[%s]funcname [%s]", cmds[len(cmds)-1].KeyCls.Format(), funcname)
 			if len(funcname) > 0 && (len(self.outputMode) == 0 || self.outputMode[len(self.outputMode)-1] == "") {
 				err = self.callbackFunc(funcname, ns, ostruct, Context)
 				if err != nil {

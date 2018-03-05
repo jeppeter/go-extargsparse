@@ -118,7 +118,7 @@ func ExampleNewExtArgsParse_priority() {
 				fmt.Fprintf(os.Stdout, "port=%d\n", args.GetInt("port"))                // port=9000
 				fmt.Fprintf(os.Stdout, "subcommand=%s\n", args.GetString("subcommand")) // subcommand=dep
 				fmt.Fprintf(os.Stdout, "dep_list=%v\n", args.GetArray("dep_list"))      //dep_list=[depenv1 depenv2]
-				fmt.Fprintf(os.Stdout, "dep_string=%d\n", args.GetString("dep_string")) // dep_string=ee
+				fmt.Fprintf(os.Stdout, "dep_string=%s\n", args.GetString("dep_string")) // dep_string=ee
 				fmt.Fprintf(os.Stdout, "subnargs=%v\n", args.GetArray("subnargs"))      // subnargs=ww
 			}
 		}
@@ -156,15 +156,18 @@ func ExampleExtArgsParse_GetCmdKey() {
 	if err == nil {
 		parser, err = extargsparse.NewExtArgsParse(options, nil)
 		if err == nil {
-			keycls, err = parser.GetCmdKey("")
+			err = parser.LoadCommandLineString(loads)
 			if err == nil {
-				fmt.Fprintf(os.Stdout, "cmdname=%s\n", keycls.CmdName()) // cmdname=main
-				keycls, err = parser.GetCmdKey("dep")
+				keycls, err = parser.GetCmdKey("")
 				if err == nil {
-					fmt.Fprintf(os.Stdout, "cmdname=%s\n", keycls.CmdName()) // cmdname=dep
-					keycls, err = parser.GetCmdKey("rdep.ip")
+					fmt.Fprintf(os.Stdout, "cmdname=%s\n", keycls.CmdName()) // cmdname=main
+					keycls, err = parser.GetCmdKey("dep")
 					if err == nil {
-						fmt.Fprintf(os.Stdout, "cmdname=%s\n", keycls.CmdName()) // cmdname=ip  it is the subcommand of subcommand rdep
+						fmt.Fprintf(os.Stdout, "cmdname=%s\n", keycls.CmdName()) // cmdname=dep
+						keycls, err = parser.GetCmdKey("rdep.ip")
+						if err == nil {
+							fmt.Fprintf(os.Stdout, "cmdname=%s\n", keycls.CmdName()) // cmdname=ip  it is the subcommand of subcommand rdep
+						}
 					}
 				}
 			}

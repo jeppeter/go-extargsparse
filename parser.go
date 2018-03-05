@@ -1841,6 +1841,8 @@ func (self *ExtArgsParse) getCmdOpts(cmdname string, cmdpaths []*parserCompat) [
 	return retkeys
 }
 
+// GetCmdOpts return the cmdopts for all the ExtKeyParse for current command
+//    cmdname is the top or the subcommand
 func (self *ExtArgsParse) GetCmdOpts(cmdname string) ([]*ExtKeyParse, error) {
 	var retkeys []*ExtKeyParse
 	var err error

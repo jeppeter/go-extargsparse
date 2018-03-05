@@ -1636,6 +1636,7 @@ func (self *ExtArgsParse) callbackFunc(funcname string, ns *NameSpaceEx, ostruct
 //    Context is the user defined parameter ,it will used in the callback function like
 //    ostruct is the used defined struct of NameSpaceEx ,the rule is in the https://github.com/jeppeter/go-extargsparse/README.md
 //    mode is the reserved for otheruse ,just put nil
+//    more example see https://github.com/jeppeter/example/
 func (self *ExtArgsParse) ParseCommandLineEx(params interface{}, Context interface{}, ostruct interface{}, mode interface{}) (ns *NameSpaceEx, err error) {
 	var s string
 	var realparams []string

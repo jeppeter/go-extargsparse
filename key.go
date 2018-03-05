@@ -675,6 +675,23 @@ func (self *ExtKeyParse) parse(prefix string, key string, value interface{}, isf
 	return self.validate()
 }
 
+// Attr function
+//    extension attribute for keycls ,it is more
+//    example see https://github.com/jeppeter/go-extargsparse/example/getopt/attrset1.go
+//    no used options is : opthelp and optparse
+func (self *ExtKeyParse) Attr(k string) string {
+	if k == "" {
+		return formatMap(self.attr)
+	}
+
+	v, ok := self.attr[k]
+	if !ok {
+		return ""
+	}
+	return v
+}
+
+// Format is the debug function for output as string
 func (self *ExtKeyParse) Format() string {
 	var s string
 	s = "{"
@@ -793,6 +810,7 @@ func (self *ExtKeyParse) Value() interface{} {
 	return self.value
 }
 
+// CmdName is the command name
 func (self *ExtKeyParse) CmdName() string {
 	return self.cmdName
 }
@@ -801,22 +819,12 @@ func (self *ExtKeyParse) HelpInfo() string {
 	return self.helpInfo
 }
 
+// Function is the function return for command
 func (self *ExtKeyParse) Function() string {
 	return self.function
 }
 
-func (self *ExtKeyParse) Attr(k string) string {
-	if k == "" {
-		return formatMap(self.attr)
-	}
-
-	v, ok := self.attr[k]
-	if !ok {
-		return ""
-	}
-	return v
-}
-
+// FlagName for the flag
 func (self *ExtKeyParse) FlagName() string {
 	return self.flagName
 }
@@ -829,6 +837,7 @@ func (self *ExtKeyParse) Nargs() interface{} {
 	return self.nargs
 }
 
+// compare the ExtKeyParse ,it only for all the things are equaled
 func (self *ExtKeyParse) Equal(other *ExtKeyParse) bool {
 	if self.Format() != other.Format() {
 		return false

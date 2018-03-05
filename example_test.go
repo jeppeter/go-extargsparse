@@ -343,3 +343,226 @@ func ExampleExtArgsParse_GetSubCommands() {
 
 	return
 }
+
+func ExampleExtKeyParse_CmdName() {
+	var loads = `{
+		"dep" : {
+
+		},
+		"rdep": {
+
+		}
+	}`
+	var err error
+	var parser *extargsparse.ExtArgsParse
+	var options *extargsparse.ExtArgsOptions
+	var flag *extargsparse.ExtKeyParse
+	options, err = extargsparse.NewExtArgsOptions(fmt.Sprintf(`{}`))
+	if err == nil {
+		parser, err = extargsparse.NewExtArgsParse(options, nil)
+		if err == nil {
+			err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+			if err == nil {
+				flag, _ = parser.GetCmdKey("")
+				fmt.Fprintf(os.Stdout, "cmdname=%s\n", flag.CmdName())
+				flag, _ = parser.GetCmdKey("dep")
+				fmt.Fprintf(os.Stdout, "cmdname=%s\n", flag.CmdName())
+				flag, _ = parser.GetCmdKey("rdep")
+				fmt.Fprintf(os.Stdout, "cmdname=%s\n", flag.CmdName())
+				/*
+					Output:
+					cmdname=main
+					cmdname=dep
+					cmdname=ip
+				*/
+
+			}
+		}
+	}
+}
+
+func ExampleExtKeyParse_FlagName() {
+	var loads = `{
+		"verbose|v" : "+",
+		"dep" : {
+			"cc|c" : ""
+		},
+		"rdep": {
+			"dd|C" : ""
+		}
+	}`
+	var err error
+	var parser *extargsparse.ExtArgsParse
+	var options *extargsparse.ExtArgsOptions
+	var flag *extargsparse.ExtKeyParse
+	var opts []*extargsparse.ExtKeyParse
+	var finded bool
+	options, err = extargsparse.NewExtArgsOptions(fmt.Sprintf(`{}`))
+	if err == nil {
+		parser, err = extargsparse.NewExtArgsParse(options, nil)
+		if err == nil {
+			err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+			if err == nil {
+				opts, _ = parser.GetCmdOpts("")
+				for _, flag = range opts {
+					if flag.FlagName() == "verbose" {
+						fmt.Fprintf(os.Stdout, "flagname=%s\n", flag.FlagName())
+					}
+				}
+
+				opts, _ = parser.GetCmdOpts("dep")
+				for _, flag = range opts {
+					if flag.FlagName() == "cc" {
+						fmt.Fprintf(os.Stdout, "flagname=%s\n", flag.FlagName())
+					}
+				}
+				opts, _ = parser.GetCmdOpts("rdep")
+				for _, flag = range opts {
+					if flag.FlagName() == "dd" {
+						fmt.Fprintf(os.Stdout, "flagname=%s\n", flag.FlagName())
+					}
+				}
+
+				opts, _ = parser.GetCmdOpts("rdep")
+				finded = false
+				for _, flag = range opts {
+					if flag.FlagName() == "cc" {
+						fmt.Fprintf(os.Stdout, "flagname=%s\n", flag.FlagName())
+						finded = true
+					}
+				}
+
+				if !finded {
+					fmt.Fprintf(os.Stdout, "can not found cc for rdep cmd\n")
+				}
+
+			}
+		}
+	}
+	/*
+		Output:
+		flagname=verbose
+		flagname=cc
+		flagname=dd
+		can not found cc for rdep cmd
+	*/
+}
+
+func ExampleExtKeyParse_Function() {
+	var loads = `{
+		"verbose|v" : "+",
+		"dep<dep_handler>" : {
+			"cc|c" : ""
+		},
+		"rdep<rdep_handler>": {
+			"dd|C" : ""
+		}
+	}`
+	var err error
+	var parser *extargsparse.ExtArgsParse
+	var options *extargsparse.ExtArgsOptions
+	var flag *extargsparse.ExtKeyParse
+	options, err = extargsparse.NewExtArgsOptions(fmt.Sprintf(`{}`))
+	if err == nil {
+		parser, err = extargsparse.NewExtArgsParse(options, nil)
+		if err == nil {
+			err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+			if err == nil {
+				flag, _ = parser.GetCmdKey("")
+				fmt.Fprintf(os.Stdout, "main funcion:%s\n", flag.Function())
+
+				flag, _ = parser.GetCmdKey("dep")
+				fmt.Fprintf(os.Stdout, "dep funcion:%s\n", flag.Function())
+
+				flag, _ = parser.GetCmdKey("rdep")
+				fmt.Fprintf(os.Stdout, "rdep funcion:%s\n", flag.Function())
+			}
+		}
+	}
+	/*
+		Notice:
+			if options not set fmt.Sprintf(`{"%s" : false}`,extargsparse.FUNC_UPPER_CASE)
+			the real function is Dep_handler and Rdep_handler
+		Output:
+			main funcion:
+			dep funcion:dep_handler
+			rdep funcion:rdep_handler
+	*/
+}
+
+func ExampleExtKeyParse_HelpInfo() {
+	var loads = `{
+		"verbose|v##we used verbose##" : "+",
+		"$##this is args help##" : "*",
+		"dep##dep help set##" : {
+			"cc|c##cc sss##" : "",
+			"$##this is dep subnargs help##" : "*"
+		},
+		"rdep##can not set rdep help##": {
+			"dd|C##capital C##" : "",
+			"$##this is rdep subnargs help##" : "*"
+		}
+	}`
+	var err error
+	var parser *extargsparse.ExtArgsParse
+	var options *extargsparse.ExtArgsOptions
+	var flag *extargsparse.ExtKeyParse
+	var opts []*extargsparse.ExtKeyParse
+	options, err = extargsparse.NewExtArgsOptions(fmt.Sprintf(`{}`))
+	if err == nil {
+		parser, err = extargsparse.NewExtArgsParse(options, nil)
+		if err == nil {
+			err = parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+			if err == nil {
+				flag, _ = parser.GetCmdKey("")
+				fmt.Fprintf(os.Stdout, "main helpinfo:%s\n", flag.HelpInfo())
+
+				flag, _ = parser.GetCmdKey("dep")
+				fmt.Fprintf(os.Stdout, "dep helpinfo:%s\n", flag.HelpInfo())
+
+				flag, _ = parser.GetCmdKey("rdep")
+				fmt.Fprintf(os.Stdout, "rdep helpinfo:%s\n", flag.HelpInfo())
+
+				opts, _ = parser.GetCmdOpts("")
+				for _, flag = range opts {
+					if flag.TypeName() == "args" {
+						fmt.Fprintf(os.Stdout, "main.args.HelpInfo=%s\n", flag.HelpInfo())
+					} else if flag.FlagName() == "verbose" {
+						fmt.Fprintf(os.Stdout, "verbose.HelpInfo=%s\n", flag.HelpInfo())
+					}
+				}
+				opts, _ = parser.GetCmdOpts("dep")
+				for _, flag = range opts {
+					if flag.TypeName() == "args" {
+						fmt.Fprintf(os.Stdout, "dep.subnargs.HelpInfo=%s\n", flag.HelpInfo())
+					} else if flag.FlagName() == "cc" {
+						fmt.Fprintf(os.Stdout, "dep.cc.HelpInfo=%s\n", flag.HelpInfo())
+					}
+				}
+				opts, _ = parser.GetCmdOpts("rdep")
+				for _, flag = range opts {
+					if flag.TypeName() == "args" {
+						fmt.Fprintf(os.Stdout, "rdep.subnargs.HelpInfo=%s\n", flag.HelpInfo())
+					} else if flag.FlagName() == "dd" {
+						fmt.Fprintf(os.Stdout, "rdep.dd.HelpInfo=%s\n", flag.HelpInfo())
+					}
+				}
+
+			}
+		}
+	}
+	/*
+		Notice:
+			HelpInfo is part of between ##(information)##
+		Output:
+			main helpinfo:
+			dep helpinfo:dep help set
+			rdep helpinfo:can not set rdep help
+			main.args.HelpInfo=this is args help
+			verbose.HelpInfo=we used verbose
+			dep.subnargs.HelpInfo=this is dep subnargs help
+			dep.cc.HelpInfo=cc sss
+			rdep.subnargs.HelpInfo=this is rdep subnargs help
+			rdep.dd.HelpInfo=capital C
+	*/
+}

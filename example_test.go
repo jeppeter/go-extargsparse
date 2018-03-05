@@ -11,12 +11,11 @@ func ExampleNewExtArgsOptions() {
 	var options *extargsparse.ExtArgsOptions
 	var err error
 	var confstr = `{
-		"screenwidth" : 80.0		
+		"screenwidth" : 90.0		
 		}`
 	options, err = extargsparse.NewExtArgsOptions(confstr)
 	if err == nil {
-		fmt.Fprintf(os.Stdout, "screenwidth=%d\n", options.GetInt("screenwidth"))
-		// Output screenwidth=80
+		fmt.Fprintf(os.Stdout, "screenwidth=%d\n", options.GetInt("screenwidth")) // screenwidth=90
 	}
 	return
 }
@@ -26,9 +25,8 @@ func ExampleExtArgsOptions_SetValue() {
 	var err error
 	options, err = extargsparse.NewExtArgsOptions(`{}`)
 	if err == nil {
-		options.SetValue("screenwidth", float64(90.0))
-		fmt.Fprintf(os.Stdout, "screenwidth=%d\n", options.GetInt("screenwidth"))
-		// Output screenwidth=90
+		options.SetValue("screenwidth", float64(100.0))
+		fmt.Fprintf(os.Stdout, "screenwidth=%d\n", options.GetInt("screenwidth")) //screenwidth=100
 	}
 	return
 }
@@ -40,7 +38,15 @@ func ExampleNewExtArgsParse() {
 	parser, err = extargsparse.NewExtArgsParse(nil, nil)
 	if err == nil {
 		parser.LoadCommandLineString(loads)
-		// simplest the parser with help and
+		parser.ParseCommandLine([]string{"-h"}, nil)
+		/*
+			Output:
+			cmd 0.0.1  [OPTIONS] [args...]'
+
+			[OPTIONS]
+			    --json     json  json input file to get the value set
+			    --help|-h        to display this help information
+		*/
 	}
 }
 

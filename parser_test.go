@@ -2158,7 +2158,7 @@ func Test_parser_A035(t *testing.T) {
 	beforeParser(t)
 	depjson = makeWriteTempFile(`{"float3":33.221}`)
 	defer func() { safeRemoveFile(depjson, "depjson", ok) }()
-	rdepipjson = makeWriteTempFile(`{"ip" : { "float4" : 40.3}}`)
+	rdepjson = makeWriteTempFile(`{"ip" : { "float4" : 40.3}}`)
 	defer func() { safeRemoveFile(rdepjson, "rdepjson", ok) }()
 	jsonfile = makeWriteTempFile(`{"verbose": 30,"float3": 77.1}`)
 	defer func() { safeRemoveFile(jsonfile, "jsonfile", ok) }()

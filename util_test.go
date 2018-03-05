@@ -669,7 +669,12 @@ func (self *compileExec) makeSrcDir(copyfrom string) error {
 		return err
 	}
 	self.dname = dname
-	err = os.MkdirAll(filepath.Join(self.dname, "src"), os.ModeDir|0644)
+	err = os.Chmod(self.dname, 0755)
+	if err != nil {
+		return fmt.Errorf("%s", "can not change [%s] mode err[%s]", self.dname, err.Error())
+	}
+
+	err = os.MkdirAll(filepath.Join(self.dname, "src"), 0755)
 	if err != nil {
 		return fmt.Errorf("%s", format_error("can not mkdir [%s] err[%s]", filepath.Join(self.dname, "src"), err.Error()))
 	}
@@ -678,10 +683,16 @@ func (self *compileExec) makeSrcDir(copyfrom string) error {
 	if err != nil {
 		return fmt.Errorf("%s", format_error("can not make temp err[%s]", err.Error()))
 	}
-	defer f.Close()
 	self.origfname = f.Name()
+	f.Close()
 	self.fname = self.origfname
 	self.fname += ".go"
+	/*now change the temp file ok*/
+	err = os.Chmod(self.origfname, 0644)
+	if err != nil {
+		return fmt.Errorf("%s", format_error("can not change [%s] mode err[%s]", self.origfname, err.Error()))
+	}
+
 	return nil
 }
 

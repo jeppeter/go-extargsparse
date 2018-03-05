@@ -6,32 +6,51 @@ import (
 	"os"
 )
 
+type SubcmdStruct struct {
+	Verbose int
+	Dep     struct {
+		List     []string
+		Str      string
+		Subnargs []string
+	}
+	Rdep struct {
+		List     []string
+		Str      string
+		Subnargs []string
+	}
+	Args []string
+}
+
 func dep_handler(ns *extargsparse.NameSpaceEx, ostruct interface{}, ctx interface{}) error {
+	var p *SubcmdStruct
 	if ns == nil {
 		return nil
 	}
+	p = ostruct.(*SubcmdStruct)
 	fmt.Fprintf(os.Stdout, "subcommand=%s\n", ns.GetString("subcommand"))
-	fmt.Fprintf(os.Stdout, "verbose=%d\n", ns.GetInt("verbose"))
-	fmt.Fprintf(os.Stdout, "dep_list=%v\n", ns.GetArray("dep_list"))
-	fmt.Fprintf(os.Stdout, "dep_str=%s\n", ns.GetString("dep_str"))
-	fmt.Fprintf(os.Stdout, "subnargs=%v\n", ns.GetArray("subnargs"))
-	fmt.Fprintf(os.Stdout, "rdep_list=%v\n", ns.GetArray("rdep_list"))
-	fmt.Fprintf(os.Stdout, "rdep_str=%s\n", ns.GetString("rdep_str"))
+	fmt.Fprintf(os.Stdout, "verbose=%d\n", p.Verbose)
+	fmt.Fprintf(os.Stdout, "dep_list=%v\n", p.Dep.List)
+	fmt.Fprintf(os.Stdout, "dep_str=%s\n", p.Dep.Str)
+	fmt.Fprintf(os.Stdout, "subnargs=%v\n", p.Dep.Subnargs)
+	fmt.Fprintf(os.Stdout, "rdep_list=%v\n", p.Rdep.List)
+	fmt.Fprintf(os.Stdout, "rdep_str=%s\n", p.Rdep.Str)
 	os.Exit(0)
 	return nil
 }
 
 func rdep_handler(ns *extargsparse.NameSpaceEx, ostruct interface{}, ctx interface{}) error {
+	var p *SubcmdStruct
 	if ns == nil {
 		return nil
 	}
+	p = ostruct.(*SubcmdStruct)
 	fmt.Fprintf(os.Stdout, "subcommand=%s\n", ns.GetString("subcommand"))
-	fmt.Fprintf(os.Stdout, "verbose=%d\n", ns.GetInt("verbose"))
-	fmt.Fprintf(os.Stdout, "dep_list=%v\n", ns.GetArray("dep_list"))
-	fmt.Fprintf(os.Stdout, "dep_str=%s\n", ns.GetString("dep_str"))
-	fmt.Fprintf(os.Stdout, "subnargs=%v\n", ns.GetArray("subnargs"))
-	fmt.Fprintf(os.Stdout, "rdep_list=%v\n", ns.GetArray("rdep_list"))
-	fmt.Fprintf(os.Stdout, "rdep_str=%s\n", ns.GetString("rdep_str"))
+	fmt.Fprintf(os.Stdout, "verbose=%d\n", p.Verbose)
+	fmt.Fprintf(os.Stdout, "dep_list=%v\n", p.Dep.List)
+	fmt.Fprintf(os.Stdout, "dep_str=%s\n", p.Dep.Str)
+	fmt.Fprintf(os.Stdout, "subnargs=%v\n", p.Dep.Subnargs)
+	fmt.Fprintf(os.Stdout, "rdep_list=%v\n", p.Rdep.List)
+	fmt.Fprintf(os.Stdout, "rdep_str=%s\n", p.Rdep.Str)
 	os.Exit(0)
 	return nil
 }
@@ -58,6 +77,7 @@ func main() {
 	var parser *extargsparse.ExtArgsParse
 	var err error
 	var options *extargsparse.ExtArgsOptions
+	var p *SubcmdStruct
 	var confstr = fmt.Sprintf(`{ "%s" : false}`, extargsparse.FUNC_UPPER_CASE)
 	options, err = extargsparse.NewExtArgsOptions(confstr)
 	if err != nil {
@@ -79,7 +99,8 @@ func main() {
 		return
 	}
 
-	_, err = parser.ParseCommandLineEx(nil, nil, nil, nil)
+	p = &SubcmdStruct{}
+	_, err = parser.ParseCommandLineEx(nil, nil, p, nil)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "can not parse err[%s]\n", err.Error())
 		os.Exit(5)

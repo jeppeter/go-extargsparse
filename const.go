@@ -62,3 +62,7 @@ const (
 	ENV_COMMAND_JSON_SET     = 60
 	DEFAULT_SET              = 70
 )
+
+const (
+	EXTARGSPARSE_VERSION = "0.0.2"
+)

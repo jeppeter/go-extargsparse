@@ -2,7 +2,7 @@
 > golang command line handle package inspired by [extargsparse](https://github.com/jeppeter/extargsparse)
 
 ### Release History
-> March 5th 2018 Release 0.0.2 for the first release
+> March 6th 2018 Release 0.0.2 for the first release
 
 ### simple example
 ```go
@@ -16,7 +16,7 @@ import (
 
 func main() {
     var commandline = `{
-        "verbose" : "+",
+        "verbose|v" : "+",
         "removed|R" : false,
         "floatv|f" : 3.3,
         "intv|i" : 5,
@@ -42,7 +42,12 @@ func main() {
         return
     }
 
-    ns, err = parser.ParseCommandLine(nil, nil)
+    if len(os.Args[1:]) == 0 {
+        ns, err = parser.ParseCommandLine([]string{"-vvvv", "cc", "-f", "33.2", "--arrl", "wwwe", "-s", "3993"}, nil)
+    } else {
+        ns, err = parser.ParseCommandLine(nil, nil)
+    }
+
     if err != nil {
         fmt.Fprintf(os.Stderr, "can not parser command err[%s]\n", err.Error())
         os.Exit(5)
@@ -97,7 +102,7 @@ type ArgStruct struct {
 
 func main() {
     var commandline = `{
-        "verbose" : "+",
+        "verbose|v" : "+",
         "removed|R" : false,
         "floatv|f" : 3.3,
         "intv|i" : 5,
@@ -125,7 +130,12 @@ func main() {
         return
     }
 
-    _, err = parser.ParseCommandLineEx(nil, nil, p, nil)
+    if len(os.Args[1:]) == 0 {
+        _, err = parser.ParseCommandLineEx([]string{"-vvvv", "cc", "-f", "33.2", "--arrl", "wwwe", "-s", "3993"}, nil, p, nil)
+    } else {
+        _, err = parser.ParseCommandLineEx(nil, nil, p, nil)
+    }
+
     if err != nil {
         fmt.Fprintf(os.Stderr, "can not parser command err[%s]\n", err.Error())
         os.Exit(5)
@@ -267,3 +277,4 @@ rdep_list=[css]
 rdep_str=
 ```
 
+### [more documentation](https://godoc.org/github.com/jeppeter/go-extargsparse)

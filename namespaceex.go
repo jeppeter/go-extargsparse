@@ -6,6 +6,8 @@ import (
 	"strconv"
 )
 
+// NameSpaceEx structure to store the parse command line result
+//    use multifunction to get the coding
 type NameSpaceEx struct {
 	logger *logObject
 	obj    map[string]interface{}
@@ -17,11 +19,13 @@ func newNameSpaceEx() *NameSpaceEx {
 	return self
 }
 
+// SetValue to set value
 func (self *NameSpaceEx) SetValue(k string, v interface{}) {
 	self.obj[k] = v
 	return
 }
 
+// GetValue return interface{} if not set return nil
 func (self *NameSpaceEx) GetValue(k string) interface{} {
 	var v interface{} = nil
 	var ok bool
@@ -32,12 +36,14 @@ func (self *NameSpaceEx) GetValue(k string) interface{} {
 	return v
 }
 
+// IsAccessed return whether the key has been setted
 func (self *NameSpaceEx) IsAccessed(k string) bool {
 	var ok bool
 	_, ok = self.obj[k]
 	return ok
 }
 
+// GetBool return true/false value ,no key or not the type return false
 func (self *NameSpaceEx) GetBool(k string) bool {
 	var v bool = false
 	var ok bool
@@ -54,6 +60,7 @@ func (self *NameSpaceEx) GetBool(k string) bool {
 	return v
 }
 
+// GetString return string type ,default "" on no key or not type of string
 func (self *NameSpaceEx) GetString(k string) string {
 	var v interface{}
 	v = self.GetValue(k)
@@ -69,6 +76,7 @@ func (self *NameSpaceEx) GetString(k string) string {
 	return fmt.Sprintf("%v", v)
 }
 
+// GetInt return int type , default 0 on nokey or not type of int
 func (self *NameSpaceEx) GetInt(k string) int {
 	var v interface{}
 	var err error
@@ -104,6 +112,7 @@ func (self *NameSpaceEx) GetInt(k string) int {
 	return vint
 }
 
+// GetFloat return type of float64 ,default 0.0 on no key set or not type of float64
 func (self *NameSpaceEx) GetFloat(k string) float64 {
 	var v interface{}
 	var err error
@@ -139,6 +148,7 @@ func (self *NameSpaceEx) GetFloat(k string) float64 {
 	return vint
 }
 
+// GetArray return []string, default []string{} on no key set or not type of []string
 func (self *NameSpaceEx) GetArray(k string) []string {
 	var v interface{}
 	var ve string
@@ -163,6 +173,7 @@ func (self *NameSpaceEx) GetArray(k string) []string {
 	return varr
 }
 
+// GetKeys get all available keys for setted sorted by alphabet value
 func (self *NameSpaceEx) GetKeys() []string {
 	var keys []string
 	keys = make([]string, 0)
@@ -173,6 +184,7 @@ func (self *NameSpaceEx) GetKeys() []string {
 	return keys
 }
 
+// Format return string with all keys set like format {key1=val1;key2=value2;...;keyn=valn}
 func (self *NameSpaceEx) Format() string {
 	var s string = ""
 	var keys []string

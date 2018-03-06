@@ -5,6 +5,8 @@ import (
 	"os"
 )
 
+// IoWriter is the interface for PrintHelp
+//    extended example see https://github.com/jeppeter/go-extargsparse/example/helpfunc/helpstr1.go
 type IoWriter interface {
 	Write(data []byte) (int, error)
 	WriteString(s string) (int, error)
@@ -15,7 +17,8 @@ type FileIoWriter struct {
 	file *os.File
 }
 
-// it is called by
+// it is called by PrintHelp
+//    example see https://github.com/jeppeter/go-extargsparse/example/helpfunc/filehelp.go
 func NewFileWriter(f *os.File) *FileIoWriter {
 	self := &FileIoWriter{}
 	self.file = f

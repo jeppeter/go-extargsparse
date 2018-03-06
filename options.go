@@ -160,7 +160,7 @@ func (p *ExtArgsOptions) Format() string {
 //    OPT_VERSION:         "0.0.1"
 //    OPT_ERROR_HANDLER:   "exit"
 //    OPT_HELP_HANDLER:    nil
-//    "longprefix":        "--"
+//    OPT_LONG_PREFIX:     "--"
 //    "shortprefix":       "-"
 //    "nohelpoption":      false
 //    "nojsonoption":      false

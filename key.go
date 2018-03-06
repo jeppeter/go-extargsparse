@@ -798,7 +798,7 @@ func (self *ExtKeyParse) Shortopt() string {
 	return shortopt
 }
 
-// LongPrefix this return the longprefix default is -- set by OPT_LONGPREFIX
+// LongPrefix this return the longprefix default is -- which setted by OPT_LONGPREFIX in NewExtArgsOptions json string
 func (self *ExtKeyParse) LongPrefix() string {
 	return self.longPrefix
 }

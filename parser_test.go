@@ -2533,7 +2533,7 @@ func Test_parser_A044(t *testing.T) {
 	var args *NameSpaceEx
 	var options *ExtArgsOptions
 	beforeParser(t)
-	options, err = NewExtArgsOptions(`{"parseall": true,"longprefix" : "++", "shortprefix" : "+"}`)
+	options, err = NewExtArgsOptions(fmt.Sprintf(`{"parseall": true,"%s" : "++", "shortprefix" : "+"}`, OPT_LONG_PREFIX))
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(options, nil)
 	check_equal(t, err, nil)
@@ -2569,7 +2569,7 @@ func Test_parser_A045(t *testing.T) {
 	pkgname = getCallerPackage(0)
 	check_not_equal(t, pkgname, "")
 	loads = fmt.Sprintf(loads_fmt, pkgname)
-	options, err = NewExtArgsOptions(fmt.Sprintf(`{"parseall": true,"longprefix" : "++", "shortprefix" : "+","%s": false}`, OPT_FUNC_UPPER_CASE))
+	options, err = NewExtArgsOptions(fmt.Sprintf(`{"parseall": true,"%s" : "++", "shortprefix" : "+","%s": false}`, OPT_LONG_PREFIX, OPT_FUNC_UPPER_CASE))
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(options, nil)
 	check_equal(t, err, nil)
@@ -2609,7 +2609,7 @@ func Test_parser_A046(t *testing.T) {
 	pkgname = getCallerPackage(0)
 	check_not_equal(t, pkgname, "")
 	loads = fmt.Sprintf(loads_fmt, pkgname, pkgname)
-	options, err = NewExtArgsOptions(fmt.Sprintf(`{"parseall": true,"longprefix" : "++", "shortprefix" : "+", "%s": false}`, OPT_FUNC_UPPER_CASE))
+	options, err = NewExtArgsOptions(fmt.Sprintf(`{"parseall": true,"%s" : "++", "shortprefix" : "+", "%s": false}`, OPT_LONG_PREFIX, OPT_FUNC_UPPER_CASE))
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(options, nil)
 	check_equal(t, err, nil)
@@ -2647,7 +2647,7 @@ func Test_parser_A047(t *testing.T) {
 	var cl *compileExec
 	var c string
 	var setvars map[string]string
-	var confstr = fmt.Sprintf(`{"parseall": true,"longprefix" : "++", "shortprefix" : "+" , "helpshort" : "?" , "helplong": "usage" , "jsonlong" : "jsonfile", "%s": false}`, OPT_FUNC_UPPER_CASE)
+	var confstr = fmt.Sprintf(`{"parseall": true,"%s" : "++", "shortprefix" : "+" , "helpshort" : "?" , "helplong": "usage" , "jsonlong" : "jsonfile", "%s": false}`, OPT_LONG_PREFIX, OPT_FUNC_UPPER_CASE)
 	var codestr = `func format_error(fmtstr string, a ...interface{}) string {
 	return fmt.Sprintf(fmtstr, a...)
 }
@@ -2831,7 +2831,7 @@ func Test_parser_A050(t *testing.T) {
                 "$" : "+"
             }
         }`
-	var confstr = fmt.Sprintf(`{"helplong": "usage", "helpshort" : "?" , "longprefix" : "++", "shortprefix" : "+"}`)
+	var confstr = fmt.Sprintf(`{"helplong": "usage", "helpshort" : "?" , "%s" : "++", "shortprefix" : "+"}`, OPT_LONG_PREFIX)
 	var options *ExtArgsOptions
 	var parser *ExtArgsParse
 	var sarr []string
@@ -2873,9 +2873,9 @@ func Test_parser_A051(t *testing.T) {
 	var confstr = fmt.Sprintf(`        {
             "helplong" : "usage",
             "helpshort" : null,
-            "longprefix" : "++",
+            "%s" : "++",
             "shortprefix" : "+"
-        }`)
+        }`, OPT_LONG_PREFIX)
 	var options *ExtArgsOptions
 	var parser *ExtArgsParse
 	var sarr []string
@@ -3239,12 +3239,11 @@ func Test_parser_A056(t *testing.T) {
             }
         }`
 	var confstr = fmt.Sprintf(`        {
-            "longprefix" : "-",
+            "%s" : "-",
             "shortprefix" : "-",
             "nojsonoption" : true,
             "cmdprefixadded" : false
-        }
-`)
+        }`, OPT_LONG_PREFIX)
 	var options *ExtArgsOptions
 	var parser *ExtArgsParse
 	var sarr []string
@@ -3356,12 +3355,12 @@ func Test_parser_A057(t *testing.T) {
             }
         }`
 	var confstr = fmt.Sprintf(`        {
-            "longprefix" : "-",
+            "%s" : "-",
             "shortprefix" : "-",
             "nojsonoption" : true,
             "cmdprefixadded" : false,
             "flagnochange" : true
-        }`)
+        }`, OPT_LONG_PREFIX)
 	var options *ExtArgsOptions
 	var parser *ExtArgsParse
 	var sarr []string
@@ -3457,7 +3456,7 @@ func Test_parser_A059(t *testing.T) {
             }
         }`
 	var loads string
-	var confstr = fmt.Sprintf(`{"parseall" : true,"longprefix" : "++", "shortprefix" : "+"}`)
+	var confstr = fmt.Sprintf(`{"parseall" : true,"%s" : "++", "shortprefix" : "+"}`, OPT_LONG_PREFIX)
 	var options *ExtArgsOptions
 	var parser *ExtArgsParse
 	var args *NameSpaceEx

@@ -20,7 +20,7 @@ var opt_default_VALUE = map[string]interface{}{
 	OPT_ERROR_HANDLER:   "exit",
 	OPT_HELP_HANDLER:    nil,
 	OPT_LONG_PREFIX:     "--",
-	"shortprefix":       "-",
+	OPT_SHORT_PREFIX:    "-",
 	"nohelpoption":      false,
 	"nojsonoption":      false,
 	"helplong":          "help",
@@ -161,7 +161,7 @@ func (p *ExtArgsOptions) Format() string {
 //    OPT_ERROR_HANDLER:   "exit"
 //    OPT_HELP_HANDLER:    nil
 //    OPT_LONG_PREFIX:     "--"
-//    "shortprefix":       "-"
+//    OPT_SHORT_PREFIX:    "-"
 //    "nohelpoption":      false
 //    "nojsonoption":      false
 //    "helplong":          "help"

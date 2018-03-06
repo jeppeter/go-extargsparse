@@ -43,7 +43,7 @@ func newParseState(args []string, maincmd *parserCompat, optattr *ExtArgsOptions
 	self.args = args
 	self.ended = 0
 	self.longprefix = optattr.GetString(OPT_LONG_PREFIX)
-	self.shortprefix = optattr.GetString("shortprefix")
+	self.shortprefix = optattr.GetString(OPT_SHORT_PREFIX)
 	if len(self.shortprefix) == 0 || len(self.longprefix) == 0 ||
 		self.shortprefix == self.longprefix {
 		self.bundlemode = true

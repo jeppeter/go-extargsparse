@@ -9,6 +9,7 @@ package extargsparse
 //   OPT_ERROR_HANDLER for error handler ,now is reserved
 //   OPT_HELP_HANDLER for help option ,default is ""; "nohelp" for no help information print out
 //   OPT_LONG_PREFIX for long prefix ,default is "--"
+//   OPT_SHORT_PREFIX for short prefix, default is "-"
 //   OPT_VAR_UPPER_CASE used in the extargsparse.ExtArgsOptions for variable for first character uppercase default is true
 //   OPT_FUNC_UPPER_CASE used in the function for first character uppercase default is true
 const (
@@ -20,6 +21,7 @@ const (
 	OPT_ERROR_HANDLER   = "errorhandler"
 	OPT_HELP_HANDLER    = "helphandler"
 	OPT_LONG_PREFIX     = "longprefix"
+	OPT_SHORT_PREFIX    = "shortprefix"
 	OPT_VAR_UPPER_CASE  = "varuppercase"
 	OPT_FUNC_UPPER_CASE = "funcuppercase"
 )

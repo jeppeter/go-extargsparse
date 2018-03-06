@@ -34,7 +34,7 @@ func main() {
 		}
 	}
 
-	confstr = fmt.Sprintf(`{ "%s" : "++", "shortprefix" : "+"}`, extargsparse.OPT_LONG_PREFIX)
+	confstr = fmt.Sprintf(`{ "%s" : "++", "%s" : "+"}`, extargsparse.OPT_LONG_PREFIX, extargsparse.OPT_SHORT_PREFIX)
 	options, _ = extargsparse.NewExtArgsOptions(confstr)
 	parser, _ = extargsparse.NewExtArgsParse(options, nil)
 	parser.LoadCommandLineString(fmt.Sprintf("%s", loads))

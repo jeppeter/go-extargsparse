@@ -29,7 +29,7 @@ var opt_default_VALUE = map[string]interface{}{
 	OPT_CMD_PREFIX_ADDED: true,
 	OPT_PARSE_ALL:        true,
 	OPT_SCREEN_WIDTH:     80,
-	"flagnochange":       false,
+	OPT_FLAG_NO_CHANGE:   false,
 	OPT_VAR_UPPER_CASE:   true,
 	OPT_FUNC_UPPER_CASE:  true,
 }
@@ -170,7 +170,7 @@ func (p *ExtArgsOptions) Format() string {
 //    OPT_CMD_PREFIX_ADDED:    true
 //    OPT_PARSE_ALL:           true
 //    OPT_SCREEN_WIDTH:        80
-//    "flagnochange":          false
+//    OPT_FLAG_NO_CHANGE:      false
 //    OPT_VAR_UPPER_CASE:      true
 //    OPT_FUNC_UPPER_CASE:     true
 func NewExtArgsOptions(s string) (p *ExtArgsOptions, err error) {

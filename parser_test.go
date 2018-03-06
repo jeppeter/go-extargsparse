@@ -3359,8 +3359,8 @@ func Test_parser_A057(t *testing.T) {
             "%s" : "-",
             "%s" : true,
             "%s" : false,
-            "flagnochange" : true
-        }`, OPT_LONG_PREFIX, OPT_SHORT_PREFIX, OPT_NO_JSON_OPTION, OPT_CMD_PREFIX_ADDED)
+            "%s" : true
+        }`, OPT_LONG_PREFIX, OPT_SHORT_PREFIX, OPT_NO_JSON_OPTION, OPT_CMD_PREFIX_ADDED, OPT_FLAG_NO_CHANGE)
 	var options *ExtArgsOptions
 	var parser *ExtArgsParse
 	var sarr []string

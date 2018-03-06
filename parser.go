@@ -308,7 +308,7 @@ func (self *ExtArgsParse) setCommandLineSelfArgsInner(paths []*parserCompat) err
 	if !setted {
 		cmdname = self.formatCmdFromCmdArray(parentpaths)
 		prefix = strings.Replace(cmdname, ".", "_", -1)
-		curkey, err := newExtKeyParse_long("", "$", "*", true, false, false, self.longPrefix, self.shortPrefix, self.options.GetBool("flagnochange"))
+		curkey, err := newExtKeyParse_long("", "$", "*", true, false, false, self.longPrefix, self.shortPrefix, self.options.GetBool(OPT_FLAG_NO_CHANGE))
 		if err != nil {
 			return err
 		}
@@ -1099,7 +1099,7 @@ func (self *ExtArgsParse) loadCommandLineInner(prefix string, vmap map[string]in
 
 	for k, v = range vmap {
 		self.logger.Info("%s , %s , %v , False", prefix, k, v)
-		keycls, err = newExtKeyParse_long(prefix, k, v, false, false, false, self.longPrefix, self.shortPrefix, self.options.GetBool("flagnochange"))
+		keycls, err = newExtKeyParse_long(prefix, k, v, false, false, false, self.longPrefix, self.shortPrefix, self.options.GetBool(OPT_FLAG_NO_CHANGE))
 		if err != nil {
 			return err
 		}

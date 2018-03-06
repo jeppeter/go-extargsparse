@@ -18,6 +18,7 @@ package extargsparse
 //   OPT_CMD_PREFIX_ADDED for cmd and subcommand to add before flag , default true
 //   OPT_PARSE_ALL for parse all ,and it will enable subargs or args before the flags , default true
 //   OPT_SCREEN_WIDTH for print help screen width ,default 80
+//   OPT_FLAG_NO_CHANGE for flag will change when to varname flagname and longopt default true
 //   OPT_VAR_UPPER_CASE used in the extargsparse.ExtArgsOptions for variable for first character uppercase default is true
 //   OPT_FUNC_UPPER_CASE used in the function for first character uppercase default is true
 const (
@@ -38,6 +39,7 @@ const (
 	OPT_CMD_PREFIX_ADDED = "cmdprefixadded"
 	OPT_PARSE_ALL        = "parseall"
 	OPT_SCREEN_WIDTH     = "screenwidth"
+	OPT_FLAG_NO_CHANGE   = "flagnochange"
 	OPT_VAR_UPPER_CASE   = "varuppercase"
 	OPT_FUNC_UPPER_CASE  = "funcuppercase"
 )

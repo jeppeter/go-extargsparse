@@ -2647,7 +2647,7 @@ func Test_parser_A047(t *testing.T) {
 	var cl *compileExec
 	var c string
 	var setvars map[string]string
-	var confstr = fmt.Sprintf(`{"parseall": true,"%s" : "++", "%s" : "+" , "helpshort" : "?" , "%s": "usage" , "jsonlong" : "jsonfile", "%s": false}`, OPT_LONG_PREFIX, OPT_SHORT_PREFIX, OPT_HELP_LONG, OPT_FUNC_UPPER_CASE)
+	var confstr = fmt.Sprintf(`{"parseall": true,"%s" : "++", "%s" : "+" , "%s" : "?" , "%s": "usage" , "jsonlong" : "jsonfile", "%s": false}`, OPT_LONG_PREFIX, OPT_SHORT_PREFIX, OPT_HELP_SHORT, OPT_HELP_LONG, OPT_FUNC_UPPER_CASE)
 	var codestr = `func format_error(fmtstr string, a ...interface{}) string {
 	return fmt.Sprintf(fmtstr, a...)
 }
@@ -2831,7 +2831,7 @@ func Test_parser_A050(t *testing.T) {
                 "$" : "+"
             }
         }`
-	var confstr = fmt.Sprintf(`{"%s": "usage", "helpshort" : "?" , "%s" : "++", "%s" : "+"}`, OPT_HELP_LONG, OPT_LONG_PREFIX, OPT_SHORT_PREFIX)
+	var confstr = fmt.Sprintf(`{"%s": "usage", "%s" : "?" , "%s" : "++", "%s" : "+"}`, OPT_HELP_LONG, OPT_HELP_SHORT, OPT_LONG_PREFIX, OPT_SHORT_PREFIX)
 	var options *ExtArgsOptions
 	var parser *ExtArgsParse
 	var sarr []string
@@ -2872,10 +2872,10 @@ func Test_parser_A051(t *testing.T) {
         }`
 	var confstr = fmt.Sprintf(`        {
             "%s" : "usage",
-            "helpshort" : null,
+            "%s" : null,
             "%s" : "++",
             "%s" : "+"
-        }`, OPT_HELP_LONG, OPT_LONG_PREFIX, OPT_SHORT_PREFIX)
+        }`, OPT_HELP_LONG, OPT_HELP_SHORT, OPT_LONG_PREFIX, OPT_SHORT_PREFIX)
 	var options *ExtArgsOptions
 	var parser *ExtArgsParse
 	var sarr []string

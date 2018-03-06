@@ -1,8 +1,8 @@
 package extargsparse_test
 
 import (
+	extargsparse "."
 	"fmt"
-	"github.com/jeppeter/go-extargsparse"
 	"io/ioutil"
 	"os"
 )
@@ -564,5 +564,113 @@ func ExampleExtKeyParse_HelpInfo() {
 			dep.cc.HelpInfo=cc sss
 			rdep.subnargs.HelpInfo=this is rdep subnargs help
 			rdep.dd.HelpInfo=capital C
+	*/
+}
+
+func ExampleExtKeyParse_Longopt() {
+	var loads = `{
+		"verbose|v" : "+",
+		"dep<dep_handler>" : {
+			"cc|c" : ""
+		},
+		"rdep<rdep_handler>": {
+			"dd|C" : ""
+		}
+	}`
+	var confstr string
+	var parser *extargsparse.ExtArgsParse
+	var options *extargsparse.ExtArgsOptions
+	var flag *extargsparse.ExtKeyParse
+	var opts []*extargsparse.ExtKeyParse
+	confstr = `{}`
+	options, _ = extargsparse.NewExtArgsOptions(confstr)
+	parser, _ = extargsparse.NewExtArgsParse(options, nil)
+	parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	opts, _ = parser.GetCmdOpts("")
+	for _, flag = range opts {
+		if flag.TypeName() == "count" && flag.FlagName() == "verbose" {
+			fmt.Fprintf(os.Stdout, "longprefix=%s\n", flag.LongPrefix())
+			fmt.Fprintf(os.Stdout, "longopt=%s\n", flag.Longopt())
+			fmt.Fprintf(os.Stdout, "shortopt=%s\n", flag.Shortopt())
+		}
+	}
+
+	confstr = `{ "longprefix" : "++", "shortprefix" : "+"}`
+	options, _ = extargsparse.NewExtArgsOptions(confstr)
+	parser, _ = extargsparse.NewExtArgsParse(options, nil)
+	parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	opts, _ = parser.GetCmdOpts("")
+	for _, flag = range opts {
+		if flag.TypeName() == "count" && flag.FlagName() == "verbose" {
+			fmt.Fprintf(os.Stdout, "longprefix=%s\n", flag.LongPrefix())
+			fmt.Fprintf(os.Stdout, "longopt=%s\n", flag.Longopt())
+			fmt.Fprintf(os.Stdout, "shortopt=%s\n", flag.Shortopt())
+		}
+	}
+
+	/*
+		Output:
+			longprefix=--
+			longopt=--verbose
+			shortopt=-v
+			longprefix=++
+			longopt=++verbose
+			shortopt=+v
+	*/
+}
+
+func ExampleExtKeyParse_Nargs() {
+	var loads = `{
+		"verbose|v" : "+",
+		"dep<dep_handler>" : {
+			"cc|c" : "",
+			"$" : "+"
+		},
+		"rdep<rdep_handler>": {
+			"dd|C" : "",
+			"$" : "?"
+		},
+		"$port" : {
+			"nargs" : 1,
+			"type" : "int",
+			"value" : 9000
+		}
+	}`
+	var confstr string
+	var parser *extargsparse.ExtArgsParse
+	var options *extargsparse.ExtArgsOptions
+	var flag *extargsparse.ExtKeyParse
+	var opts []*extargsparse.ExtKeyParse
+	confstr = `{}`
+	options, _ = extargsparse.NewExtArgsOptions(confstr)
+	parser, _ = extargsparse.NewExtArgsParse(options, nil)
+	parser.LoadCommandLineString(fmt.Sprintf("%s", loads))
+	opts, _ = parser.GetCmdOpts("")
+	for _, flag = range opts {
+		if flag.TypeName() == "args" {
+			fmt.Fprintf(os.Stdout, "args.nargs=%v\n", flag.Nargs())
+		} else if flag.FlagName() == "port" {
+			fmt.Fprintf(os.Stdout, "port.nargs=%d\n", flag.Nargs().(int))
+		}
+	}
+
+	opts, _ = parser.GetCmdOpts("dep")
+	for _, flag = range opts {
+		if flag.TypeName() == "args" {
+			fmt.Fprintf(os.Stdout, "dep.args.nargs=%v\n", flag.Nargs())
+		}
+	}
+	opts, _ = parser.GetCmdOpts("rdep")
+	for _, flag = range opts {
+		if flag.TypeName() == "args" {
+			fmt.Fprintf(os.Stdout, "rdep.args.nargs=%v\n", flag.Nargs())
+		}
+	}
+	/*
+		Output:
+			args.nargs=*
+			port.nargs=1
+			dep.args.nargs=+
+			rdep.args.nargs=?
 	*/
 }

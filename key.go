@@ -349,14 +349,28 @@ func (self *ExtKeyParse) ShortFlag() string {
 	return self.shortFlag
 }
 
+// IsFlag return whether this ExtKeyParse is flag mode
 func (self *ExtKeyParse) IsFlag() bool {
 	return self.isFlag
 }
 
+// IsCmd return whether this ExtKeyParse is cmd mode
 func (self *ExtKeyParse) IsCmd() bool {
 	return self.isCmd
 }
 
+// TypeName type of the flag
+//        value can be 9 ,and only 6 set by user
+//        typename            value type
+//        bool                false/true
+//        int                 int
+//        float               float64
+//        list                []string
+//        string              string
+//        count               int (only added by one with each)
+//        help                inner define ,for help display
+//        jsonfile            inner define ,for json set value
+//        args                []string (with no other parameters)
 func (self *ExtKeyParse) TypeName() string {
 	return self.typeName
 }
@@ -745,6 +759,7 @@ func (self *ExtKeyParse) Format() string {
 	return s
 }
 
+// Longopt long option in the flag , this determined by flagname,command,prefix,longprefix
 func (self *ExtKeyParse) Longopt() string {
 	var longopt string
 	if !self.isFlag || len(self.flagName) == 0 || self.typeName == "args" {
@@ -769,6 +784,7 @@ func (self *ExtKeyParse) Longopt() string {
 	return longopt
 }
 
+// Shortopt short option in the flag , this determined by shortflag,shortprefix
 func (self *ExtKeyParse) Shortopt() string {
 	var shortopt string = ""
 	if !self.isFlag || len(self.flagName) == 0 || self.typeName == "args" {
@@ -782,14 +798,17 @@ func (self *ExtKeyParse) Shortopt() string {
 	return shortopt
 }
 
+// LongPrefix this return the longprefix default is -- set by OPT_LONGPREFIX
 func (self *ExtKeyParse) LongPrefix() string {
 	return self.longPrefix
 }
 
+// ShortPrefix this return the shortprefix default is - set by OPT_SHORTPREFIX
 func (self *ExtKeyParse) ShortPrefix() string {
 	return self.shortPrefix
 }
 
+/*
 func (self *ExtKeyParse) NeedArg() int {
 	if !self.isFlag {
 		return 0
@@ -801,11 +820,13 @@ func (self *ExtKeyParse) NeedArg() int {
 	}
 	return 0
 }
+*/
 
 func (self *ExtKeyParse) Prefix() string {
 	return self.prefix
 }
 
+// Value default value for the flag , it is defined at the value of json
 func (self *ExtKeyParse) Value() interface{} {
 	return self.value
 }
@@ -829,10 +850,24 @@ func (self *ExtKeyParse) FlagName() string {
 	return self.flagName
 }
 
+// VarName variable name this is used for the Struct defined
+//    example see https://github.com/jeppeter/example/getopt/varname1.go
 func (self *ExtKeyParse) VarName() string {
 	return self.varName
 }
 
+// Nargs return string or int ,determined by whether it is args or simple flag
+//    if it is args type ,it will give the string or int value
+//    if it is simple flag ,it will give the int value ,default is
+//           typename               number
+//           count                  0
+//           int                    1
+//           float                  1
+//           list                   1
+//           string                 1
+//           help                   0
+//           jsonfile               1
+//           bool                   0
 func (self *ExtKeyParse) Nargs() interface{} {
 	return self.nargs
 }

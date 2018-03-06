@@ -1,0 +1,37 @@
+cmd1 0.0.1  [OPTIONS] [SUBCOMMANDS] [args...]'
+
+[OPTIONS]
+    --json                 json     
+                    json input file to get the value set
+    --help|-h                       
+                    to display this help information
+    --verbose|-v           verbose  
+                    verbose set default(0)
+    --http-url|-u          http_url 
+                    http_url set default(http://www.google.com)
+    --http-visual-mode|-V           
+                    http_visual_mode set true default(False)
+    --port|-p              port     
+                    port to connect
+
+[SUBCOMMANDS]
+    [rdep]  rdep handler 
+    [dep]   dep handler  
+cmd1 0.0.1  dep [OPTIONS] [SUBCOMMANDS] args...
+
+[OPTIONS]
+    --dep-json       dep_json    json input file to get the value set 
+    --help|-h                    to display this help information     
+    --dep-list|-l    dep_list    dep_list set default([])             
+    --dep-string|-s  dep_string  dep_string set default(s_var)        
+
+[SUBCOMMANDS]
+    [ip]   ip handler  
+cmd1 0.0.1  rdep [OPTIONS] [SUBCOMMANDS] [args...]'
+
+[OPTIONS]
+    --rdep-json  rdep_json  json input file to get the value set 
+    --help|-h               to display this help information     
+
+[SUBCOMMANDS]
+    [ip]    ip handler   

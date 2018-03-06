@@ -15,6 +15,7 @@ type FileIoWriter struct {
 	file *os.File
 }
 
+// it is called by
 func NewFileWriter(f *os.File) *FileIoWriter {
 	self := &FileIoWriter{}
 	self.file = f

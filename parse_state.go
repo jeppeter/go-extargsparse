@@ -50,7 +50,7 @@ func newParseState(args []string, maincmd *parserCompat, optattr *ExtArgsOptions
 	} else {
 		self.bundlemode = false
 	}
-	self.parseall = optattr.GetBool("parseall")
+	self.parseall = optattr.GetBool(OPT_PARSE_ALL)
 	self.leftargs = make([]string, 0)
 	return self
 }

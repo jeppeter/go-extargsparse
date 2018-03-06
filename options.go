@@ -27,7 +27,7 @@ var opt_default_VALUE = map[string]interface{}{
 	OPT_HELP_SHORT:       "h",
 	OPT_JSON_LONG:        "json",
 	OPT_CMD_PREFIX_ADDED: true,
-	"parseall":           true,
+	OPT_PARSE_ALL:        true,
 	"screenwidth":        80,
 	"flagnochange":       false,
 	OPT_VAR_UPPER_CASE:   true,
@@ -168,7 +168,7 @@ func (p *ExtArgsOptions) Format() string {
 //    OPT_HELP_SHORT:          "h"
 //    OPT_JSON_LONG:           "json"
 //    OPT_CMD_PREFIX_ADDED:    true
-//    "parseall":              true
+//    OPT_PARSE_ALL:           true
 //    "screenwidth":           80
 //    "flagnochange":          false
 //    OPT_VAR_UPPER_CASE:      true

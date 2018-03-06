@@ -2503,7 +2503,7 @@ func Test_parser_A043(t *testing.T) {
 	var args *NameSpaceEx
 	var options *ExtArgsOptions
 	beforeParser(t)
-	options, err = NewExtArgsOptions(fmt.Sprintf(`{"parseall": true,"%s" : "-", "%s" : "-"}`, OPT_LONG_PREFIX, OPT_SHORT_PREFIX))
+	options, err = NewExtArgsOptions(fmt.Sprintf(`{"%s": true,"%s" : "-", "%s" : "-"}`, OPT_PARSE_ALL, OPT_LONG_PREFIX, OPT_SHORT_PREFIX))
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(options, nil)
 	check_equal(t, err, nil)
@@ -2533,7 +2533,7 @@ func Test_parser_A044(t *testing.T) {
 	var args *NameSpaceEx
 	var options *ExtArgsOptions
 	beforeParser(t)
-	options, err = NewExtArgsOptions(fmt.Sprintf(`{"parseall": true,"%s" : "++", "%s" : "+"}`, OPT_LONG_PREFIX, OPT_SHORT_PREFIX))
+	options, err = NewExtArgsOptions(fmt.Sprintf(`{"%s": true,"%s" : "++", "%s" : "+"}`, OPT_PARSE_ALL, OPT_LONG_PREFIX, OPT_SHORT_PREFIX))
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(options, nil)
 	check_equal(t, err, nil)
@@ -2569,7 +2569,7 @@ func Test_parser_A045(t *testing.T) {
 	pkgname = getCallerPackage(0)
 	check_not_equal(t, pkgname, "")
 	loads = fmt.Sprintf(loads_fmt, pkgname)
-	options, err = NewExtArgsOptions(fmt.Sprintf(`{"parseall": true,"%s" : "++", "%s" : "+","%s": false}`, OPT_LONG_PREFIX, OPT_SHORT_PREFIX, OPT_FUNC_UPPER_CASE))
+	options, err = NewExtArgsOptions(fmt.Sprintf(`{"%s": true,"%s" : "++", "%s" : "+","%s": false}`, OPT_PARSE_ALL, OPT_LONG_PREFIX, OPT_SHORT_PREFIX, OPT_FUNC_UPPER_CASE))
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(options, nil)
 	check_equal(t, err, nil)
@@ -2609,7 +2609,7 @@ func Test_parser_A046(t *testing.T) {
 	pkgname = getCallerPackage(0)
 	check_not_equal(t, pkgname, "")
 	loads = fmt.Sprintf(loads_fmt, pkgname, pkgname)
-	options, err = NewExtArgsOptions(fmt.Sprintf(`{"parseall": true,"%s" : "++", "%s" : "+", "%s": false}`, OPT_LONG_PREFIX, OPT_SHORT_PREFIX, OPT_FUNC_UPPER_CASE))
+	options, err = NewExtArgsOptions(fmt.Sprintf(`{"%s": true,"%s" : "++", "%s" : "+", "%s": false}`, OPT_PARSE_ALL, OPT_LONG_PREFIX, OPT_SHORT_PREFIX, OPT_FUNC_UPPER_CASE))
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(options, nil)
 	check_equal(t, err, nil)
@@ -2647,7 +2647,7 @@ func Test_parser_A047(t *testing.T) {
 	var cl *compileExec
 	var c string
 	var setvars map[string]string
-	var confstr = fmt.Sprintf(`{"parseall": true,"%s" : "++", "%s" : "+" , "%s" : "?" , "%s": "usage" , "%S" : "jsonfile", "%s": false}`, OPT_LONG_PREFIX, OPT_SHORT_PREFIX, OPT_HELP_SHORT, OPT_HELP_LONG, OPT_JSON_LONG, OPT_FUNC_UPPER_CASE)
+	var confstr = fmt.Sprintf(`{"%s": true,"%s" : "++", "%s" : "+" , "%s" : "?" , "%s": "usage" , "%S" : "jsonfile", "%s": false}`, OPT_PARSE_ALL, OPT_LONG_PREFIX, OPT_SHORT_PREFIX, OPT_HELP_SHORT, OPT_HELP_LONG, OPT_JSON_LONG, OPT_FUNC_UPPER_CASE)
 	var codestr = `func format_error(fmtstr string, a ...interface{}) string {
 	return fmt.Sprintf(fmtstr, a...)
 }
@@ -3456,7 +3456,7 @@ func Test_parser_A059(t *testing.T) {
             }
         }`
 	var loads string
-	var confstr = fmt.Sprintf(`{"parseall" : true,"%s" : "++", "%s" : "+"}`, OPT_LONG_PREFIX, OPT_SHORT_PREFIX)
+	var confstr = fmt.Sprintf(`{"%s" : true,"%s" : "++", "%s" : "+"}`, OPT_PARSE_ALL, OPT_LONG_PREFIX, OPT_SHORT_PREFIX)
 	var options *ExtArgsOptions
 	var parser *ExtArgsParse
 	var args *NameSpaceEx

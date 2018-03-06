@@ -16,6 +16,7 @@ package extargsparse
 //   OPT_HELP_SHORT for help flag shortflag default "h"
 //   OPT_JSON_LONG for json flag flagname default "json"
 //   OPT_CMD_PREFIX_ADDED for cmd and subcommand to add before flag , default true
+//   OPT_PARSE_ALL for parse all ,and it will enable subargs or args before the flags , default true
 //   OPT_VAR_UPPER_CASE used in the extargsparse.ExtArgsOptions for variable for first character uppercase default is true
 //   OPT_FUNC_UPPER_CASE used in the function for first character uppercase default is true
 const (
@@ -34,6 +35,7 @@ const (
 	OPT_HELP_SHORT       = "helpshort"
 	OPT_JSON_LONG        = "jsonlong"
 	OPT_CMD_PREFIX_ADDED = "cmdprefixadded"
+	OPT_PARSE_ALL        = "parseall"
 	OPT_VAR_UPPER_CASE   = "varuppercase"
 	OPT_FUNC_UPPER_CASE  = "funcuppercase"
 )

@@ -2,10 +2,24 @@ package extargsparse
 
 // constant for the options used
 //   OPT_PROG used for program name
+//   OPT_USAGE used for help information
+//   OPT_DESCRIPTION for description in help
+//   OPT_EPILOG for help epilog
+//   OPT_VERSION for version set
+//   OPT_ERROR_HANDLER for error handler ,now is reserved
+//   OPT_HELP_HANDLER for help option ,default is ""; "nohelp" for no help information print out
+//   OPT_LONG_PREFIX for long prefix ,default is "--"
 //   OPT_VAR_UPPER_CASE used in the extargsparse.ExtArgsOptions for variable for first character uppercase default is true
 //   OPT_FUNC_UPPER_CASE used in the function for first character uppercase default is true
 const (
 	OPT_PROG            = "prog"
+	OPT_USAGE           = "usage"
+	OPT_DESCRIPTION     = "description"
+	OPT_EPILOG          = "epilog"
+	OPT_VERSION         = "version"
+	OPT_ERROR_HANDLER   = "errorhandler"
+	OPT_HELP_HANDLER    = "helphandler"
+	OPT_LONG_PREFIX     = "longprefix"
 	OPT_VAR_UPPER_CASE  = "varuppercase"
 	OPT_FUNC_UPPER_CASE = "funcuppercase"
 )

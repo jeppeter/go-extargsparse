@@ -908,10 +908,10 @@ func NewExtArgsParse(options *ExtArgsOptions, priority interface{}) (self *ExtAr
 	self.mainCmd = newParserCompat(nil, options)
 	self.argState = nil
 
-	self.helpHandler = options.GetString("helphandler")
+	self.helpHandler = options.GetString(OPT_HELP_HANDLER)
 	self.outputMode = make([]string, 0)
 	self.ended = 0
-	self.longPrefix = options.GetString("longprefix")
+	self.longPrefix = options.GetString(OPT_LONG_PREFIX)
 	self.shortPrefix = options.GetString("shortprefix")
 	self.noHelpOption = options.GetBool("nohelpoption")
 	self.noJsonOption = options.GetBool("nojsonoption")

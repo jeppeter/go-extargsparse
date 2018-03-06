@@ -13,13 +13,13 @@ type ExtArgsOptions struct {
 
 var opt_default_VALUE = map[string]interface{}{
 	OPT_PROG:            "",
-	"usage":             "",
-	"description":       "",
-	"epilog":            "",
-	"version":           "0.0.1",
-	"errorhandler":      "exit",
-	"helphandler":       nil,
-	"longprefix":        "--",
+	OPT_USAGE:           "",
+	OPT_DESCRIPTION:     "",
+	OPT_EPILOG:          "",
+	OPT_VERSION:         "0.0.1",
+	OPT_ERROR_HANDLER:   "exit",
+	OPT_HELP_HANDLER:    nil,
+	OPT_LONG_PREFIX:     "--",
 	"shortprefix":       "-",
 	"nohelpoption":      false,
 	"nojsonoption":      false,
@@ -154,12 +154,12 @@ func (p *ExtArgsOptions) Format() string {
 //    s is the json file ,
 //    key                  default value
 //    OPT_PROG:            ""
-//    "usage":             ""
-//    "description":       ""
-//    "epilog":            ""
-//    "version":           "0.0.1"
-//    "errorhandler":      "exit"
-//    "helphandler":       nil
+//    OPT_USAGE:           ""
+//    OPT_DESCRIPTION:     ""
+//    OPT_EPILOG:          ""
+//    OPT_VERSION:         "0.0.1"
+//    OPT_ERROR_HANDLER:   "exit"
+//    OPT_HELP_HANDLER:    nil
 //    "longprefix":        "--"
 //    "shortprefix":       "-"
 //    "nohelpoption":      false

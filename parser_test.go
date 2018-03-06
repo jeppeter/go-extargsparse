@@ -999,7 +999,7 @@ func Test_parser_A010(t *testing.T) {
 
 	depjsonfile = makeWriteTempFile(`{"list" : ["jsonval1","jsonval2"],"string" : "jsonstring"}`)
 	defer func() { safeRemoveFile(depjsonfile, "depjsonfile", ok) }()
-	option, err = NewExtArgsOptions(`{"errorhandler" : "raise"}`)
+	option, err = NewExtArgsOptions(fmt.Sprintf(`{"%s" : "raise"}`, OPT_ERROR_HANDLER))
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(option, nil)
 	check_equal(t, err, nil)
@@ -1863,7 +1863,7 @@ func Test_parser_A028(t *testing.T) {
 	var options *ExtArgsOptions
 	var params []string
 	beforeParser(t)
-	options, err = NewExtArgsOptions(`{"errorhandler" : "raise"}`)
+	options, err = NewExtArgsOptions(fmt.Sprintf(`{"%s" : "raise"}`, OPT_ERROR_HANDLER))
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(options, nil)
 	check_equal(t, err, nil)
@@ -1911,7 +1911,7 @@ func Test_parser_A029(t *testing.T) {
 	var options *ExtArgsOptions
 	var sarr []string
 	beforeParser(t)
-	options, err = NewExtArgsOptions(`{"helphandler" : "nohelp"}`)
+	options, err = NewExtArgsOptions(fmt.Sprintf(`{"%s" : "nohelp"}`, OPT_HELP_HANDLER))
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(options, nil)
 	check_equal(t, err, nil)
@@ -2503,7 +2503,7 @@ func Test_parser_A043(t *testing.T) {
 	var args *NameSpaceEx
 	var options *ExtArgsOptions
 	beforeParser(t)
-	options, err = NewExtArgsOptions(`{"parseall": true,"longprefix" : "-", "shortprefix" : "-"}`)
+	options, err = NewExtArgsOptions(fmt.Sprintf(`{"parseall": true,"%s" : "-", "shortprefix" : "-"}`, OPT_LONG_PREFIX))
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(options, nil)
 	check_equal(t, err, nil)

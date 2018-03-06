@@ -16,7 +16,7 @@ func main() {
                 "$" : "+"
             }
         }`
-	var confstr = fmt.Sprintf(`{"helplong": "usage", "helpshort" : "?" , "longprefix" : "++", "shortprefix" : "+"}`)
+	var confstr = fmt.Sprintf(fmt.Sprintf(`{"helplong": "usage", "helpshort" : "?" , "%s" : "++", "shortprefix" : "+"}`, extargsparse.OPT_LONG_PREFIX))
 	var options *extargsparse.ExtArgsOptions
 	var parser *extargsparse.ExtArgsParse
 	var ns *extargsparse.NameSpaceEx

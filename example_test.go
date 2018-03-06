@@ -53,7 +53,7 @@ func ExampleNewExtArgsParse() {
 func ExampleNewExtArgsParse_withnohelp() {
 	var parser *extargsparse.ExtArgsParse
 	var options *extargsparse.ExtArgsOptions
-	var confstr = `{"nohelpoption" : true}`
+	var confstr = fmt.Sprintf(`{"%s" : true}`, extargsparse.OPT_NO_HELP_OPTION)
 	var err error
 	var loads = `{}`
 	options, err = extargsparse.NewExtArgsOptions(confstr)
@@ -85,8 +85,8 @@ func ExampleNewExtArgsParse_priority() {
         }`
 	var confstr = fmt.Sprintf(`        {
             "nojsonoption" : true,
-            "nohelpoption" : true
-        }`)
+            "%s" : true
+        }`, extargsparse.OPT_NO_HELP_OPTION)
 	var options *extargsparse.ExtArgsOptions
 	var parser *extargsparse.ExtArgsParse
 	var args *extargsparse.NameSpaceEx
@@ -153,8 +153,8 @@ func ExampleExtArgsParse_GetCmdKey() {
         }`
 	var confstr = fmt.Sprintf(`        {
             "nojsonoption" : true,
-            "nohelpoption" : true
-        }`)
+            "%s" : true
+        }`, extargsparse.OPT_NO_HELP_OPTION)
 	var options *extargsparse.ExtArgsOptions
 	var parser *extargsparse.ExtArgsParse
 	var keycls *extargsparse.ExtKeyParse

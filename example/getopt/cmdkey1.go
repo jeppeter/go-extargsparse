@@ -27,8 +27,8 @@ func main() {
         }`
 	var confstr = fmt.Sprintf(`        {
             "nojsonoption" : true,
-            "nohelpoption" : true
-        }`)
+            "%s" : true
+        }`, extargsparse.OPT_NO_HELP_OPTION)
 	var options *extargsparse.ExtArgsOptions
 	var parser *extargsparse.ExtArgsParse
 	var keycls *extargsparse.ExtKeyParse

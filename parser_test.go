@@ -2922,8 +2922,8 @@ func Test_parser_A052(t *testing.T) {
         }`
 	var confstr = fmt.Sprintf(`        {
             "nojsonoption" : true,
-            "nohelpoption" : true
-        }`)
+            "%s" : true
+        }`, OPT_NO_HELP_OPTION)
 	var options *ExtArgsOptions
 	var parser *ExtArgsParse
 	var args *NameSpaceEx

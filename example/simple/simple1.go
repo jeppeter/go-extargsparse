@@ -34,7 +34,12 @@ func main() {
 		return
 	}
 
-	ns, err = parser.ParseCommandLine([]string{"-vvvv", "cc", "-f", "33.2", "--arrl", "wwwe", "-s", "3993"}, nil)
+	if len(os.Args[1:]) == 0 {
+		ns, err = parser.ParseCommandLine([]string{"-vvvv", "cc", "-f", "33.2", "--arrl", "wwwe", "-s", "3993"}, nil)
+	} else {
+		ns, err = parser.ParseCommandLine(nil, nil)
+	}
+
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "can not parser command err[%s]\n", err.Error())
 		os.Exit(5)

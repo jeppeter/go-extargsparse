@@ -2647,7 +2647,7 @@ func Test_parser_A047(t *testing.T) {
 	var cl *compileExec
 	var c string
 	var setvars map[string]string
-	var confstr = fmt.Sprintf(`{"parseall": true,"%s" : "++", "%s" : "+" , "%s" : "?" , "%s": "usage" , "jsonlong" : "jsonfile", "%s": false}`, OPT_LONG_PREFIX, OPT_SHORT_PREFIX, OPT_HELP_SHORT, OPT_HELP_LONG, OPT_FUNC_UPPER_CASE)
+	var confstr = fmt.Sprintf(`{"parseall": true,"%s" : "++", "%s" : "+" , "%s" : "?" , "%s": "usage" , "%S" : "jsonfile", "%s": false}`, OPT_LONG_PREFIX, OPT_SHORT_PREFIX, OPT_HELP_SHORT, OPT_HELP_LONG, OPT_JSON_LONG, OPT_FUNC_UPPER_CASE)
 	var codestr = `func format_error(fmtstr string, a ...interface{}) string {
 	return fmt.Sprintf(fmtstr, a...)
 }
@@ -2719,7 +2719,7 @@ func Test_parser_A048(t *testing.T) {
             }
         }`
 	var ok bool = false
-	var confstr = fmt.Sprintf(`{"jsonlong": "jsonfile"}`)
+	var confstr = fmt.Sprintf(`{"%s": "jsonfile"}`, OPT_JSON_LONG)
 	var jsonfile string
 	var depjsonfile string
 	var depstrval string = `newval`
@@ -3118,8 +3118,8 @@ func Test_parser_A054(t *testing.T) {
             }
         }`
 	var confstr = fmt.Sprintf(`        {
-            "jsonlong" : "jsonfile"
-        }`)
+            "%s" : "jsonfile"
+        }`, OPT_JSON_LONG)
 	var options *ExtArgsOptions
 	var parser *ExtArgsParse
 	var args *NameSpaceEx
@@ -3175,8 +3175,8 @@ func Test_parser_A055(t *testing.T) {
         }`
 	var loads string
 	var confstr = fmt.Sprintf(`        {
-            "jsonlong" : "jsonfile"
-        }`)
+            "%s" : "jsonfile"
+        }`, OPT_JSON_LONG)
 	var options *ExtArgsOptions
 	var parser *ExtArgsParse
 	var args *NameSpaceEx

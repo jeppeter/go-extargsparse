@@ -14,6 +14,7 @@ package extargsparse
 //   OPT_NO_JSON_OPTION for no json flag inserted into the opts default false
 //   OPT_HELP_LONG for help flag flagname default "help"
 //   OPT_HELP_SHORT for help flag shortflag default "h"
+//   OPT_JSON_LONG for json flag flagname default "json"
 //   OPT_VAR_UPPER_CASE used in the extargsparse.ExtArgsOptions for variable for first character uppercase default is true
 //   OPT_FUNC_UPPER_CASE used in the function for first character uppercase default is true
 const (
@@ -30,6 +31,7 @@ const (
 	OPT_NO_JSON_OPTION  = "nojsonoption"
 	OPT_HELP_LONG       = "helplong"
 	OPT_HELP_SHORT      = "helpshort"
+	OPT_JSON_LONG       = "jsonlong"
 	OPT_VAR_UPPER_CASE  = "varuppercase"
 	OPT_FUNC_UPPER_CASE = "funcuppercase"
 )

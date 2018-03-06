@@ -473,7 +473,7 @@ func (self *ExtArgsParse) findCommandsInPath(cmdname string, parsers []*parserCo
 // PrintHelp to call print out
 //    out is the IoWriter interface , if use os.File call NewFileWriter(f *os.File) *FileIoWriter to get
 //    cmdname is the cmd to display help information
-//    example see https://github.com/jeppeter/example/helpfunc/helpstr1.go
+//    example see https://github.com/jeppeter/go-extargsparse/blob/master/example/helpfunc/helpstr1.go
 func (self *ExtArgsParse) PrintHelp(out IoWriter, cmdname string) error {
 	var err error
 	var parsers []*parserCompat
@@ -1128,7 +1128,7 @@ func (self *ExtArgsParse) loadCommandLine(vmap map[string]interface{}) error {
 //    "verbose|v##verbose mode##" : "+"  to add help information between ##(help information)##
 //    "verbose|v!optparse=opt_func;opthelp=help_func!##verbose mode##" : "+" to specified with options now is support optparse and opthelp
 //    opthelp : function return help information
-//    optparse : function parse input ,more example see https://github.com/jeppeter/go-extargsparse/example
+//    optparse : function parse input ,more example see https://github.com/jeppeter/go-extargsparse/tree/master/example
 func (self *ExtArgsParse) LoadCommandLineString(s string) error {
 	var vmap map[string]interface{}
 	var err error
@@ -1634,9 +1634,9 @@ func (self *ExtArgsParse) callbackFunc(funcname string, ns *NameSpaceEx, ostruct
 // ParseCommandLineEx parse the command line
 //    params can be nil ,for the default os.Args[1:] or []string{} type
 //    Context is the user defined parameter ,it will used in the callback function like
-//    ostruct is the used defined struct of NameSpaceEx ,the rule is in the https://github.com/jeppeter/go-extargsparse/README.md
+//    ostruct is the used defined struct of NameSpaceEx ,the rule is in the https://github.com/jeppeter/go-extargsparse/blob/master/README.md
 //    mode is the reserved for otheruse ,just put nil
-//    more example see https://github.com/jeppeter/example/
+//    more example see https://github.com/jeppeter/go-extargsparse/tree/master/example
 func (self *ExtArgsParse) ParseCommandLineEx(params interface{}, Context interface{}, ostruct interface{}, mode interface{}) (ns *NameSpaceEx, err error) {
 	var s string
 	var realparams []string

@@ -691,7 +691,7 @@ func (self *ExtKeyParse) parse(prefix string, key string, value interface{}, isf
 
 // Attr function
 //    extension attribute for keycls ,it is more
-//    example see https://github.com/jeppeter/go-extargsparse/example/getopt/attrset1.go
+//    example see https://github.com/jeppeter/go-extargsparse/blob/master/example/getopt/attrset1.go
 //    no used options is : opthelp and optparse
 func (self *ExtKeyParse) Attr(k string) string {
 	if k == "" {
@@ -851,7 +851,7 @@ func (self *ExtKeyParse) FlagName() string {
 }
 
 // VarName variable name this is used for the Struct defined
-//    example see https://github.com/jeppeter/example/getopt/varname1.go
+//    example see https://github.com/jeppeter/go-extargsparse/blob/master/example/getopt/varname1.go
 func (self *ExtKeyParse) VarName() string {
 	return self.varName
 }

@@ -10,12 +10,12 @@ import (
 func ExampleNewExtArgsOptions() {
 	var options *extargsparse.ExtArgsOptions
 	var err error
-	var confstr = `{
-		"screenwidth" : 90.0		
-		}`
+	var confstr = fmt.Sprintf(`{
+		"%s" : 90.0		
+		}`, extargsparse.OPT_SCREEN_WIDTH)
 	options, err = extargsparse.NewExtArgsOptions(confstr)
 	if err == nil {
-		fmt.Fprintf(os.Stdout, "screenwidth=%d\n", options.GetInt("screenwidth")) // screenwidth=90
+		fmt.Fprintf(os.Stdout, "screenwidth=%d\n", options.GetInt(extargsparse.OPT_SCREEN_WIDTH)) // screenwidth=90
 	}
 	return
 }
@@ -25,8 +25,8 @@ func ExampleExtArgsOptions_SetValue() {
 	var err error
 	options, err = extargsparse.NewExtArgsOptions(`{}`)
 	if err == nil {
-		options.SetValue("screenwidth", float64(100.0))
-		fmt.Fprintf(os.Stdout, "screenwidth=%d\n", options.GetInt("screenwidth")) //screenwidth=100
+		options.SetValue(extargsparse.OPT_SCREEN_WIDTH, float64(100.0))
+		fmt.Fprintf(os.Stdout, "screenwidth=%d\n", options.GetInt(extargsparse.OPT_SCREEN_WIDTH)) //screenwidth=100
 	}
 	return
 }

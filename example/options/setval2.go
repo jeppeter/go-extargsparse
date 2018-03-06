@@ -11,8 +11,8 @@ func main() {
 	var err error
 	options, err = extargsparse.NewExtArgsOptions(`{}`)
 	if err == nil {
-		options.SetValue("screenwidth", float64(100.0))
-		fmt.Fprintf(os.Stdout, "screenwidth=%d\n", options.GetInt("screenwidth")) //screenwidth=100
+		options.SetValue(extargsparse.OPT_SCREEN_WIDTH, float64(100.0))
+		fmt.Fprintf(os.Stdout, "screenwidth=%d\n", options.GetInt(extargsparse.OPT_SCREEN_WIDTH)) //screenwidth=100
 	}
 	return
 }

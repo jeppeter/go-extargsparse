@@ -56,8 +56,8 @@ func newParserCompat(keycls *ExtKeyParse, opt *ExtArgsOptions) *parserCompat {
 		self.CallFunction = ""
 	}
 	self.ScreenWidth = 80
-	if opt != nil && opt.GetValue("screenwidth") != nil {
-		self.ScreenWidth = opt.GetValue("screenwidth").(int)
+	if opt != nil && opt.GetValue(OPT_SCREEN_WIDTH) != nil {
+		self.ScreenWidth = opt.GetValue(OPT_SCREEN_WIDTH).(int)
 	}
 
 	self.FunctionUpper = true

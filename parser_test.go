@@ -2772,7 +2772,7 @@ func Test_parser_A049(t *testing.T) {
                 "$" : "+"
             }
         }`
-	var confstr = fmt.Sprintf(`{"screenwidth": 60}`)
+	var confstr = fmt.Sprintf(`{"%s": 60}`, OPT_SCREEN_WIDTH)
 	var options *ExtArgsOptions
 	var parser *ExtArgsParse
 	var sio *stringIO
@@ -2800,7 +2800,7 @@ func Test_parser_A049(t *testing.T) {
 		}
 	}
 	check_equal(t, overlength, false)
-	confstr = fmt.Sprintf(`{"screenwidth" : 80}`)
+	confstr = fmt.Sprintf(`{"%s" : 80}`, OPT_SCREEN_WIDTH)
 	options, err = NewExtArgsOptions(confstr)
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(options, nil)

@@ -24,9 +24,9 @@ func main() {
             }
         }`
 	var confstr = fmt.Sprintf(`        {
-            "nojsonoption" : true,
+            "%s" : true,
             "%s" : true
-        }`, extargsparse.OPT_NO_HELP_OPTION)
+        }`, extargsparse.OPT_NO_JSON_OPTION, extargsparse.OPT_NO_HELP_OPTION)
 	var options *extargsparse.ExtArgsOptions
 	var parser *extargsparse.ExtArgsParse
 	var args *extargsparse.NameSpaceEx

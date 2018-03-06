@@ -914,7 +914,7 @@ func NewExtArgsParse(options *ExtArgsOptions, priority interface{}) (self *ExtAr
 	self.longPrefix = options.GetString(OPT_LONG_PREFIX)
 	self.shortPrefix = options.GetString(OPT_SHORT_PREFIX)
 	self.noHelpOption = options.GetBool(OPT_NO_HELP_OPTION)
-	self.noJsonOption = options.GetBool("nojsonoption")
+	self.noJsonOption = options.GetBool(OPT_NO_JSON_OPTION)
 	self.helpLong = options.GetString("helplong")
 	self.helpShort = options.GetString("helpshort")
 	self.jsonLong = options.GetString("jsonlong")

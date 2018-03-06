@@ -2921,9 +2921,9 @@ func Test_parser_A052(t *testing.T) {
             }
         }`
 	var confstr = fmt.Sprintf(`        {
-            "nojsonoption" : true,
+            "%s" : true,
             "%s" : true
-        }`, OPT_NO_HELP_OPTION)
+        }`, OPT_NO_JSON_OPTION, OPT_NO_HELP_OPTION)
 	var options *ExtArgsOptions
 	var parser *ExtArgsParse
 	var args *NameSpaceEx
@@ -3241,9 +3241,9 @@ func Test_parser_A056(t *testing.T) {
 	var confstr = fmt.Sprintf(`        {
             "%s" : "-",
             "%s" : "-",
-            "nojsonoption" : true,
+            "%s" : true,
             "cmdprefixadded" : false
-        }`, OPT_LONG_PREFIX, OPT_SHORT_PREFIX)
+        }`, OPT_LONG_PREFIX, OPT_SHORT_PREFIX, OPT_NO_JSON_OPTION)
 	var options *ExtArgsOptions
 	var parser *ExtArgsParse
 	var sarr []string
@@ -3357,10 +3357,10 @@ func Test_parser_A057(t *testing.T) {
 	var confstr = fmt.Sprintf(`        {
             "%s" : "-",
             "%s" : "-",
-            "nojsonoption" : true,
+            "%s" : true,
             "cmdprefixadded" : false,
             "flagnochange" : true
-        }`, OPT_LONG_PREFIX, OPT_SHORT_PREFIX)
+        }`, OPT_LONG_PREFIX, OPT_SHORT_PREFIX, OPT_NO_JSON_OPTION)
 	var options *ExtArgsOptions
 	var parser *ExtArgsParse
 	var sarr []string

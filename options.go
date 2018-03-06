@@ -23,7 +23,7 @@ var opt_default_VALUE = map[string]interface{}{
 	OPT_SHORT_PREFIX:    "-",
 	OPT_NO_HELP_OPTION:  false,
 	OPT_NO_JSON_OPTION:  false,
-	"helplong":          "help",
+	OPT_HELP_LONG:       "help",
 	"helpshort":         "h",
 	"jsonlong":          "json",
 	"cmdprefixadded":    true,
@@ -164,7 +164,7 @@ func (p *ExtArgsOptions) Format() string {
 //    OPT_SHORT_PREFIX:    "-"
 //    OPT_NO_HELP_OPTION:  false
 //    OPT_NO_JSON_OPTION:  false
-//    "helplong":          "help"
+//    OPT_HELP_LONG:       "help"
 //    "helpshort":         "h"
 //    "jsonlong":          "json"
 //    "cmdprefixadded":    true

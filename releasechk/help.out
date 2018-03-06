@@ -15,8 +15,8 @@ cmd1 0.0.1  [OPTIONS] [SUBCOMMANDS] [args...]'
                     port to connect
 
 [SUBCOMMANDS]
-    [rdep]  rdep handler 
     [dep]   dep handler  
+    [rdep]  rdep handler 
 cmd1 0.0.1  dep [OPTIONS] [SUBCOMMANDS] args...
 
 [OPTIONS]

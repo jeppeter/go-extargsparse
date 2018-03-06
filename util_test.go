@@ -322,7 +322,7 @@ func (self *compileExec) getParserStruct(tabs int, parser *ExtArgsParse, conf *E
 			curname += "."
 		}
 		curname += curcmd
-		if conf.GetBool(VAR_UPPER_CASE) {
+		if conf.GetBool(OPT_VAR_UPPER_CASE) {
 			s += formLine(tabs, "%s struct {", ucFirst(curcmd))
 		} else {
 			s += formLine(tabs, "%s struct {", curcmd)
@@ -369,7 +369,7 @@ func (self *compileExec) getParserStruct(tabs int, parser *ExtArgsParse, conf *E
 					optname = "args"
 				}
 			}
-			if conf.GetBool(VAR_UPPER_CASE) {
+			if conf.GetBool(OPT_VAR_UPPER_CASE) {
 				s += formLine(tabs, "%s %s", ucFirst(optname), typename)
 			} else {
 				s += formLine(tabs, "%s %s", optname, typename)
@@ -424,7 +424,7 @@ func (self *compileExec) getStructMemberName(options *ExtArgsOptions, cmdname st
 	var sarr []string
 	var i int
 	var s string
-	if options.GetBool(VAR_UPPER_CASE) && len(cmdname) > 0 {
+	if options.GetBool(OPT_VAR_UPPER_CASE) && len(cmdname) > 0 {
 		sarr = strings.Split(cmdname, ".")
 		for i = 0; i < len(sarr); i++ {
 			sarr[i] = ucFirst(sarr[i])
@@ -436,7 +436,7 @@ func (self *compileExec) getStructMemberName(options *ExtArgsOptions, cmdname st
 	if len(s) > 0 {
 		s += "."
 	}
-	if options.GetBool(VAR_UPPER_CASE) {
+	if options.GetBool(OPT_VAR_UPPER_CASE) {
 		s += ucFirst(flagname)
 	} else {
 		s += flagname

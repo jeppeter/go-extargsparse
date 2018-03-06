@@ -44,7 +44,7 @@ func main() {
 	var opts []*extargsparse.ExtKeyParse
 	var flag *extargsparse.ExtKeyParse
 
-	confstr = fmt.Sprintf(`{"%s": false}`, extargsparse.FUNC_UPPER_CASE)
+	confstr = fmt.Sprintf(`{"%s": false}`, extargsparse.OPT_FUNC_UPPER_CASE)
 	options, _ = extargsparse.NewExtArgsOptions(confstr)
 	parser, _ = extargsparse.NewExtArgsParse(options, nil)
 	parser.LoadCommandLineString(commandline)

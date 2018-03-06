@@ -62,7 +62,7 @@ func newParserCompat(keycls *ExtKeyParse, opt *ExtArgsOptions) *parserCompat {
 
 	self.FunctionUpper = true
 	if opt != nil {
-		self.FunctionUpper = opt.GetBool(FUNC_UPPER_CASE)
+		self.FunctionUpper = opt.GetBool(OPT_FUNC_UPPER_CASE)
 	}
 
 	if self.ScreenWidth < 40 {
@@ -71,7 +71,7 @@ func newParserCompat(keycls *ExtKeyParse, opt *ExtArgsOptions) *parserCompat {
 	if opt != nil {
 		self.Epilog = opt.GetString("epilog")
 		self.Description = opt.GetString("description")
-		self.Prog = opt.GetString("prog")
+		self.Prog = opt.GetString(OPT_PROG)
 		self.Usage = opt.GetString("usage")
 		self.Version = opt.GetString("version")
 	} else {

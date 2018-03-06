@@ -1,11 +1,13 @@
 package extargsparse
 
 // constant for the options used
-//   VAR_UPPER_CASE used in the extargsparse.ExtArgsOptions for variable for first character uppercase default is true
-//   FUNC_UPPER_CASE used in the function for first character uppercase default is true
+//   OPT_PROG used for program name
+//   OPT_VAR_UPPER_CASE used in the extargsparse.ExtArgsOptions for variable for first character uppercase default is true
+//   OPT_FUNC_UPPER_CASE used in the function for first character uppercase default is true
 const (
-	VAR_UPPER_CASE  = "varuppercase"
-	FUNC_UPPER_CASE = "funcuppercase"
+	OPT_PROG            = "prog"
+	OPT_VAR_UPPER_CASE  = "varuppercase"
+	OPT_FUNC_UPPER_CASE = "funcuppercase"
 )
 
 // constant for the priority in the NewExtArgsParse

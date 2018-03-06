@@ -774,7 +774,7 @@ func Test_parser_A007_2(t *testing.T) {
 	var options *ExtArgsOptions
 	var p *parserTest7
 	beforeParser(t)
-	options, err = NewExtArgsOptions(fmt.Sprintf(`{"%s" : false}`, VAR_UPPER_CASE))
+	options, err = NewExtArgsOptions(fmt.Sprintf(`{"%s" : false}`, OPT_VAR_UPPER_CASE))
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(options, nil)
 	check_equal(t, err, nil)
@@ -855,7 +855,7 @@ func Test_parser_A008_2(t *testing.T) {
 	var p *parserTest8
 	var options *ExtArgsOptions
 	beforeParser(t)
-	options, err = NewExtArgsOptions(fmt.Sprintf(`{"%s" : false}`, VAR_UPPER_CASE))
+	options, err = NewExtArgsOptions(fmt.Sprintf(`{"%s" : false}`, OPT_VAR_UPPER_CASE))
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(options, nil)
 	beforeParser(t)
@@ -942,7 +942,7 @@ func Test_parser_A009_2(t *testing.T) {
 	var p *parserTest9
 	var options *ExtArgsOptions
 	beforeParser(t)
-	options, err = NewExtArgsOptions(fmt.Sprintf(`{"%s" : false}`, VAR_UPPER_CASE))
+	options, err = NewExtArgsOptions(fmt.Sprintf(`{"%s" : false}`, OPT_VAR_UPPER_CASE))
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(options, nil)
 	check_equal(t, err, nil)
@@ -1742,7 +1742,7 @@ func Test_parser_A026(t *testing.T) {
 	var sarr []string
 	var opts []*ExtKeyParse
 	beforeParser(t)
-	options, err = NewExtArgsOptions(fmt.Sprintf(`{"prog" : "cmd1"}`))
+	options, err = NewExtArgsOptions(fmt.Sprintf(`{"%s" : "cmd1"}`, OPT_PROG))
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(options, nil)
 	check_equal(t, err, nil)
@@ -1803,7 +1803,7 @@ func Test_parser_A027(t *testing.T) {
 	var opts []*ExtKeyParse
 	var flag *ExtKeyParse
 	beforeParser(t)
-	options, err = NewExtArgsOptions(fmt.Sprintf(`{"prog" : "cmd1"}`))
+	options, err = NewExtArgsOptions(fmt.Sprintf(`{"%s" : "cmd1"}`, OPT_PROG))
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(options, nil)
 	check_equal(t, err, nil)
@@ -2569,7 +2569,7 @@ func Test_parser_A045(t *testing.T) {
 	pkgname = getCallerPackage(0)
 	check_not_equal(t, pkgname, "")
 	loads = fmt.Sprintf(loads_fmt, pkgname)
-	options, err = NewExtArgsOptions(fmt.Sprintf(`{"parseall": true,"longprefix" : "++", "shortprefix" : "+","%s": false}`, FUNC_UPPER_CASE))
+	options, err = NewExtArgsOptions(fmt.Sprintf(`{"parseall": true,"longprefix" : "++", "shortprefix" : "+","%s": false}`, OPT_FUNC_UPPER_CASE))
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(options, nil)
 	check_equal(t, err, nil)
@@ -2609,7 +2609,7 @@ func Test_parser_A046(t *testing.T) {
 	pkgname = getCallerPackage(0)
 	check_not_equal(t, pkgname, "")
 	loads = fmt.Sprintf(loads_fmt, pkgname, pkgname)
-	options, err = NewExtArgsOptions(fmt.Sprintf(`{"parseall": true,"longprefix" : "++", "shortprefix" : "+", "%s": false}`, FUNC_UPPER_CASE))
+	options, err = NewExtArgsOptions(fmt.Sprintf(`{"parseall": true,"longprefix" : "++", "shortprefix" : "+", "%s": false}`, OPT_FUNC_UPPER_CASE))
 	check_equal(t, err, nil)
 	parser, err = NewExtArgsParse(options, nil)
 	check_equal(t, err, nil)
@@ -2647,7 +2647,7 @@ func Test_parser_A047(t *testing.T) {
 	var cl *compileExec
 	var c string
 	var setvars map[string]string
-	var confstr = fmt.Sprintf(`{"parseall": true,"longprefix" : "++", "shortprefix" : "+" , "helpshort" : "?" , "helplong": "usage" , "jsonlong" : "jsonfile", "%s": false}`, FUNC_UPPER_CASE)
+	var confstr = fmt.Sprintf(`{"parseall": true,"longprefix" : "++", "shortprefix" : "+" , "helpshort" : "?" , "helplong": "usage" , "jsonlong" : "jsonfile", "%s": false}`, OPT_FUNC_UPPER_CASE)
 	var codestr = `func format_error(fmtstr string, a ...interface{}) string {
 	return fmt.Sprintf(fmtstr, a...)
 }

@@ -39,7 +39,7 @@ func main() {
 	}
 	/*
 		Notice:
-			if options not set fmt.Sprintf(`{"%s" : false}`,extargsparse.FUNC_UPPER_CASE)
+			if options not set fmt.Sprintf(`{"%s" : false}`,extargsparse.OPT_FUNC_UPPER_CASE)
 			the real function is Dep_handler and Rdep_handler
 		Output:
 			main funcion:

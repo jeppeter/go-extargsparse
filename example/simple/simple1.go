@@ -8,7 +8,7 @@ import (
 
 func main() {
 	var commandline = `{
-		"verbose" : "+",
+		"verbose|v" : "+",
 		"removed|R" : false,
 		"floatv|f" : 3.3,
 		"intv|i" : 5,
@@ -34,7 +34,7 @@ func main() {
 		return
 	}
 
-	ns, err = parser.ParseCommandLine(nil, nil)
+	ns, err = parser.ParseCommandLine([]string{"-vvvv", "cc", "-f", "33.2", "--arrl", "wwwe", "-s", "3993"}, nil)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "can not parser command err[%s]\n", err.Error())
 		os.Exit(5)

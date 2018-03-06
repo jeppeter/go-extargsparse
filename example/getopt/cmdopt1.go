@@ -43,7 +43,7 @@ func main() {
 	var opts []*extargsparse.ExtKeyParse
 	var flag *extargsparse.ExtKeyParse
 	var i int
-	options, err = extargsparse.NewExtArgsOptions(fmt.Sprintf(`{"prog" : "cmd1"}`))
+	options, err = extargsparse.NewExtArgsOptions(fmt.Sprintf(`{"%s" : "cmd1"}`, extargsparse.OPT_PROG))
 	if err == nil {
 		parser, err = extargsparse.NewExtArgsParse(options, nil)
 		if err == nil {

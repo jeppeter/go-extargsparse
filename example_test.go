@@ -219,7 +219,7 @@ func ExampleExtArgsParse_GetCmdOpts() {
 	var opts []*extargsparse.ExtKeyParse
 	var flag *extargsparse.ExtKeyParse
 	var i int
-	options, err = extargsparse.NewExtArgsOptions(fmt.Sprintf(`{"prog" : "cmd1"}`))
+	options, err = extargsparse.NewExtArgsOptions(fmt.Sprintf(`{"%s" : "cmd1"}`, extargsparse.OPT_PROG))
 	if err == nil {
 		parser, err = extargsparse.NewExtArgsParse(options, nil)
 		if err == nil {
@@ -313,7 +313,7 @@ func ExampleExtArgsParse_GetSubCommands() {
 	var parser *extargsparse.ExtArgsParse
 	var options *extargsparse.ExtArgsOptions
 	var subcmds []string
-	options, err = extargsparse.NewExtArgsOptions(fmt.Sprintf(`{"prog" : "cmd1"}`))
+	options, err = extargsparse.NewExtArgsOptions(fmt.Sprintf(`{"%s" : "cmd1"}`, extargsparse.OPT_PROG))
 	if err == nil {
 		parser, err = extargsparse.NewExtArgsParse(options, nil)
 		if err == nil {
@@ -481,7 +481,7 @@ func ExampleExtKeyParse_Function() {
 	}
 	/*
 		Notice:
-			if options not set fmt.Sprintf(`{"%s" : false}`,extargsparse.FUNC_UPPER_CASE)
+			if options not set fmt.Sprintf(`{"%s" : false}`,extargsparse.OPT_FUNC_UPPER_CASE)
 			the real function is Dep_handler and Rdep_handler
 		Output:
 			main funcion:

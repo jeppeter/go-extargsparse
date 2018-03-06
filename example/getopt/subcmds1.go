@@ -27,7 +27,7 @@ func main() {
 	var parser *extargsparse.ExtArgsParse
 	var options *extargsparse.ExtArgsOptions
 	var subcmds []string
-	options, err = extargsparse.NewExtArgsOptions(fmt.Sprintf(`{"prog" : "cmd1"}`))
+	options, err = extargsparse.NewExtArgsOptions(fmt.Sprintf(`{"%s" : "cmd1"}`, extargsparse.OPT_PROG))
 	if err == nil {
 		parser, err = extargsparse.NewExtArgsParse(options, nil)
 		if err == nil {

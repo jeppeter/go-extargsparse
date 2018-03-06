@@ -12,26 +12,26 @@ type ExtArgsOptions struct {
 }
 
 var opt_default_VALUE = map[string]interface{}{
-	"prog":           "",
-	"usage":          "",
-	"description":    "",
-	"epilog":         "",
-	"version":        "0.0.1",
-	"errorhandler":   "exit",
-	"helphandler":    nil,
-	"longprefix":     "--",
-	"shortprefix":    "-",
-	"nohelpoption":   false,
-	"nojsonoption":   false,
-	"helplong":       "help",
-	"helpshort":      "h",
-	"jsonlong":       "json",
-	"cmdprefixadded": true,
-	"parseall":       true,
-	"screenwidth":    80,
-	"flagnochange":   false,
-	VAR_UPPER_CASE:   true,
-	FUNC_UPPER_CASE:  true,
+	OPT_PROG:            "",
+	"usage":             "",
+	"description":       "",
+	"epilog":            "",
+	"version":           "0.0.1",
+	"errorhandler":      "exit",
+	"helphandler":       nil,
+	"longprefix":        "--",
+	"shortprefix":       "-",
+	"nohelpoption":      false,
+	"nojsonoption":      false,
+	"helplong":          "help",
+	"helpshort":         "h",
+	"jsonlong":          "json",
+	"cmdprefixadded":    true,
+	"parseall":          true,
+	"screenwidth":       80,
+	"flagnochange":      false,
+	OPT_VAR_UPPER_CASE:  true,
+	OPT_FUNC_UPPER_CASE: true,
 }
 
 // to set the value of k and v
@@ -152,27 +152,27 @@ func (p *ExtArgsOptions) Format() string {
 
 // NewExtArgsOptions for create new options for *ExtArgsParse
 //    s is the json file ,
-//    key               default value
-//    "prog":           ""
-//    "usage":          ""
-//    "description":    ""
-//    "epilog":         ""
-//    "version":        "0.0.1"
-//    "errorhandler":   "exit"
-//    "helphandler":    nil
-//    "longprefix":     "--"
-//    "shortprefix":    "-"
-//    "nohelpoption":   false
-//    "nojsonoption":   false
-//    "helplong":       "help"
-//    "helpshort":      "h"
-//    "jsonlong":       "json"
-//    "cmdprefixadded": true
-//    "parseall":       true
-//    "screenwidth":    80
-//    "flagnochange":   false
-//    VAR_UPPER_CASE:   true
-//    FUNC_UPPER_CASE:  true
+//    key                  default value
+//    OPT_PROG:            ""
+//    "usage":             ""
+//    "description":       ""
+//    "epilog":            ""
+//    "version":           "0.0.1"
+//    "errorhandler":      "exit"
+//    "helphandler":       nil
+//    "longprefix":        "--"
+//    "shortprefix":       "-"
+//    "nohelpoption":      false
+//    "nojsonoption":      false
+//    "helplong":          "help"
+//    "helpshort":         "h"
+//    "jsonlong":          "json"
+//    "cmdprefixadded":    true
+//    "parseall":          true
+//    "screenwidth":       80
+//    "flagnochange":      false
+//    OPT_VAR_UPPER_CASE:  true
+//    OPT_FUNC_UPPER_CASE: true
 func NewExtArgsOptions(s string) (p *ExtArgsOptions, err error) {
 	var vmap map[string]interface{}
 	var k string

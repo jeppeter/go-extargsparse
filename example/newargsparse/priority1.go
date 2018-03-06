@@ -1,3 +1,11 @@
+package main
+
+import (
+	"fmt"
+	"github.com/jeppeter/go-extargsparse"
+	"io/ioutil"
+	"os"
+)
 
 func main() {
 	var err error
@@ -62,5 +70,5 @@ func main() {
 		}
 	}
 	return
-	
+
 }

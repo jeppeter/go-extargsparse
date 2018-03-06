@@ -90,7 +90,7 @@ func main() {
 	var err error
 	var options *extargsparse.ExtArgsOptions
 	var p *SubcmdStruct
-	var confstr = fmt.Sprintf(`{ "%s" : false}`, extargsparse.FUNC_UPPER_CASE)
+	var confstr = fmt.Sprintf(`{ "%s" : false}`, extargsparse.OPT_FUNC_UPPER_CASE)
 	options, err = extargsparse.NewExtArgsOptions(confstr)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "can not make string [%s] err[%s]\n", confstr, err.Error())

@@ -1219,7 +1219,7 @@ func (self *ExtArgsParse) callOptMethodFunc(ns *NameSpaceEx, validx int, keycls 
 func (self *ExtArgsParse) callKeyOptMethodFunc(ns *NameSpaceEx, validx int, keycls *ExtKeyParse, params []string) (step int, err error) {
 	var callfunc func(ns *NameSpaceEx, valid int, keycls *ExtKeyParse, params []string) (step int, err error)
 	self.logger.Trace("get [%s]", keycls.Attr("optparse"))
-	err = self.logger.GetFuncPtr(self.options.GetBool(FUNC_UPPER_CASE), keycls.Attr("optparse"), &callfunc)
+	err = self.logger.GetFuncPtr(self.options.GetBool(OPT_FUNC_UPPER_CASE), keycls.Attr("optparse"), &callfunc)
 	if err != nil {
 		err = fmt.Errorf("%s", format_error("find [%s] error [%s]", keycls.Attr("optparse"), err.Error()))
 		return 0, err
@@ -1354,7 +1354,7 @@ func (self *ExtArgsParse) callJsonValue(ns *NameSpaceEx, opt *ExtKeyParse, value
 	var err error
 	if opt.Attr("jsonfunc") != "" {
 		var jsonfunc func(ns *NameSpaceEx, opt *ExtKeyParse, value interface{}) error
-		err = self.logger.GetFuncPtr(self.options.GetBool(FUNC_UPPER_CASE), opt.Attr("jsonfunc"), &jsonfunc)
+		err = self.logger.GetFuncPtr(self.options.GetBool(OPT_FUNC_UPPER_CASE), opt.Attr("jsonfunc"), &jsonfunc)
 		if err != nil {
 			return err
 		}
@@ -1412,7 +1412,7 @@ func (self *ExtArgsParse) setDefaultValue(ns *NameSpaceEx) error {
 }
 
 func (self *ExtArgsParse) varUcFirst(name string) string {
-	if self.options.GetBool(VAR_UPPER_CASE) {
+	if self.options.GetBool(OPT_VAR_UPPER_CASE) {
 		return ucFirst(name)
 	}
 	return name
@@ -1612,7 +1612,7 @@ func (self *ExtArgsParse) setStructPart(ns *NameSpaceEx, ostruct interface{}) er
 }
 
 func (self *ExtArgsParse) funcUcFirst(name string) string {
-	if self.options.GetBool(FUNC_UPPER_CASE) {
+	if self.options.GetBool(OPT_FUNC_UPPER_CASE) {
 		return ucFirst(name)
 	}
 	return name
@@ -1622,7 +1622,7 @@ func (self *ExtArgsParse) callbackFunc(funcname string, ns *NameSpaceEx, ostruct
 	var callfunc func(ns *NameSpaceEx, ostruct interface{}, Context interface{}) error
 	var err error
 
-	err = self.logger.GetFuncPtr(self.options.GetBool(FUNC_UPPER_CASE), funcname, &callfunc)
+	err = self.logger.GetFuncPtr(self.options.GetBool(OPT_FUNC_UPPER_CASE), funcname, &callfunc)
 	if err != nil {
 		self.logger.Error("can not find [%s] [%s]", funcname, err.Error())
 		return err

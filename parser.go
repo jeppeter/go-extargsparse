@@ -918,7 +918,7 @@ func NewExtArgsParse(options *ExtArgsOptions, priority interface{}) (self *ExtAr
 	self.helpLong = options.GetString(OPT_HELP_LONG)
 	self.helpShort = options.GetString(OPT_HELP_SHORT)
 	self.jsonLong = options.GetString(OPT_JSON_LONG)
-	self.cmdPrefixAdded = options.GetBool("cmdprefixadded")
+	self.cmdPrefixAdded = options.GetBool(OPT_CMD_PREFIX_ADDED)
 
 	self.loadCommandMap = make(map[string]reflect.Value)
 	self.optParseHandleMap = make(map[string]reflect.Value)

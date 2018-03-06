@@ -15,25 +15,27 @@ package extargsparse
 //   OPT_HELP_LONG for help flag flagname default "help"
 //   OPT_HELP_SHORT for help flag shortflag default "h"
 //   OPT_JSON_LONG for json flag flagname default "json"
+//   OPT_CMD_PREFIX_ADDED for cmd and subcommand to add before flag , default true
 //   OPT_VAR_UPPER_CASE used in the extargsparse.ExtArgsOptions for variable for first character uppercase default is true
 //   OPT_FUNC_UPPER_CASE used in the function for first character uppercase default is true
 const (
-	OPT_PROG            = "prog"
-	OPT_USAGE           = "usage"
-	OPT_DESCRIPTION     = "description"
-	OPT_EPILOG          = "epilog"
-	OPT_VERSION         = "version"
-	OPT_ERROR_HANDLER   = "errorhandler"
-	OPT_HELP_HANDLER    = "helphandler"
-	OPT_LONG_PREFIX     = "longprefix"
-	OPT_SHORT_PREFIX    = "shortprefix"
-	OPT_NO_HELP_OPTION  = "nohelpoption"
-	OPT_NO_JSON_OPTION  = "nojsonoption"
-	OPT_HELP_LONG       = "helplong"
-	OPT_HELP_SHORT      = "helpshort"
-	OPT_JSON_LONG       = "jsonlong"
-	OPT_VAR_UPPER_CASE  = "varuppercase"
-	OPT_FUNC_UPPER_CASE = "funcuppercase"
+	OPT_PROG             = "prog"
+	OPT_USAGE            = "usage"
+	OPT_DESCRIPTION      = "description"
+	OPT_EPILOG           = "epilog"
+	OPT_VERSION          = "version"
+	OPT_ERROR_HANDLER    = "errorhandler"
+	OPT_HELP_HANDLER     = "helphandler"
+	OPT_LONG_PREFIX      = "longprefix"
+	OPT_SHORT_PREFIX     = "shortprefix"
+	OPT_NO_HELP_OPTION   = "nohelpoption"
+	OPT_NO_JSON_OPTION   = "nojsonoption"
+	OPT_HELP_LONG        = "helplong"
+	OPT_HELP_SHORT       = "helpshort"
+	OPT_JSON_LONG        = "jsonlong"
+	OPT_CMD_PREFIX_ADDED = "cmdprefixadded"
+	OPT_VAR_UPPER_CASE   = "varuppercase"
+	OPT_FUNC_UPPER_CASE  = "funcuppercase"
 )
 
 // constant for the priority in the NewExtArgsParse

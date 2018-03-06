@@ -3002,8 +3002,8 @@ func Test_parser_A053(t *testing.T) {
             }
         }`
 	var confstr = fmt.Sprintf(`        {
-            "cmdprefixadded" : false
-        }`)
+            "%s" : false
+        }`, OPT_CMD_PREFIX_ADDED)
 	var options *ExtArgsOptions
 	var parser *ExtArgsParse
 	var args *NameSpaceEx
@@ -3242,8 +3242,8 @@ func Test_parser_A056(t *testing.T) {
             "%s" : "-",
             "%s" : "-",
             "%s" : true,
-            "cmdprefixadded" : false
-        }`, OPT_LONG_PREFIX, OPT_SHORT_PREFIX, OPT_NO_JSON_OPTION)
+            "%s" : false
+        }`, OPT_LONG_PREFIX, OPT_SHORT_PREFIX, OPT_NO_JSON_OPTION, OPT_CMD_PREFIX_ADDED)
 	var options *ExtArgsOptions
 	var parser *ExtArgsParse
 	var sarr []string
@@ -3358,9 +3358,9 @@ func Test_parser_A057(t *testing.T) {
             "%s" : "-",
             "%s" : "-",
             "%s" : true,
-            "cmdprefixadded" : false,
+            "%s" : false,
             "flagnochange" : true
-        }`, OPT_LONG_PREFIX, OPT_SHORT_PREFIX, OPT_NO_JSON_OPTION)
+        }`, OPT_LONG_PREFIX, OPT_SHORT_PREFIX, OPT_NO_JSON_OPTION, OPT_CMD_PREFIX_ADDED)
 	var options *ExtArgsOptions
 	var parser *ExtArgsParse
 	var sarr []string

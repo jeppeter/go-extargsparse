@@ -2,6 +2,7 @@
 > golang command line handle package inspired by [extargsparse](https://github.com/jeppeter/extargsparse)
 
 ### Release History
+> Sep 5th 2018 Release 0.0.4 for fixup the usage format
 > March 6th 2018 Release 0.0.2 for the first release
 
 ### simple example

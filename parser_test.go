@@ -2647,7 +2647,7 @@ func Test_parser_A047(t *testing.T) {
 	var cl *compileExec
 	var c string
 	var setvars map[string]string
-	var confstr = fmt.Sprintf(`{"%s": true,"%s" : "++", "%s" : "+" , "%s" : "?" , "%s": "usage" , "%S" : "jsonfile", "%s": false}`, OPT_PARSE_ALL, OPT_LONG_PREFIX, OPT_SHORT_PREFIX, OPT_HELP_SHORT, OPT_HELP_LONG, OPT_JSON_LONG, OPT_FUNC_UPPER_CASE)
+	var confstr = fmt.Sprintf(`{"%s": true,"%s" : "++", "%s" : "+" , "%s" : "?" , "%s": "usage" , "%s" : "jsonfile", "%s": false}`, OPT_PARSE_ALL, OPT_LONG_PREFIX, OPT_SHORT_PREFIX, OPT_HELP_SHORT, OPT_HELP_LONG, OPT_JSON_LONG, OPT_FUNC_UPPER_CASE)
 	var codestr = `func format_error(fmtstr string, a ...interface{}) string {
 	return fmt.Sprintf(fmtstr, a...)
 }
@@ -3510,5 +3510,118 @@ func Test_parser_A060(t *testing.T) {
 	sarr = getCmdHelp(parser, "rdep")
 	err = assertOkCmds(t, sarr, parser, "rdep")
 	check_equal(t, err, nil)
+	return
+}
+
+func Test_parser_A061(t *testing.T) {
+	var loads = `        {
+            "dep##[cc]... dep handler used##" : {
+                "$" : "*",
+                "ip" : {
+                    "$" : "*"
+                }
+            },
+            "rdep##[dd]... rdep handler used##" : {
+                "$" : "*",
+                "ip" : {
+                    "$" : "*"
+                }
+            }
+        }
+`
+	var parser *ExtArgsParse
+	var sarr []string
+	var err error
+	var ex *regexp.Regexp
+	var ok bool
+	parser, err = NewExtArgsParse(nil, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(loads)
+	check_equal(t, err, nil)
+	sarr = getCmdHelp(parser, "dep")
+	ex, err = regexp.Compile(`\[cc\]... dep handler used`)
+	check_equal(t, err, nil)
+	ok = false
+	if len(sarr) > 0 {
+		if ex.MatchString(sarr[0]) {
+			ok = true
+		}
+	}
+	check_equal(t, ok, true)
+
+	sarr = getCmdHelp(parser, "rdep")
+	ex, err = regexp.Compile(`\[dd\]... rdep handler used`)
+	check_equal(t, err, nil)
+	ok = false
+	if len(sarr) > 0 {
+		if ex.MatchString(sarr[0]) {
+			ok = true
+		}
+	}
+	check_equal(t, ok, true)
+
+	return
+}
+
+func Test_parser_A062(t *testing.T) {
+	var loads = `        {
+            "dep##[cc]... dep handler used##" : {
+                "$" : "*",
+                "ip" : {
+                    "$" : "*"
+                }
+            },
+            "rdep##[dd]... rdep handler used##" : {
+                "$" : "*",
+                "ip" : {
+                    "$" : "*"
+                }
+            }
+        }
+`
+	var optstr = `{
+		"prog" : "cmd1"
+		}`
+	var parser *ExtArgsParse
+	var sarr []string
+	var err error
+	var ex, ex2 *regexp.Regexp
+	var ok bool
+	var opt *ExtArgsOptions
+	opt, err = NewExtArgsOptions(optstr)
+	check_equal(t, err, nil)
+	parser, err = NewExtArgsParse(opt, nil)
+	check_equal(t, err, nil)
+	err = parser.LoadCommandLineString(loads)
+	check_equal(t, err, nil)
+	sarr = getCmdHelp(parser, "dep")
+	ex, err = regexp.Compile(`\[cc\]... dep handler used`)
+	check_equal(t, err, nil)
+	ex2, err = regexp.Compile(`cmd1`)
+	check_equal(t, err, nil)
+	ok = false
+	if len(sarr) > 0 {
+		if ex.MatchString(sarr[0]) {
+			if ex2.MatchString(sarr[0]) {
+				ok = true
+			}
+		}
+	}
+	check_equal(t, ok, true)
+
+	sarr = getCmdHelp(parser, "rdep")
+	ex, err = regexp.Compile(`\[dd\]... rdep handler used`)
+	check_equal(t, err, nil)
+	ex2, err = regexp.Compile(`cmd1`)
+	check_equal(t, err, nil)
+	ok = false
+	if len(sarr) > 0 {
+		if ex.MatchString(sarr[0]) {
+			if ex2.MatchString(sarr[0]) {
+				ok = true
+			}
+		}
+	}
+	check_equal(t, ok, true)
 	return
 }

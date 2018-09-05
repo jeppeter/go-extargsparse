@@ -257,6 +257,7 @@ func (self *parserCompat) GetHelpInfo(hs *helpSize, parentcmds []*parserCompat) 
 		rets += fmt.Sprintf("%s", self.Usage)
 	} else {
 		rootcmds = self
+		curcmd = self
 		if len(parentcmds) > 0 {
 			rootcmds = parentcmds[0]
 		}
@@ -267,10 +268,6 @@ func (self *parserCompat) GetHelpInfo(hs *helpSize, parentcmds []*parserCompat) 
 			rets += fmt.Sprintf("%s", os.Args[0])
 		}
 
-		if len(rootcmds.Version) > 0 {
-			rets += fmt.Sprintf(" %s", rootcmds.Version)
-		}
-
 		if len(parentcmds) > 0 {
 			for _, curcmd = range parentcmds {
 				rets += fmt.Sprintf(" %s", curcmd.CmdName)
@@ -278,40 +275,45 @@ func (self *parserCompat) GetHelpInfo(hs *helpSize, parentcmds []*parserCompat) 
 		}
 		rets += fmt.Sprintf(" %s", self.CmdName)
 
-		if len(self.CmdOpts) > 0 {
-			rets += fmt.Sprintf(" [OPTIONS]")
-		}
+		if len(self.HelpInfo) > 0 {
+			rets += fmt.Sprintf(" %s", self.HelpInfo)
+		} else {
+			if len(self.CmdOpts) > 0 {
+				rets += fmt.Sprintf(" [OPTIONS]")
+			}
 
-		if len(self.SubCommands) > 0 {
-			rets += fmt.Sprintf(" [SUBCOMMANDS]")
-		}
+			if len(self.SubCommands) > 0 {
+				rets += fmt.Sprintf(" [SUBCOMMANDS]")
+			}
 
-		for _, curopt = range self.CmdOpts {
-			if curopt.TypeName() == "args" {
-				switch curopt.Nargs().(type) {
-				case string:
-					curs = curopt.Nargs().(string)
-					if curs == "+" {
-						rets += fmt.Sprintf(" args...")
-					} else if curs == "*" {
-						rets += fmt.Sprintf(" [args...]'")
-					} else if curs == "?" {
-						rets += fmt.Sprintf(" arg")
+			for _, curopt = range self.CmdOpts {
+				if curopt.TypeName() == "args" {
+					switch curopt.Nargs().(type) {
+					case string:
+						curs = curopt.Nargs().(string)
+						if curs == "+" {
+							rets += fmt.Sprintf(" args...")
+						} else if curs == "*" {
+							rets += fmt.Sprintf(" [args...]'")
+						} else if curs == "?" {
+							rets += fmt.Sprintf(" arg")
+						}
+					case int:
+						curint = curopt.Nargs().(int)
+						if curint > 1 {
+							rets += " args..."
+						} else if curint == 1 {
+							rets += " arg"
+						} else {
+							rets += ""
+						}
+					default:
+						assert_test(false == true, "%s nargs not valid", curopt.Format())
 					}
-				case int:
-					curint = curopt.Nargs().(int)
-					if curint > 1 {
-						rets += " args..."
-					} else if curint == 1 {
-						rets += " arg"
-					} else {
-						rets += ""
-					}
-				default:
-					assert_test(false == true, "%s nargs not valid", curopt.Format())
 				}
 			}
 		}
+
 		rets += "\n"
 	}
 

@@ -671,7 +671,7 @@ func (self *compileExec) makeSrcDir(copyfrom string) error {
 	self.dname = dname
 	err = os.Chmod(self.dname, 0755)
 	if err != nil {
-		return fmt.Errorf("%s", "can not change [%s] mode err[%s]", self.dname, err.Error())
+		return fmt.Errorf("can not change [%s] mode err[%s]", self.dname, err.Error())
 	}
 
 	err = os.MkdirAll(filepath.Join(self.dname, "src"), 0755)

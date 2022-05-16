@@ -131,7 +131,7 @@ func (p *ExtArgsOptions) Format() string {
 
 	keys = make([]string, 0)
 
-	for k, _ = range p.values {
+	for k = range p.values {
 		keys = append(keys, k)
 	}
 
@@ -181,7 +181,7 @@ func NewExtArgsOptions(s string) (p *ExtArgsOptions, err error) {
 	p = nil
 	err = json.Unmarshal([]byte(s), &vmap)
 	if err != nil {
-		err = fmt.Errorf("%s", format_error("parse [%s] error[%s]", err.Error()))
+		err = fmt.Errorf("%s", format_error("parse [%s] error[%s]", s, err.Error()))
 		return
 	}
 

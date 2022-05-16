@@ -231,6 +231,7 @@ func (self *ExtArgsParse) intAction(ns *NameSpaceEx, validx int, keycls *ExtKeyP
 	var base int = 10
 	var s string
 	var i int64
+	self.logger.Trace("validx %d", validx)
 	if validx >= len(params) {
 		err = fmt.Errorf("%s", format_error("need args [%d] [%s] [%v]", validx, keycls.Format(), params))
 		return 1, err
@@ -1447,7 +1448,7 @@ func (self *ExtArgsParse) setStructPartForSingle(ns *NameSpaceEx, ostruct interf
 	var value interface{}
 	name = self.formatCmdFromCmdArray(parsers)
 	sarr = strings.Split(name, ".")
-	for idx, _ = range sarr {
+	for idx = range sarr {
 		sarr[idx] = self.varUcFirst(sarr[idx])
 	}
 	name = strings.Join(sarr, ".")
@@ -1627,7 +1628,7 @@ func (self *ExtArgsParse) callbackFunc(funcname string, ns *NameSpaceEx, ostruct
 		self.logger.Error("can not find [%s] [%s]", funcname, err.Error())
 		return err
 	}
-	self.logger.Info("call [%s]  [%v]", funcname, callfunc)
+	self.logger.Info("call [%s] ", funcname)
 	return callfunc(ns, ostruct, Context)
 }
 

@@ -180,7 +180,7 @@ func (self *parseState) find_key_cls() (retkey *ExtKeyParse, err error) {
 						self.validx = (oldidx + 1)
 						self.curidx = oldidx
 						self.curcharidx = (oldcharidx + 1)
-						self.Info("%s validx [%s]", opt.Format(), self.validx)
+						self.Info("%s validx [%d]", opt.Format(), self.validx)
 						retkey = opt
 						err = nil
 						return

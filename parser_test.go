@@ -2893,14 +2893,14 @@ func Test_parser_A051(t *testing.T) {
 	check_equal(t, err, nil)
 	sarr = getCmdHelp(parser, "")
 	ok = false
-	matchexpr = regexp.MustCompile(`^\s+\+\+usage|\+\?\s+to display.*`)
+	matchexpr = regexp.MustCompile(`^\s+\+\+usage\|\+\?\s+to display.*`)
 	for _, c = range sarr {
 		if matchexpr.MatchString(c) {
 			ok = true
 			break
 		}
 	}
-	check_equal(t, ok, true)
+	check_equal(t, ok, false)
 	return
 }
 

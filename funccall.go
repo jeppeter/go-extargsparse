@@ -50,63 +50,66 @@ func createFuncForCodePtr(outFuncPtr interface{}, codePtr uintptr) {
 	outFuncVal.Set(newFuncVal)
 }
 
+func get_func_addr(name string, startaddr uintptr, endaddr uintptr) (findptr *runtime.Func, err error) {
+	//var names []string
+	//var searchaddr []uintptr
+	var curaddr uintptr
+	var stepaddr uintptr = (1 << 10)
+	var curfunc *runtime.Func = nil
+	findptr = nil
+	err = fmt.Errorf("not foud %s", name)
+	//names = strings.Split(name, ".")
+	for findptr == nil && stepaddr >= 32 {
+		curaddr = startaddr
+		for {
+			curfunc = runtime.FuncForPC(curaddr)
+			if curfunc != nil {
+				if curfunc.Name() == name {
+					findptr = curfunc
+					err = nil
+					break
+				}
+			}
+			curaddr += stepaddr
+			if curaddr > endaddr {
+				break
+			}
+		}
+		stepaddr = stepaddr >> 1
+	}
+	return
+}
+
 // findFuncWithName searches through the moduledata table created by the linker
 // and returns the function's code pointer. If the function was not found, it
 // returns an error. Since the data structures here are not exported, we copy
 // them below (and they need to stay in sync or else things will fail
 // catastrophically).
 func findFuncWithName(name string) (uintptr, error) {
-	for moduleData := &wFirstmoduledata; moduleData != nil; moduleData = moduleData.next {
-		for i, ftab := range moduleData.ftab {
-			if i < (len(moduleData.ftab) - 1) {
-				f := (*runtime.Func)(unsafe.Pointer(&moduleData.pclntable[ftab.funcoff]))
-				if f.Name() == name {
-					return f.Entry(), nil
-				}
-			}
-		}
+	var startaddr uintptr
+	var endaddr uintptr
+	var err error
+	var funcptr *runtime.Func
+	startaddr, endaddr, err = get_current_process_exec_info()
+	if err != nil {
+		return 0, err
 	}
-	return 0, fmt.Errorf("Invalid function name: %s", name)
-}
 
-// Everything below is taken from the runtime package, and must stay in sync
-// with it.
+	funcptr, err = get_func_addr(name, startaddr, endaddr)
+	if err != nil {
+		return 0, err
+	}
+	return funcptr.Entry(), nil
 
-//go:linkname wFirstmoduledata runtime.firstmoduledata
-var wFirstmoduledata moduledata
-
-type moduledata struct {
-	pclntable    []byte
-	ftab         []functab
-	filetab      []uint32
-	findfunctab  uintptr
-	minpc, maxpc uintptr
-
-	text, etext           uintptr
-	noptrdata, enoptrdata uintptr
-	data, edata           uintptr
-	bss, ebss             uintptr
-	noptrbss, enoptrbss   uintptr
-	end, gcdata, gcbss    uintptr
-
-	// Original type was []*_type
-	typelinks []interface{}
-
-	modulename string
-	// Original type was []modulehash
-	modulehashes []interface{}
-
-	gcdatamask, gcbssmask bitvector
-
-	next *moduledata
-}
-
-type functab struct {
-	entry   uintptr
-	funcoff uintptr
-}
-
-type bitvector struct {
-	n        int32 // # of bits
-	bytedata *uint8
+	// for moduleData := &wFirstmoduledata; moduleData != nil; moduleData = moduleData.next {
+	// 	for i, ftab := range moduleData.ftab {
+	// 		if i < (len(moduleData.ftab) - 1) {
+	// 			f := (*runtime.Func)(unsafe.Pointer(&moduleData.pclntable[ftab.funcoff]))
+	// 			if f.Name() == name {
+	// 				return f.Entry(), nil
+	// 			}
+	// 		}
+	// 	}
+	// }
+	// return 0, fmt.Errorf("Invalid function name: %s", name)
 }

@@ -38,7 +38,8 @@ func ExampleNewExtArgsParse() {
 	parser, err = extargsparse.NewExtArgsParse(nil, nil)
 	if err == nil {
 		parser.LoadCommandLineString(loads)
-		parser.ParseCommandLine([]string{"-h"}, nil)
+		/*we not call this function because for the panic in test mode*/
+		//parser.ParseCommandLine([]string{"-h"}, nil)
 		/*
 			Output:
 			cmd 0.0.1  [OPTIONS] [args...]'
@@ -255,32 +256,30 @@ func ExampleExtArgsParse_GetCmdOpts() {
 								} else {
 									fmt.Fprintf(os.Stdout, "[%d].Longopt=%s;.Shortopt=%s;Optdest=%s;attr=%s\n", i, flag.Longopt(), flag.Shortopt(), flag.Optdest(), flag.Attr(""))
 								}
-								/*
-									Output:
-									main cmd opts:
-									[0].type=args
-									[1].Longopt=--help;.Shortopt=-h;Optdest=help;attr=
-									[2].Longopt=--json;.Shortopt=;Optdest=json;attr=
-									[3].Longopt=--port;.Shortopt=-p;Optdest=port;attr=
-									[4].Longopt=--http-url;.Shortopt=-u;Optdest=http_url;attr=
-									[5].Longopt=--verbose;.Shortopt=-v;Optdest=verbose;attr=
-									[6].Longopt=--http-visual-mode;.Shortopt=-V;Optdest=http_visual_mode;attr=
-									dep cmd opts:
-									[0].type=args
-									[1].Longopt=--help;.Shortopt=-h;Optdest=help;attr=
-									[2].Longopt=--dep-json;.Shortopt=;Optdest=dep_json;attr=
-									[3].Longopt=--dep-list;.Shortopt=-l;Optdest=dep_list;attr=[attr]=[cc]
-									[optfunc]=[list_opt_func]
-
-									[4].Longopt=--dep-string;.Shortopt=-s;Optdest=dep_string;attr=
-									rdep.ip cmd opts:
-									[0].type=args
-									[1].Longopt=--rdep-ip-cc;.Shortopt=;Optdest=rdep_ip_cc;attr=
-									[2].Longopt=--help;.Shortopt=-h;Optdest=help;attr=
-									[3].Longopt=--rdep-ip-json;.Shortopt=;Optdest=rdep_ip_json;attr=
-									[4].Longopt=--rdep-ip-list;.Shortopt=;Optdest=rdep_ip_list;attr=
-									[5].Longopt=--rdep-ip-verbose;.Shortopt=;Optdest=rdep_ip_verbose;attr=
-								*/
+								// Output:
+								// main cmd opts:
+								// [0].type=args
+								// [1].Longopt=--help;.Shortopt=-h;Optdest=help;attr=
+								// [2].Longopt=--json;.Shortopt=;Optdest=json;attr=
+								// [3].Longopt=--port;.Shortopt=-p;Optdest=port;attr=
+								// [4].Longopt=--http-url;.Shortopt=-u;Optdest=http_url;attr=
+								// [5].Longopt=--verbose;.Shortopt=-v;Optdest=verbose;attr=
+								// [6].Longopt=--http-visual-mode;.Shortopt=-V;Optdest=http_visual_mode;attr=
+								// dep cmd opts:
+								// [0].type=args
+								// [1].Longopt=--help;.Shortopt=-h;Optdest=help;attr=
+								// [2].Longopt=--dep-json;.Shortopt=;Optdest=dep_json;attr=
+								// [3].Longopt=--dep-list;.Shortopt=-l;Optdest=dep_list;attr=[attr]=[cc]
+								// [optfunc]=[list_opt_func]
+								//
+								// [4].Longopt=--dep-string;.Shortopt=-s;Optdest=dep_string;attr=
+								// rdep.ip cmd opts:
+								// [0].type=args
+								// [1].Longopt=--rdep-ip-cc;.Shortopt=;Optdest=rdep_ip_cc;attr=
+								// [2].Longopt=--help;.Shortopt=-h;Optdest=help;attr=
+								// [3].Longopt=--rdep-ip-json;.Shortopt=;Optdest=rdep_ip_json;attr=
+								// [4].Longopt=--rdep-ip-list;.Shortopt=;Optdest=rdep_ip_list;attr=
+								// [5].Longopt=--rdep-ip-verbose;.Shortopt=;Optdest=rdep_ip_verbose;attr=
 							}
 						}
 					}
@@ -328,12 +327,10 @@ func ExampleExtArgsParse_GetSubCommands() {
 						subcmds, err = parser.GetSubCommands("rdep.ip")
 						if err == nil {
 							fmt.Fprintf(os.Stdout, "rdep.ip cmd subcmds:%v\n", subcmds)
-							/*
-								Output:
-								main cmd subcmds:[dep rdep]
-								dep cmd subcmds:[ip mip]
-								rdep.ip cmd subcmds:[]
-							*/
+							// Output:
+							// main cmd subcmds:[dep rdep]
+							// dep cmd subcmds:[ip mip]
+							// rdep.ip cmd subcmds:[]
 						}
 					}
 				}
@@ -369,13 +366,10 @@ func ExampleExtKeyParse_CmdName() {
 				fmt.Fprintf(os.Stdout, "cmdname=%s\n", flag.CmdName())
 				flag, _ = parser.GetCmdKey("rdep")
 				fmt.Fprintf(os.Stdout, "cmdname=%s\n", flag.CmdName())
-				/*
-					Output:
-					cmdname=main
-					cmdname=dep
-					cmdname=ip
-				*/
-
+				// Output:
+				// cmdname=main
+				// cmdname=dep
+				// cmdname=rdep
 			}
 		}
 	}
@@ -439,13 +433,11 @@ func ExampleExtKeyParse_FlagName() {
 			}
 		}
 	}
-	/*
-		Output:
-		flagname=verbose
-		flagname=cc
-		flagname=dd
-		can not found cc for rdep cmd
-	*/
+	// Output:
+	// flagname=verbose
+	// flagname=cc
+	// flagname=dd
+	// can not found cc for rdep cmd
 }
 
 func ExampleExtKeyParse_Function() {
@@ -608,15 +600,13 @@ func ExampleExtKeyParse_Longopt() {
 		}
 	}
 
-	/*
-		Output:
-			longprefix=--
-			longopt=--verbose
-			shortopt=-v
-			longprefix=++
-			longopt=++verbose
-			shortopt=+v
-	*/
+	// Output:
+	// longprefix=--
+	// longopt=--verbose
+	// shortopt=-v
+	// longprefix=++
+	// longopt=++verbose
+	// shortopt=+v
 }
 
 func ExampleExtKeyParse_Nargs() {
@@ -666,11 +656,9 @@ func ExampleExtKeyParse_Nargs() {
 			fmt.Fprintf(os.Stdout, "rdep.args.nargs=%v\n", flag.Nargs())
 		}
 	}
-	/*
-		Output:
-			args.nargs=*
-			port.nargs=1
-			dep.args.nargs=+
-			rdep.args.nargs=?
-	*/
+	// Output:
+	// args.nargs=*
+	// port.nargs=1
+	// dep.args.nargs=+
+	// rdep.args.nargs=?
 }

@@ -34,20 +34,23 @@ func ExampleExtArgsOptions_SetValue() {
 func ExampleNewExtArgsParse() {
 	var parser *extargsparse.ExtArgsParse
 	var err error
+	var options *extargsparse.ExtArgsOptions
+	var confstr = fmt.Sprintf(`{"%s" : false,"%s" : "cmd"}`, extargsparse.OPT_HELP_EXIT_MODE, extargsparse.OPT_PROG)
 	var loads = `{}`
-	parser, err = extargsparse.NewExtArgsParse(nil, nil)
+	options, err = extargsparse.NewExtArgsOptions(confstr)
 	if err == nil {
-		parser.LoadCommandLineString(loads)
-		/*we not call this function because for the panic in test mode*/
-		//parser.ParseCommandLine([]string{"-h"}, nil)
-		/*
-			Output:
-			cmd 0.0.1  [OPTIONS] [args...]'
-
-			[OPTIONS]
-			    --json     json  json input file to get the value set
-			    --help|-h        to display this help information
-		*/
+		parser, err = extargsparse.NewExtArgsParse(options, nil)
+		if err == nil {
+			parser.LoadCommandLineString(loads)
+			/*we not call this function because for the panic in test mode*/
+			parser.ParseCommandLine([]string{"-h"}, nil)
+			// Output:
+			// cmd  [OPTIONS] [args...]
+			//
+			// [OPTIONS]
+			//     --json     json  json input file to get the value set
+			//     --help|-h        to display this help information
+		}
 	}
 }
 

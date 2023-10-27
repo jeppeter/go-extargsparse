@@ -42,6 +42,7 @@ const (
 	OPT_FLAG_NO_CHANGE   = "flagnochange"
 	OPT_VAR_UPPER_CASE   = "varuppercase"
 	OPT_FUNC_UPPER_CASE  = "funcuppercase"
+	OPT_HELP_EXIT_MODE   = "helpexitmode"
 )
 
 // constant for the priority in the NewExtArgsParse

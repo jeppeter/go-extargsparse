@@ -32,6 +32,7 @@ var opt_default_VALUE = map[string]interface{}{
 	OPT_FLAG_NO_CHANGE:   false,
 	OPT_VAR_UPPER_CASE:   true,
 	OPT_FUNC_UPPER_CASE:  true,
+	OPT_HELP_EXIT_MODE:   true,
 }
 
 // to set the value of k and v

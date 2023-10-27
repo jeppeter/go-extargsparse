@@ -294,7 +294,8 @@ func (self *parserCompat) GetHelpInfo(hs *helpSize, parentcmds []*parserCompat) 
 						if curs == "+" {
 							rets += fmt.Sprintf(" args...")
 						} else if curs == "*" {
-							rets += fmt.Sprintf(" [args...]'")
+							rets += fmt.Sprintf(" [args...]")
+
 						} else if curs == "?" {
 							rets += fmt.Sprintf(" arg")
 						}
@@ -337,6 +338,11 @@ func (self *parserCompat) GetHelpInfo(hs *helpSize, parentcmds []*parserCompat) 
 			opthelp = self.get_opt_help_opthelp(curopt)
 			curs += fmt.Sprintf("%-*s %-*s %-*s\n", hs.GetValue("optnamesize"), optname, hs.GetValue("optexprsize"), optexpr, hs.GetValue("opthelpsize"), opthelp)
 			if len(curs) < self.ScreenWidth {
+				curs = ""
+				curs += "    "
+				curs += fmt.Sprintf("%-*s %-*s %-*s", hs.GetValue("optnamesize"), optname, hs.GetValue("optexprsize"), optexpr, hs.GetValue("opthelpsize"), opthelp)
+				curs = strings.TrimRight(curs, " \t")
+				curs += "\n"
 				rets += curs
 			} else {
 				curs = ""

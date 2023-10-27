@@ -514,6 +514,16 @@ func (self *ExtArgsParse) helpAction(ns *NameSpaceEx, validx int, keycls *ExtKey
 	return 0, nil
 }
 
+func (self *ExtArgsParse) helpActionNoExit(ns *NameSpaceEx, validx int, keycls *ExtKeyParse, params []string) (step int, err error) {
+	var f *FileIoWriter
+	f = NewFileWriter(os.Stdout)
+	err = self.PrintHelp(f, params[0])
+	if err != nil {
+		return 0, err
+	}
+	return 0, nil
+}
+
 func (self *ExtArgsParse) incAction(ns *NameSpaceEx, validx int, keycls *ExtKeyParse, params []string) (step int, err error) {
 	var i int
 	i = ns.GetInt(keycls.Optdest())
@@ -949,7 +959,12 @@ func NewExtArgsParse(options *ExtArgsOptions, priority interface{}) (self *ExtAr
 	self.bindOptParseHandleMap("long", self.intAction)
 	self.bindOptParseHandleMap("list", self.appendAction)
 	self.bindOptParseHandleMap("count", self.incAction)
-	self.bindOptParseHandleMap("help", self.helpAction)
+	if options.GetBool(OPT_HELP_EXIT_MODE) {
+		self.bindOptParseHandleMap("help", self.helpAction)
+	} else {
+		self.bindOptParseHandleMap("help", self.helpActionNoExit)
+	}
+
 	self.bindOptParseHandleMap("jsonfile", self.stringAction)
 	self.bindOptParseHandleMap("command", self.commandAction)
 	self.bindOptParseHandleMap("float", self.floatAction)

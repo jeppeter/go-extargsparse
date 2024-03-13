@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"unsafe"
 )
 
 func read_file_bytes(fname string) (rbytes []byte, err error) {
@@ -32,6 +33,18 @@ func read_file_bytes(fname string) (rbytes []byte, err error) {
 	return
 }
 
+func get_min_addr_minus_1() uintptr {
+	var nsize uintptr
+	var retval uintptr
+	/*to make value of size*/
+	nsize = unsafe.Sizeof(retval) * 8
+	retval = (1 << (nsize - 1))
+	/*to make 0x80000000 for 32-bit 0x8000000000000000 64-bits*/
+	retval -= 1
+	retval |= (1 << (nsize - 1))
+	return retval
+}
+
 func get_current_process_exec_info() (startaddr uintptr, endaddr uintptr, err error) {
 	var exename string
 	var exebyte []byte
@@ -41,7 +54,7 @@ func get_current_process_exec_info() (startaddr uintptr, endaddr uintptr, err er
 	var s string
 	var lines []string
 	var curline string
-	var minaddr uintptr = get_min_addr_minus_1()
+	var minaddr uintptr = ^uintptr(0)
 	var maxaddr uintptr = 0
 	var curstart uintptr
 	var curend uintptr

@@ -2,6 +2,7 @@
 > golang command line handle package inspired by [extargsparse](https://github.com/jeppeter/extargsparse)
 
 ### Release History
+> Mar 13th 2024 Release 0.0.6 for fixup compiling bugs in 1.22 when uintptr in different size in mem_linux.go
 > Sep 5th 2018 Release 0.0.4 for fixup the usage format
 > March 6th 2018 Release 0.0.2 for the first release
 

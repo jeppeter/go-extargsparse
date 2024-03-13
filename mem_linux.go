@@ -41,7 +41,7 @@ func get_current_process_exec_info() (startaddr uintptr, endaddr uintptr, err er
 	var s string
 	var lines []string
 	var curline string
-	var minaddr uintptr = 0xffffffffffffffff
+	var minaddr uintptr = get_min_addr_minus_1()
 	var maxaddr uintptr = 0
 	var curstart uintptr
 	var curend uintptr
